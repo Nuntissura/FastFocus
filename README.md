@@ -17,7 +17,12 @@ Do not commit drive-letter paths (like `C:\` / `P:\`) into code, configs, or doc
 Use repo-relative paths and environment variables.
 
 ## What exists right now
-- `apps/api/` - Node.js SSR + API app with Postgres wiring, marketplace ingest/matching scripts, price-band + deal-score jobs, admin endpoints, and smoke tests
+- `apps/api/` - Node.js SSR + API app with Postgres wiring, marketplace ingest/matching scripts, price-band + deal-score jobs, consent-aware analytics, admin endpoints, and smoke tests
+
+## Current launch surface
+- Public launch pages: `/`, `/cameras`, `/brands`, `/compare`, `/cameras/{slug}`, `/compare/{slugA}-vs-{slugB}`
+- Parked but still implemented: `/lenses`, `/guides`, `/newsletter`, `/premium`
+- Parked surfaces are not part of the launch nav/`llms.txt`/sitemap contract and send `noindex,follow`
 
 ## Beginner-first deploy/env guide
 - If you are new to web hosting or environment variables, read `FF - gov/runbooks/EU_PAAS_DEPLOYMENT_AND_ENV.md` before touching staging/production settings.
@@ -134,6 +139,7 @@ Model pages (HTML, server-rendered):
 ```powershell
 # open in a browser, or fetch via iwr/irm
 irm http://127.0.0.1:8787/cameras/sony-a7-iv
+# parked surface (still implemented, not launch-critical)
 irm http://127.0.0.1:8787/lenses/sony-fe-24-70mm-f2-8-gm-ii
 ``` 
 
@@ -147,6 +153,7 @@ Admin endpoints (requires admin token):
 $env:FF_ADMIN_TOKEN = \"dev-admin\"
 irm -Headers @{\"x-admin-token\"=$env:FF_ADMIN_TOKEN} http://127.0.0.1:8787/api/v1/admin/ingestion/runs
 irm -Headers @{\"x-admin-token\"=$env:FF_ADMIN_TOKEN} http://127.0.0.1:8787/api/v1/admin/audit-log
+irm -Headers @{\"x-admin-token\"=$env:FF_ADMIN_TOKEN} http://127.0.0.1:8787/api/v1/admin/analytics/demand
 ```
 
 ## Staging/production config (URLs, proxies, robots)

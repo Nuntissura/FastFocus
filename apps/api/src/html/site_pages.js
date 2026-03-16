@@ -1,3 +1,5 @@
+﻿import { PRIMARY_NAV_LINKS, SITE_TAGLINE } from "../launch_contract.js";
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -20,7 +22,7 @@ function lensCanonicalPath({ slug }) {
 }
 
 function formatMaybeIso(ts) {
-  if (!isNonEmptyString(ts)) return "—";
+  if (!isNonEmptyString(ts)) return "â€”";
   try {
     return new Date(ts).toISOString();
   } catch {
@@ -31,13 +33,13 @@ function formatMaybeIso(ts) {
 function formatBool(value) {
   if (value === true) return "Yes";
   if (value === false) return "No";
-  return "—";
+  return "â€”";
 }
 
 function formatMoney(amount, currency) {
-  if (amount === null || amount === undefined) return "—";
+  if (amount === null || amount === undefined) return "â€”";
   const n = Number(amount);
-  if (!Number.isFinite(n)) return "—";
+  if (!Number.isFinite(n)) return "â€”";
   if (isNonEmptyString(currency)) {
     try {
       return new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(n);
@@ -100,7 +102,7 @@ const SENSOR_FORMAT_LABELS = {
   one_over_2_5_inch: "1/2.5-inch",
   one_over_2_7_inch: "1/2.7-inch",
   one_over_3_0_inch: "1/3-inch",
-  medium_format_44x33: "Medium format (44×33)",
+  medium_format_44x33: "Medium format (44Ã—33)",
   medium_format_645: "Medium format (645)",
   other: "Other",
 };
@@ -155,15 +157,12 @@ function buildQuery(params) {
 }
 
 function navHtml() {
+  const links = PRIMARY_NAV_LINKS.map(
+    (link) => `<a href="${escapeHtml(link.href)}" data-testid="${escapeHtml(link.testId)}">${escapeHtml(link.label)}</a>`,
+  ).join("");
   return `
-    <nav aria-label="Primary">
-      <a href="/cameras">Cameras</a>
-      <a href="/lenses">Lenses</a>
-      <a href="/brands">Brands</a>
-      <a href="/compare">Compare</a>
-      <a href="/guides">Guides</a>
-      <a href="/newsletter">Newsletter</a>
-      <a href="/premium">Premium</a>
+    <nav aria-label="Primary" data-testid="site-primary-nav">
+      ${links}
     </nav>
   `;
 }
@@ -183,7 +182,7 @@ function documentHtml({ title, description, canonicalUrl = null, robots = null, 
     ${canonicalUrl ? `<link rel="canonical" href="${escapeHtml(canonicalUrl)}" />` : ""}
     ${robots ? `<meta name="robots" content="${escapeHtml(robots)}" />` : ""}
     <style>
-      :root { color-scheme: light dark; }
+      :root { color-scheme: light dark; --accent: #a14c1d; --line: rgba(127,127,127,0.35); }
       body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; line-height: 1.5; }
       header { border-bottom: 1px solid rgba(127,127,127,0.25); }
       header .wrap { max-width: 1040px; margin: 0 auto; padding: 16px 20px; display: flex; gap: 16px; align-items: baseline; justify-content: space-between; flex-wrap: wrap; }
@@ -195,9 +194,17 @@ function documentHtml({ title, description, canonicalUrl = null, robots = null, 
       h2 { margin-top: 28px; }
       .subtle { opacity: 0.8; }
       .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+      .tri-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
       @media (min-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
+      @media (min-width: 900px) { .tri-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
       .card { border: 1px solid rgba(127,127,127,0.35); border-radius: 12px; padding: 14px 14px; }
       .card h3 { margin: 0 0 8px; font-size: 16px; }
+      .hero { border: 1px solid rgba(127,127,127,0.3); border-radius: 20px; padding: 20px; background: linear-gradient(135deg, rgba(161,76,29,0.12), rgba(127,127,127,0.04)); }
+      .stack { display: grid; gap: 12px; }
+      .eyebrow { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+      .section-lead { max-width: 58rem; font-size: 1.02rem; }
+      .card-link { display: block; border: 1px solid rgba(127,127,127,0.2); border-radius: 12px; padding: 12px; text-decoration: none; }
+      .card-link:hover, .card-link:focus-visible { border-color: rgba(127,127,127,0.45); outline: none; }
       table { width: 100%; border-collapse: collapse; }
       th, td { border: 1px solid rgba(127,127,127,0.35); padding: 8px 10px; vertical-align: top; }
       th { text-align: left; }
@@ -206,6 +213,9 @@ function documentHtml({ title, description, canonicalUrl = null, robots = null, 
       button { padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(127,127,127,0.35); background: transparent; color: inherit; cursor: pointer; }
       .row { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
       .row > * { flex: 1 1 220px; }
+      .cta-row { display: flex; gap: 10px; flex-wrap: wrap; }
+      .cta-row a { display: inline-flex; text-decoration: none; border: 1px solid rgba(127,127,127,0.35); border-radius: 999px; padding: 8px 12px; }
+      .meta-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
       .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; border: 1px solid rgba(127,127,127,0.35); font-size: 12px; opacity: 0.9; }
       footer { max-width: 1040px; margin: 0 auto; padding: 20px; opacity: 0.75; }
       footer a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
@@ -217,11 +227,11 @@ function documentHtml({ title, description, canonicalUrl = null, robots = null, 
     </style>
   </head>
   <body>
-    <header>
+    <header data-testid="site-header">
       <div class="wrap">
         <div>
-          <strong><a href="/">Fast Focus</a></strong>
-          <span class="subtle">Used gear discovery</span>
+          <strong><a href="/" data-testid="site-logo-link">Fast Focus</a></strong>
+          <span class="subtle">${escapeHtml(SITE_TAGLINE)}</span>
         </div>
         ${navHtml()}
       </div>
@@ -229,10 +239,10 @@ function documentHtml({ title, description, canonicalUrl = null, robots = null, 
     <main>
       ${bodyHtml}
     </main>
-    <footer>
+    <footer data-testid="site-footer">
       <div>
-        Fast Focus MVP • Generated ${escapeHtml(new Date().toISOString())} • <a href="/about">About</a> • <a href="/privacy">Privacy</a> •
-        <a href="/sitemap.xml">Sitemap</a> • <a href="/llms.txt">LLMs</a>
+        Fast Focus MVP â€¢ Generated ${escapeHtml(new Date().toISOString())} â€¢ <a href="/about">About</a> â€¢ <a href="/privacy">Privacy</a> â€¢
+        <a href="/sitemap.xml">Sitemap</a> â€¢ <a href="/llms.txt">LLMs</a>
       </div>
     </footer>
   </body>
@@ -245,9 +255,9 @@ export function renderHomePageHtml({ canonicalUrl, dbEnabled, dbHint, marketplac
     .map((m) => {
       const name = escapeHtml(m.display_name || m.marketplace_code);
       const code = escapeHtml(m.marketplace_code);
-      const active = typeof m.active_listing_count === "number" ? String(m.active_listing_count) : "—";
+      const active = typeof m.active_listing_count === "number" ? String(m.active_listing_count) : "â€”";
       const last = formatMaybeIso(m.last_listing_retrieved_at);
-      const status = escapeHtml(m.last_run_status || "—");
+      const status = escapeHtml(m.last_run_status || "â€”");
       return `<tr><th scope="row">${name} <span class="pill">${code}</span></th><td>${active}</td><td>${last}</td><td>${status}</td></tr>`;
     })
     .join("");
@@ -259,8 +269,8 @@ export function renderHomePageHtml({ canonicalUrl, dbEnabled, dbHint, marketplac
       const meta = [c.brand_name || c.brand_slug, c.release_year, c.sensor_format, c.mount_code]
         .filter((v) => v !== null && v !== undefined && String(v).trim())
         .map((v) => escapeHtml(String(v)))
-        .join(" • ");
-      return `<li><a href="${href}">${label}</a><div class="subtle">${meta}</div></li>`;
+        .join(" â€¢ ");
+      return `<li><a class="card-link" href="${href}" data-testid="home-featured-camera-card-${escapeHtml(c.slug)}"><strong>${label}</strong><div class="subtle">${meta}</div></a></li>`;
     })
     .join("");
 
@@ -271,7 +281,7 @@ export function renderHomePageHtml({ canonicalUrl, dbEnabled, dbHint, marketplac
       const meta = [l.brand_name || l.brand_slug, l.release_year, l.mount_code, l.lens_category]
         .filter((v) => v !== null && v !== undefined && String(v).trim())
         .map((v) => escapeHtml(String(v)))
-        .join(" • ");
+        .join(" â€¢ ");
       return `<li><a href="${href}">${label}</a><div class="subtle">${meta}</div></li>`;
     })
     .join("");
@@ -284,41 +294,42 @@ export function renderHomePageHtml({ canonicalUrl, dbEnabled, dbHint, marketplac
       </div>`;
 
   const bodyHtml = `
-    <h1>Fast Focus</h1>
-    <p class="subtle">Find typical used prices, compare models, and click out to live listings (affiliate-supported).</p>
+    <section class="hero stack" data-testid="home-page">
+      <div class="eyebrow">Launch Scope</div>
+      <div data-testid="home-hero">
+        <h1>Used camera bodies with live market context.</h1>
+        <p class="section-lead subtle">Fast Focus launches as a camera-body-first discovery surface: compare upgrade candidates, see transparent asking-price bands, and inspect real listings with better context.</p>
+      </div>
 
-    ${dbBlock}
+      ${dbBlock}
 
-    <section class="card" aria-label="Search">
-      <h2>Search</h2>
-      <form action="/search" method="get" aria-label="Search form">
+      <form action="/search" method="get" aria-label="Search form" data-testid="home-search-form">
+        <input type="hidden" name="type" value="cameras" />
         <div class="row">
           <div>
-            <label for="q">Query</label>
-            <input id="q" name="q" placeholder="e.g., a7 iv, z6 ii, rf 24-70" />
-          </div>
-          <div>
-            <label for="type">Search in</label>
-            <select id="type" name="type" aria-label="Search scope">
-              <option value="cameras">Cameras</option>
-              <option value="lenses">Lenses</option>
-            </select>
+            <label for="q">Search camera models</label>
+            <input id="q" name="q" placeholder="e.g., sony a7 iv, nikon z6 ii, canon r6" data-testid="home-search-input" />
           </div>
           <div style="flex:0 0 auto">
             <label>&nbsp;</label>
-            <button type="submit">Search</button>
+            <button type="submit" data-testid="home-search-submit">Search cameras</button>
           </div>
         </div>
       </form>
-      <p class="subtle">Or browse: <a href="/cameras">cameras</a>, <a href="/lenses">lenses</a>, <a href="/brands">brands</a>.</p>
+
+      <div class="cta-row">
+        <a href="/cameras">Browse camera pages</a>
+        <a href="/compare" data-testid="home-compare-entry">Build a comparison</a>
+        <a href="/brands" data-testid="home-brand-hub-entry">Open brand hubs</a>
+      </div>
     </section>
 
-    <div class="grid" style="margin-top:16px">
+    <div class="grid">
       <section class="card" aria-label="Live market">
         <h2>Live market (freshness)</h2>
         ${
           marketRows
-            ? `<table aria-label="Marketplace freshness">
+            ? `<table aria-label="Marketplace freshness" data-testid="home-market-freshness">
                 <thead><tr><th scope="col">Marketplace</th><th scope="col">Active listings</th><th scope="col">Last retrieved</th><th scope="col">Last run</th></tr></thead>
                 <tbody>${marketRows}</tbody>
               </table>`
@@ -326,32 +337,28 @@ export function renderHomePageHtml({ canonicalUrl, dbEnabled, dbHint, marketplac
         }
       </section>
 
-      <section class="card" aria-label="Start here">
-        <h2>Start here</h2>
+      <section class="card" aria-label="Launch promise">
+        <h2>Launch promise</h2>
         <ul>
-          <li><a href="/cameras">Browse cameras</a> (model pages include price bands + listings)</li>
-          <li><a href="/lenses">Browse lenses</a></li>
-          <li><a href="/compare">Compare two models</a></li>
-          <li><a href="/guides">Read guides</a> (coming soon)</li>
+          <li>Canonical camera-body pages with specs, used-buyer checklist, price bands, and live listings.</li>
+          <li>Stable navigation for humans and browser agents.</li>
+          <li>First-party demand tracking to shape later expansion.</li>
         </ul>
       </section>
     </div>
 
-    <div class="grid" style="margin-top:16px">
-      <section class="card" aria-label="Featured cameras">
-        <h2>Featured cameras</h2>
-        ${cameraItems ? `<ul class="clean">${cameraItems}</ul>` : `<p class="subtle">No cameras yet.</p>`}
-      </section>
-      <section class="card" aria-label="Featured lenses">
-        <h2>Featured lenses</h2>
-        ${lensItems ? `<ul class="clean">${lensItems}</ul>` : `<p class="subtle">No lenses yet.</p>`}
-      </section>
-    </div>
+    <section class="card" aria-label="Featured cameras" data-testid="home-featured-cameras">
+      <h2>Featured cameras</h2>
+      ${cameraItems ? `<ul class="clean tri-grid">${cameraItems}</ul>` : `<p class="subtle">No cameras yet.</p>`}
+    </section>
+    </section>
+    </section>
+    </section>
   `;
 
   return documentHtml({
     title: "Fast Focus",
-    description: "Used camera and lens discovery: typical used price bands, comparisons, and live listings.",
+    description: "Camera-body-first used market intelligence: transparent price bands, comparisons, and live listings.",
     canonicalUrl,
     bodyHtml,
   });
@@ -380,8 +387,8 @@ export function renderCameraIndexHtml({ canonicalUrl, robots, filters, brands = 
       ]
         .filter(Boolean)
         .map((v) => escapeHtml(String(v)))
-        .join(" • ");
-      return `<li><a href="${href}">${title}</a><div class="subtle">${meta}</div></li>`;
+        .join(" â€¢ ");
+      return `<li><a class="card-link" href="${href}" data-testid="camera-index-card-${escapeHtml(c.slug)}"><strong>${title}</strong><div class="subtle">${meta}</div></a></li>`;
     })
     .join("");
 
@@ -400,20 +407,24 @@ export function renderCameraIndexHtml({ canonicalUrl, robots, filters, brands = 
   const nextHref = nextOffset === null ? null : `/cameras${buildQuery({ ...baseParams, offset: nextOffset })}`;
 
   const bodyHtml = `
-    <h1>Cameras</h1>
-    <p class="subtle">Canonical model pages use <code>/cameras/{slug}</code>.</p>
+    <section class="stack" data-testid="camera-index-page">
+      <div data-testid="camera-index-header">
+        <div class="eyebrow">Camera Index</div>
+        <h1>Cameras</h1>
+        <p class="section-lead subtle">Browse canonical camera-body pages with price bands, listing snapshots, and used-buyer checklists.</p>
+      </div>
 
     <section class="card" aria-label="Filters">
       <h2>Filter</h2>
-      <form action="/cameras" method="get" aria-label="Camera filters">
+      <form action="/cameras" method="get" aria-label="Camera filters" data-testid="camera-index-filter-form">
         <div class="row">
           <div>
             <label for="q">Search</label>
-            <input id="q" name="q" value="${escapeHtml(filters.q || "")}" placeholder="Search cameras..." />
+            <input id="q" name="q" value="${escapeHtml(filters.q || "")}" placeholder="Search cameras..." data-testid="camera-index-search-input" />
           </div>
           <div>
             <label for="brand">Brand</label>
-            <select id="brand" name="brand">${optionsBrands}</select>
+            <select id="brand" name="brand" data-testid="camera-index-brand-filter">${optionsBrands}</select>
           </div>
           <div>
             <label for="capture_medium">Capture medium</label>
@@ -437,22 +448,22 @@ export function renderCameraIndexHtml({ canonicalUrl, robots, filters, brands = 
 
     <section class="card" aria-label="Results" style="margin-top:16px">
       <h2>Results</h2>
-      ${items ? `<ul class="clean">${items}</ul>` : `<p class="subtle">No results.</p>`}
+      <div class="subtle" data-testid="camera-index-results-summary">Showing ${escapeHtml(String(cameras.length))} items â€¢ offset ${escapeHtml(String(page.offset))}</div>
+      ${items ? `<ul class="clean tri-grid" data-testid="camera-index-results">${items}</ul>` : `<p class="subtle" data-testid="camera-index-empty-state">No results.</p>`}
       <div class="row" style="margin-top:10px;align-items:center">
-        <div>
-          <span class="subtle">Showing ${escapeHtml(String(cameras.length))} items • offset ${escapeHtml(String(page.offset))}</span>
-        </div>
+
         <div style="flex:0 0 auto;display:flex;gap:10px">
           ${prevHref ? `<a href="${prevHref}">Prev</a>` : `<span class="subtle">Prev</span>`}
           ${nextHref ? `<a href="${nextHref}">Next</a>` : `<span class="subtle">Next</span>`}
         </div>
       </div>
     </section>
+    </section>
   `;
 
   return documentHtml({
-    title: "Cameras • Fast Focus",
-    description: "Browse camera models with canonical brand/model URLs.",
+    title: "Cameras â€¢ Fast Focus",
+    description: "Browse camera-body model pages with live market context.",
     canonicalUrl,
     robots,
     bodyHtml,
@@ -476,7 +487,7 @@ export function renderLensIndexHtml({ canonicalUrl, robots, filters, brands = []
       const meta = [l.brand_name || l.brand_slug, l.release_year ? String(l.release_year) : null, l.mount_code, l.lens_category]
         .filter(Boolean)
         .map((v) => escapeHtml(String(v)))
-        .join(" • ");
+        .join(" â€¢ ");
       return `<li><a href="${href}">${title}</a><div class="subtle">${meta}</div></li>`;
     })
     .join("");
@@ -538,7 +549,7 @@ export function renderLensIndexHtml({ canonicalUrl, robots, filters, brands = []
       ${items ? `<ul class="clean">${items}</ul>` : `<p class="subtle">No results.</p>`}
       <div class="row" style="margin-top:10px;align-items:center">
         <div>
-          <span class="subtle">Showing ${escapeHtml(String(lenses.length))} items • offset ${escapeHtml(String(page.offset))}</span>
+          <span class="subtle">Showing ${escapeHtml(String(lenses.length))} items â€¢ offset ${escapeHtml(String(page.offset))}</span>
         </div>
         <div style="flex:0 0 auto;display:flex;gap:10px">
           ${prevHref ? `<a href="${prevHref}">Prev</a>` : `<span class="subtle">Prev</span>`}
@@ -549,7 +560,7 @@ export function renderLensIndexHtml({ canonicalUrl, robots, filters, brands = []
   `;
 
   return documentHtml({
-    title: "Lenses • Fast Focus",
+    title: "Lenses â€¢ Fast Focus",
     description: "Browse lens models with canonical brand/model URLs.",
     canonicalUrl,
     robots,
@@ -572,7 +583,7 @@ export function renderBrandsIndexHtml({ canonicalUrl, brands = [] }) {
   `;
 
   return documentHtml({
-    title: "Brands • Fast Focus",
+    title: "Brands â€¢ Fast Focus",
     description: "Browse brands and jump to brand hubs.",
     canonicalUrl,
     bodyHtml,
@@ -589,8 +600,8 @@ export function renderBrandHubHtml({ canonicalUrl, robots = null, brand, cameras
       const meta = [c.release_year ? String(c.release_year) : null, c.sensor_format, c.mount_code]
         .filter(Boolean)
         .map((v) => escapeHtml(String(v)))
-        .join(" • ");
-      return `<li><a href="${href}">${title}</a>${meta ? `<div class="subtle">${meta}</div>` : ""}</li>`;
+        .join(" â€¢ ");
+      return `<li><a class="card-link" href="${href}" data-testid="brand-hub-camera-card-${escapeHtml(c.slug)}"><strong>${title}</strong>${meta ? `<div class="subtle">${meta}</div>` : ""}</a></li>`;
     })
     .join("");
 
@@ -601,14 +612,18 @@ export function renderBrandHubHtml({ canonicalUrl, robots = null, brand, cameras
       const meta = [l.release_year ? String(l.release_year) : null, l.mount_code, l.lens_category]
         .filter(Boolean)
         .map((v) => escapeHtml(String(v)))
-        .join(" • ");
+        .join(" â€¢ ");
       return `<li><a href="${href}">${title}</a>${meta ? `<div class="subtle">${meta}</div>` : ""}</li>`;
     })
     .join("");
 
   const bodyHtml = `
-    <h1>${escapeHtml(brand.name)}</h1>
-    <p class="subtle">Brand hub: <code>/brands/${escapeHtml(brand.slug)}</code></p>
+    <section class="stack" data-testid="brand-hub-page">
+    <div data-testid="brand-hub-header">
+      <div class="eyebrow">Brand Hub</div>
+      <h1 data-testid="brand-hub-title-${escapeHtml(brand.slug)}">${escapeHtml(brand.name)}</h1>
+      <p class="section-lead subtle">Camera-body coverage for ${escapeHtml(brand.name)}. Lens expansion is tracked separately from the launch navigation.</p>
+    </div>
 
     <section class="card" aria-label="Search within brand">
       <h2>Search within ${escapeHtml(brand.name)}</h2>
@@ -632,24 +647,30 @@ export function renderBrandHubHtml({ canonicalUrl, robots = null, brand, cameras
           }
         </div>
       </form>
-      <p class="subtle">Tip: for broader filters, use <a href="/cameras">/cameras</a> and <a href="/lenses">/lenses</a>.</p>
+      <p class="subtle">Tip: for broader filters, use <a href="/cameras">/cameras</a>.</p>
     </section>
 
     <div class="grid">
-      <section class="card" aria-label="Cameras">
+      <section class="card" aria-label="Cameras" data-testid="brand-hub-cameras">
         <h2>Cameras (${escapeHtml(String(cameras.length))})</h2>
+        <div class="subtle" data-testid="brand-hub-results-summary">Showing ${escapeHtml(String(cameras.length))} camera pages for ${escapeHtml(brand.name)}.</div>
         ${cameraItems ? `<ul class="clean">${cameraItems}</ul>` : `<p class="subtle">No cameras found.</p>`}
       </section>
-      <section class="card" aria-label="Lenses">
-        <h2>Lenses (${escapeHtml(String(lenses.length))})</h2>
-        ${lensItems ? `<ul class="clean">${lensItems}</ul>` : `<p class="subtle">No lenses found.</p>`}
-      </section>
+      ${
+        lenses.length
+          ? `<section class="card" aria-label="Lenses">
+              <h2>Lenses (${escapeHtml(String(lenses.length))})</h2>
+              ${lensItems ? `<ul class="clean">${lensItems}</ul>` : `<p class="subtle">No lenses found.</p>`}
+            </section>`
+          : ""
+      }
     </div>
+    </section>
   `;
 
   return documentHtml({
-    title: `${brand.name} • Fast Focus`,
-    description: `Browse ${brand.name} camera and lens models.`,
+    title: `${brand.name} â€¢ Fast Focus`,
+    description: `Browse ${brand.name} camera-body model pages.`,
     canonicalUrl,
     robots,
     bodyHtml,
@@ -667,20 +688,24 @@ export function renderCompareIndexHtml({ canonicalUrl, cameras = [], currency = 
   const listId = "camera_slugs";
 
   const bodyHtml = `
-    <h1>Compare</h1>
-    <p class="subtle">Canonical comparisons: <code>/compare/{modelA}-vs-{modelB}</code> (camera slugs for now).</p>
+    <section class="stack" data-testid="compare-index-page">
+    <div data-testid="compare-index-header">
+      <div class="eyebrow">Compare</div>
+      <h1>Compare camera bodies</h1>
+      <p class="section-lead subtle">Use canonical compare URLs to line up two camera-body pages and their current Fast Focus price context.</p>
+    </div>
 
     <section class="card" aria-label="Compare form">
       <h2>Build a comparison</h2>
-      <form action="/compare" method="get" aria-label="Compare form">
+      <form action="/compare" method="get" aria-label="Compare form" data-testid="compare-index-form">
         <div class="row">
           <div>
             <label for="a">Model A slug</label>
-            <input id="a" name="a" placeholder="e.g. sony-a7-iv" list="${listId}" />
+            <input id="a" name="a" placeholder="e.g. sony-a7-iv" list="${listId}" data-testid="compare-index-camera-a-input" />
           </div>
           <div>
             <label for="b">Model B slug</label>
-            <input id="b" name="b" placeholder="e.g. nikon-z6-ii" list="${listId}" />
+            <input id="b" name="b" placeholder="e.g. nikon-z6-ii" list="${listId}" data-testid="compare-index-camera-b-input" />
           </div>
           <div>
             <label for="currency">Currency</label>
@@ -692,7 +717,7 @@ export function renderCompareIndexHtml({ canonicalUrl, cameras = [], currency = 
           </div>
           <div style="flex:0 0 auto">
             <label>&nbsp;</label>
-            <button type="submit">Compare</button>
+            <button type="submit" data-testid="compare-index-submit">Compare</button>
           </div>
         </div>
       </form>
@@ -700,10 +725,11 @@ export function renderCompareIndexHtml({ canonicalUrl, cameras = [], currency = 
 
     ${options ? `<datalist id="${listId}">${options}</datalist>` : ""}
     <p class="subtle">Tip: you can copy slugs from <a href="/cameras">/cameras</a>, or start typing to see suggestions.</p>
+    </section>
   `;
 
   return documentHtml({
-    title: "Compare • Fast Focus",
+    title: "Compare â€¢ Fast Focus",
     description: "Compare two camera models.",
     canonicalUrl,
     bodyHtml,
@@ -720,16 +746,16 @@ export function renderComparePageHtml({
   currency = "EUR",
   comparisonSections = null,
 }) {
-  const aMedian = priceBandA ? formatMoney(priceBandA.median, priceBandA.currency || currency) : "—";
-  const bMedian = priceBandB ? formatMoney(priceBandB.median, priceBandB.currency || currency) : "—";
+  const aMedian = priceBandA ? formatMoney(priceBandA.median, priceBandA.currency || currency) : "â€”";
+  const bMedian = priceBandB ? formatMoney(priceBandB.median, priceBandB.currency || currency) : "â€”";
   const aIqr =
     priceBandA && priceBandA.p25 !== null && priceBandA.p25 !== undefined && priceBandA.p75 !== null && priceBandA.p75 !== undefined
-      ? `${formatMoney(priceBandA.p25, priceBandA.currency || currency)}–${formatMoney(priceBandA.p75, priceBandA.currency || currency)}`
-      : "—";
+      ? `${formatMoney(priceBandA.p25, priceBandA.currency || currency)}â€“${formatMoney(priceBandA.p75, priceBandA.currency || currency)}`
+      : "â€”";
   const bIqr =
     priceBandB && priceBandB.p25 !== null && priceBandB.p25 !== undefined && priceBandB.p75 !== null && priceBandB.p75 !== undefined
-      ? `${formatMoney(priceBandB.p25, priceBandB.currency || currency)}–${formatMoney(priceBandB.p75, priceBandB.currency || currency)}`
-      : "—";
+      ? `${formatMoney(priceBandB.p25, priceBandB.currency || currency)}â€“${formatMoney(priceBandB.p75, priceBandB.currency || currency)}`
+      : "â€”";
 
   function isHttpUrl(value) {
     if (!isNonEmptyString(value)) return false;
@@ -754,7 +780,7 @@ export function renderComparePageHtml({
     const w = obj.w ?? null;
     const h = obj.h ?? null;
     if (!Number.isFinite(Number(w)) || !Number.isFinite(Number(h))) return null;
-    return `${Number(w)}×${Number(h)}`;
+    return `${Number(w)}Ã—${Number(h)}`;
   }
 
   function formatRatio(obj) {
@@ -771,9 +797,9 @@ export function renderComparePageHtml({
     const h = obj.h ?? null;
     const d = obj.d ?? null;
     if (!Number.isFinite(Number(w)) || !Number.isFinite(Number(h))) return null;
-    if (d === null || d === undefined) return `${Number(w)}×${Number(h)} mm`;
-    if (!Number.isFinite(Number(d))) return `${Number(w)}×${Number(h)} mm`;
-    return `${Number(w)}×${Number(h)}×${Number(d)} mm`;
+    if (d === null || d === undefined) return `${Number(w)}Ã—${Number(h)} mm`;
+    if (!Number.isFinite(Number(d))) return `${Number(w)}Ã—${Number(h)} mm`;
+    return `${Number(w)}Ã—${Number(h)}Ã—${Number(d)} mm`;
   }
 
   function formatRange(obj, unit = "") {
@@ -783,7 +809,7 @@ export function renderComparePageHtml({
     if (!Number.isFinite(Number(min)) || !Number.isFinite(Number(max))) return null;
     const suffix = unit ? ` ${unit}` : "";
     if (Number(min) === Number(max)) return `${Number(min)}${suffix}`;
-    return `${Number(min)}–${Number(max)}${suffix}`;
+    return `${Number(min)}â€“${Number(max)}${suffix}`;
   }
 
   function formatValue(fieldPath, value) {
@@ -806,7 +832,7 @@ export function renderComparePageHtml({
       if (fieldPath.endsWith(".type") && fieldPath.includes("viewfinder")) return escapeHtml(enumLabel(trimmed, VIEWFINDER_TYPE_LABELS) || trimmed);
 
       const maxLen = 180;
-      return escapeHtml(trimmed.length > maxLen ? `${trimmed.slice(0, maxLen - 1)}…` : trimmed);
+      return escapeHtml(trimmed.length > maxLen ? `${trimmed.slice(0, maxLen - 1)}â€¦` : trimmed);
     }
 
     if (typeof value === "number") {
@@ -823,7 +849,7 @@ export function renderComparePageHtml({
       if (items.length === 0) return null;
       const joined = items.join(", ");
       const maxLen = 220;
-      return joined.length > maxLen ? `${joined.slice(0, maxLen - 1)}…` : joined;
+      return joined.length > maxLen ? `${joined.slice(0, maxLen - 1)}â€¦` : joined;
     }
 
     if (typeof value === "object") {
@@ -831,7 +857,7 @@ export function renderComparePageHtml({
         const amount = value.amount ?? null;
         const cur = value.currency ?? null;
         const money = formatMoney(amount, cur);
-        return money === "—" ? null : escapeHtml(money);
+        return money === "â€”" ? null : escapeHtml(money);
       }
 
       const ratio = formatRatio(value);
@@ -853,7 +879,7 @@ export function renderComparePageHtml({
         if (keys.length === 0) return null;
         const text = JSON.stringify(safe);
         const maxLen = 180;
-        return escapeHtml(text.length > maxLen ? `${text.slice(0, maxLen - 1)}…` : text);
+        return escapeHtml(text.length > maxLen ? `${text.slice(0, maxLen - 1)}â€¦` : text);
       }
     }
 
@@ -930,21 +956,21 @@ export function renderComparePageHtml({
       const formatted = formatValue(p, raw);
       if (formatted !== null && formatted !== undefined) parts.push(formatted);
     }
-    if (parts.length === 0) return "—";
+    if (parts.length === 0) return "â€”";
 
     // Special-case: sensor size often combines a label + mm dims.
     if (fieldPaths.includes("specs.sensor.sensor_format") && fieldPaths.includes("specs.sensor.physical_dimensions_mm")) {
       if (parts.length === 2) return `${parts[0]} (${parts[1]})`;
     }
 
-    return parts.join(" • ");
+    return parts.join(" â€¢ ");
   }
 
   function renderCompareTable(sectionLabel, rows) {
     const tableRows = rows
       .map((row) => {
-        const aText = row.aHtml ?? "—";
-        const bText = row.bHtml ?? "—";
+        const aText = row.aHtml ?? "â€”";
+        const bText = row.bHtml ?? "â€”";
         return `<tr><th scope="row">${escapeHtml(row.label)}</th><td>${aText}</td><td>${bText}</td></tr>`;
       })
       .join("");
@@ -971,7 +997,7 @@ export function renderComparePageHtml({
 
   const usedMarketSection = renderCompareTable("Used market (Fast Focus)", [
     { label: "Typical used price (median)", aHtml: escapeHtml(aMedian), bHtml: escapeHtml(bMedian) },
-    { label: "Typical used price (P25–P75)", aHtml: escapeHtml(aIqr), bHtml: escapeHtml(bIqr) },
+    { label: "Typical used price (P25â€“P75)", aHtml: escapeHtml(aIqr), bHtml: escapeHtml(bIqr) },
   ]);
 
   const sectionDefs = Array.isArray(comparisonSections) ? comparisonSections : [];
@@ -989,27 +1015,38 @@ export function renderComparePageHtml({
           .join("")
       : renderCompareTable("Key specs", [
           { label: "Brand", aHtml: escapeHtml(cameraA.brand_name || cameraA.brand_slug), bHtml: escapeHtml(cameraB.brand_name || cameraB.brand_slug) },
-          { label: "Release year", aHtml: escapeHtml(String(cameraA.release_year ?? "—")), bHtml: escapeHtml(String(cameraB.release_year ?? "—")) },
-          { label: "Sensor format", aHtml: escapeHtml(enumLabel(cameraA.sensor_format, SENSOR_FORMAT_LABELS) || "—"), bHtml: escapeHtml(enumLabel(cameraB.sensor_format, SENSOR_FORMAT_LABELS) || "—") },
-          { label: "Resolution (MP)", aHtml: escapeHtml(String(cameraA.resolution_mp ?? "—")), bHtml: escapeHtml(String(cameraB.resolution_mp ?? "—")) },
-          { label: "Mount", aHtml: escapeHtml(cameraA.mount_code || "—"), bHtml: escapeHtml(cameraB.mount_code || "—") },
+          { label: "Release year", aHtml: escapeHtml(String(cameraA.release_year ?? "â€”")), bHtml: escapeHtml(String(cameraB.release_year ?? "â€”")) },
+          { label: "Sensor format", aHtml: escapeHtml(enumLabel(cameraA.sensor_format, SENSOR_FORMAT_LABELS) || "â€”"), bHtml: escapeHtml(enumLabel(cameraB.sensor_format, SENSOR_FORMAT_LABELS) || "â€”") },
+          { label: "Resolution (MP)", aHtml: escapeHtml(String(cameraA.resolution_mp ?? "â€”")), bHtml: escapeHtml(String(cameraB.resolution_mp ?? "â€”")) },
+          { label: "Mount", aHtml: escapeHtml(cameraA.mount_code || "â€”"), bHtml: escapeHtml(cameraB.mount_code || "â€”") },
         ]);
 
   const bodyHtml = `
-    <h1>${escapeHtml(cameraA.display_name)} vs ${escapeHtml(cameraB.display_name)}</h1>
+    <section class="stack" data-testid="compare-page">
+    <div data-testid="compare-page-header">
+      <div class="eyebrow">Canonical Compare</div>
+      <h1>${escapeHtml(cameraA.display_name)} vs ${escapeHtml(cameraB.display_name)}</h1>
+    </div>
+    <section class="card" data-testid="compare-page-summary">
+    <div class="meta-row">
+      <a href="/compare" data-testid="compare-back-link">Back to compare builder</a>
+      <span class="pill">Currency ${escapeHtml(currency)}</span>
+    </div>
     <p class="subtle">
       Model pages:
-      <a href="${aHref}">${escapeHtml(cameraA.slug)}</a> •
+      <a href="${aHref}">${escapeHtml(cameraA.slug)}</a> â€¢
       <a href="${bHref}">${escapeHtml(cameraB.slug)}</a>
     </p>
     <p class="subtle">Price bands are computed from matched active listings and may lag the live market.</p>
+    </section>
 
-    ${usedMarketSection}
-    ${dpreviewTables}
+    <div data-testid="compare-price-section">${usedMarketSection}</div>
+    <div data-testid="compare-specs-table">${dpreviewTables}</div>
+    </section>
   `;
 
   return documentHtml({
-    title: `${cameraA.display_name} vs ${cameraB.display_name} • Fast Focus`,
+    title: `${cameraA.display_name} vs ${cameraB.display_name} â€¢ Fast Focus`,
     description: `Compare ${cameraA.display_name} vs ${cameraB.display_name}.`,
     canonicalUrl,
     robots,
@@ -1021,7 +1058,7 @@ export function renderAboutPageHtml({ canonicalUrl }) {
   const bodyHtml = `
     <h1>About Fast Focus</h1>
     <p class="subtle">
-      Fast Focus is a Phase 1 MVP for used camera and lens discovery: browse models, see typical used price bands, and click out to live listings.
+      Fast Focus launches as a camera-body-first decision surface: browse camera models, see transparent price bands, and click out to live listings with better context.
     </p>
 
     <section class="card" aria-label="How it works">
@@ -1029,7 +1066,7 @@ export function renderAboutPageHtml({ canonicalUrl }) {
       <ol>
         <li>Ingest live marketplace listings (starting with eBay in Phase 1).</li>
         <li>Normalize listings into a consistent schema (price, shipping, condition, location, etc.).</li>
-        <li>Match listings to canonical camera/lens models in the catalog.</li>
+        <li>Match listings to canonical camera models in the launch catalog.</li>
         <li>Compute typical asking-price bands from matched active listings.</li>
       </ol>
       <p class="subtle">Methodology endpoint: <a href="/api/v1/price-bands/methodology">/api/v1/price-bands/methodology</a>.</p>
@@ -1039,10 +1076,10 @@ export function renderAboutPageHtml({ canonicalUrl }) {
       <h2>How to use the site</h2>
       <ul>
         <li><a href="/">Homepage</a> shows marketplace freshness and featured models.</li>
-        <li><a href="/cameras">Cameras</a> and <a href="/lenses">Lenses</a> provide search + filters.</li>
+        <li><a href="/cameras">Cameras</a> provides the launch search + filter surface.</li>
         <li>Model pages show specs, a used-buyer checklist, and matched listings.</li>
         <li><a href="/compare">Compare</a> puts two models side-by-side.</li>
-        <li><a href="/guides">Guides</a> covers inspection and buying tips.</li>
+        <li><a href="/brands">Brands</a> gives camera-first hubs with stable URLs.</li>
       </ul>
     </section>
 
@@ -1055,8 +1092,8 @@ export function renderAboutPageHtml({ canonicalUrl }) {
   `;
 
   return documentHtml({
-    title: "About • Fast Focus",
-    description: "About the Fast Focus used camera and lens discovery MVP.",
+    title: "About â€¢ Fast Focus",
+    description: "About the Fast Focus camera-body-first launch surface.",
     canonicalUrl,
     bodyHtml,
   });
@@ -1065,14 +1102,14 @@ export function renderAboutPageHtml({ canonicalUrl }) {
 export function renderPrivacyPageHtml({ canonicalUrl }) {
   const bodyHtml = `
     <h1>Privacy</h1>
-    <p class="subtle">This page describes what the Phase 1 MVP stores when you browse and click out to listings.</p>
+    <p class="subtle">This page describes what Fast Focus stores for consented analytics, outbound click attribution, and optional email features.</p>
 
     <section class="card" aria-label="Data we store">
       <h2>Data we store (application database)</h2>
       <ul>
-        <li>A random session id cookie (<code>ff_sid</code>) to associate click-out events (only when consent is enabled; see below).</li>
-        <li>Click-out events: listing id, page type, timestamp, and destination marketplace code.</li>
-        <li>Technical context for debugging and attribution: user agent, referrer, and UTM parameters (if present).</li>
+        <li>A random session id cookie (<code>ff_sid</code>) to associate consented analytics events across pages and click-outs.</li>
+        <li>Consented event types such as page views, search/filter actions, compare views, and listing click-outs.</li>
+        <li>Technical context for debugging and attribution: page type, path, user agent, referrer, and UTM parameters (if present).</li>
       </ul>
       <p class="subtle">The application does not store IP addresses in its database. Your hosting provider may keep standard server logs.</p>
     </section>
@@ -1080,7 +1117,7 @@ export function renderPrivacyPageHtml({ canonicalUrl }) {
     <section class="card" aria-label="Cookies">
       <h2>Cookies</h2>
       <p class="subtle">
-        The <code>ff_sid</code> cookie is set only when you click an outbound listing link <em>and</em> you have enabled attribution tracking below.
+        The <code>ff_sid</code> cookie is set only when Fast Focus records consented analytics or outbound attribution.
         It is <code>HttpOnly</code>, <code>SameSite=Lax</code>, and configured for a 30-day max age.
       </p>
       <p class="subtle">
@@ -1090,19 +1127,27 @@ export function renderPrivacyPageHtml({ canonicalUrl }) {
       <div class="subtle">
         <p><strong>Attribution tracking preference</strong></p>
         <ul>
-          <li><a href="/consent?analytics=true&amp;return_to=/privacy">Enable</a> click-out attribution tracking</li>
-          <li><a href="/consent?analytics=false&amp;return_to=/privacy">Disable</a> click-out attribution tracking</li>
+          <li><a href="/consent?analytics=true&amp;return_to=/privacy">Enable</a> consented product analytics and click-out attribution</li>
+          <li><a href="/consent?analytics=false&amp;return_to=/privacy">Disable</a> consented product analytics and click-out attribution</li>
         </ul>
         <p>
-          If your browser sends a global opt-out signal (GPC or Do Not Track), Fast Focus will not record click-out events even if enabled here.
+          If your browser sends a global opt-out signal (GPC or Do Not Track), Fast Focus will not record consented analytics events even if enabled here.
         </p>
       </div>
+    </section>
+
+    <section class="card" aria-label="Why we measure">
+      <h2>Why we measure</h2>
+      <p class="subtle">
+        Fast Focus uses first-party analytics to understand what buyers actually want: camera vs lens demand, brand share, model bias, compare-pair demand,
+        click-out behavior, and where coverage should expand next.
+      </p>
     </section>
 
     <section class="card" aria-label="Retention">
       <h2>Retention</h2>
       <p class="subtle">
-        Default retention targets (production): click-out events are deleted after 90 days; operational logs (ingestion runs) after 180 days; and audit
+        Default retention targets (production): consented analytics events are deleted after 90 days; operational logs (ingestion runs) after 180 days; and audit
         logs after 365 days. These windows are designed to keep data minimization explicit (governance WP-0020).
       </p>
     </section>
@@ -1145,8 +1190,8 @@ export function renderPrivacyPageHtml({ canonicalUrl }) {
   `;
 
   return documentHtml({
-    title: "Privacy • Fast Focus",
-    description: "Privacy information for the Fast Focus Phase 1 MVP.",
+    title: "Privacy â€¢ Fast Focus",
+    description: "Privacy information for the Fast Focus launch surface.",
     canonicalUrl,
     bodyHtml,
   });
@@ -1155,12 +1200,12 @@ export function renderPrivacyPageHtml({ canonicalUrl }) {
 export function renderAlertConfirmResultHtml({ canonicalUrl, alreadyConfirmed = false } = {}) {
   const bodyHtml = `
     <h1>Alerts confirmed</h1>
-    <p class="subtle">${alreadyConfirmed ? "This alert was already confirmed." : "Thanks — alerts are now enabled."}</p>
+    <p class="subtle">${alreadyConfirmed ? "This alert was already confirmed." : "Thanks â€” alerts are now enabled."}</p>
 
     <section class="card" aria-label="Next steps">
       <h2>Next steps</h2>
       <ul>
-        <li>You’ll receive an email when new matching listings are found (batch/scheduled).</li>
+        <li>Youâ€™ll receive an email when new matching listings are found (batch/scheduled).</li>
         <li>Unsubscribe links are included in every email.</li>
       </ul>
       <p class="subtle"><a href="/privacy">Privacy</a></p>
@@ -1168,7 +1213,7 @@ export function renderAlertConfirmResultHtml({ canonicalUrl, alreadyConfirmed = 
   `;
 
   return documentHtml({
-    title: "Alerts confirmed â€¢ Fast Focus",
+    title: "Alerts confirmed Ã¢â‚¬Â¢ Fast Focus",
     description: "Your Fast Focus alert is confirmed.",
     canonicalUrl,
     bodyHtml,
@@ -1178,12 +1223,12 @@ export function renderAlertConfirmResultHtml({ canonicalUrl, alreadyConfirmed = 
 export function renderAlertUnsubscribeResultHtml({ canonicalUrl } = {}) {
   const bodyHtml = `
     <h1>Unsubscribed</h1>
-    <p class="subtle">You’ll no longer receive alerts for this saved search.</p>
+    <p class="subtle">Youâ€™ll no longer receive alerts for this saved search.</p>
     <p class="subtle"><a href="/privacy">Privacy</a></p>
   `;
 
   return documentHtml({
-    title: "Unsubscribed â€¢ Fast Focus",
+    title: "Unsubscribed Ã¢â‚¬Â¢ Fast Focus",
     description: "You have unsubscribed from a Fast Focus alert.",
     canonicalUrl,
     bodyHtml,
@@ -1223,7 +1268,7 @@ export function renderNewsletterSignupPageHtml({ canonicalUrl, status = null, er
   `;
 
   return documentHtml({
-    title: "Newsletter • Fast Focus",
+    title: "Newsletter â€¢ Fast Focus",
     description: "Subscribe to the Fast Focus weekly deals newsletter.",
     canonicalUrl,
     bodyHtml,
@@ -1233,12 +1278,12 @@ export function renderNewsletterSignupPageHtml({ canonicalUrl, status = null, er
 export function renderNewsletterConfirmResultHtml({ canonicalUrl, alreadyConfirmed = false } = {}) {
   const bodyHtml = `
     <h1>Newsletter confirmed</h1>
-    <p class="subtle">${alreadyConfirmed ? "This subscription was already confirmed." : "Thanks — you are subscribed."}</p>
+    <p class="subtle">${alreadyConfirmed ? "This subscription was already confirmed." : "Thanks â€” you are subscribed."}</p>
     <p class="subtle"><a href="/privacy">Privacy</a></p>
   `;
 
   return documentHtml({
-    title: "Newsletter confirmed • Fast Focus",
+    title: "Newsletter confirmed â€¢ Fast Focus",
     description: "Your Fast Focus newsletter subscription is confirmed.",
     canonicalUrl,
     bodyHtml,
@@ -1253,7 +1298,7 @@ export function renderNewsletterUnsubscribeResultHtml({ canonicalUrl } = {}) {
   `;
 
   return documentHtml({
-    title: "Unsubscribed • Fast Focus",
+    title: "Unsubscribed â€¢ Fast Focus",
     description: "You have unsubscribed from the Fast Focus newsletter.",
     canonicalUrl,
     bodyHtml,
@@ -1283,7 +1328,7 @@ export function renderPremiumSignupPageHtml({ canonicalUrl, status = null, error
   `;
 
   return documentHtml({
-    title: "Premium • Fast Focus",
+    title: "Premium â€¢ Fast Focus",
     description: "Upgrade to Fast Focus Premium (Pro).",
     canonicalUrl,
     bodyHtml,
@@ -1293,12 +1338,12 @@ export function renderPremiumSignupPageHtml({ canonicalUrl, status = null, error
 export function renderPremiumConfirmResultHtml({ canonicalUrl, alreadyConfirmed = false } = {}) {
   const bodyHtml = `
     <h1>Premium confirmed</h1>
-    <p class="subtle">${alreadyConfirmed ? "This subscription was already confirmed." : "Thanks — premium is now enabled on this device."}</p>
+    <p class="subtle">${alreadyConfirmed ? "This subscription was already confirmed." : "Thanks â€” premium is now enabled on this device."}</p>
     <p class="subtle"><a href="/privacy">Privacy</a></p>
   `;
 
   return documentHtml({
-    title: "Premium confirmed • Fast Focus",
+    title: "Premium confirmed â€¢ Fast Focus",
     description: "Your Fast Focus Premium subscription is confirmed.",
     canonicalUrl,
     bodyHtml,
@@ -1313,7 +1358,7 @@ export function renderPremiumCancelResultHtml({ canonicalUrl, alreadyCanceled = 
   `;
 
   return documentHtml({
-    title: "Premium canceled • Fast Focus",
+    title: "Premium canceled â€¢ Fast Focus",
     description: "Your Fast Focus Premium subscription is canceled.",
     canonicalUrl,
     bodyHtml,
@@ -1328,7 +1373,7 @@ export function renderPremiumPriceHistoryPageHtml({ canonicalUrl, kind, model, s
   const rows = Array.isArray(series) ? series : [];
   const body = rows
     .map((r) => {
-      const date = r.observed_date || "—";
+      const date = r.observed_date || "â€”";
       const sample = Number(r.sample_size || 0);
       const p25 = formatMoney(r.p25, currency);
       const med = formatMoney(r.median, currency);
@@ -1370,7 +1415,7 @@ export function renderPremiumPriceHistoryPageHtml({ canonicalUrl, kind, model, s
       : `/api/v1/premium/cameras/${encodeURIComponent(model?.slug || "")}/price-history`;
 
   const bodyHtml = `
-    <h1>${escapeHtml(String(name))} • Price history</h1>
+    <h1>${escapeHtml(String(name))} â€¢ Price history</h1>
     <p class="subtle">Premium view. Currency: <code>${escapeHtml(String(currency))}</code></p>
     <p class="subtle"><a href="${escapeHtml(jsonHref)}" rel="nofollow">JSON</a></p>
     ${table}
@@ -1378,7 +1423,7 @@ export function renderPremiumPriceHistoryPageHtml({ canonicalUrl, kind, model, s
   `;
 
   return documentHtml({
-    title: `${name} price history • Fast Focus`,
+    title: `${name} price history â€¢ Fast Focus`,
     description: `Premium price history for ${name}.`,
     canonicalUrl,
     bodyHtml,
@@ -1416,7 +1461,7 @@ export function renderGuidesIndexHtml({ canonicalUrl }) {
   `;
 
   return documentHtml({
-    title: "Guides • Fast Focus",
+    title: "Guides â€¢ Fast Focus",
     description: "Buying guides for used cameras and lenses.",
     canonicalUrl,
     bodyHtml,
@@ -1440,7 +1485,7 @@ export function renderGuidePageHtml({ canonicalUrl, topic }) {
         <li>Confirm the exact model name + mount (avoid near-identical variants).</li>
         <li>Scan photos for dents, impact marks, cracked LCD, and missing screws.</li>
         <li>Look for a clear photo of the sensor (digital) or film chamber (film).</li>
-        <li>Verify what’s included: battery, charger, body cap, strap, box, paperwork.</li>
+        <li>Verify whatâ€™s included: battery, charger, body cap, strap, box, paperwork.</li>
       </ol>
     </section>
 
@@ -1467,8 +1512,8 @@ export function renderGuidePageHtml({ canonicalUrl, topic }) {
     <section class="card" aria-label="Red flags">
       <h2>Red flags</h2>
       <ul>
-        <li>Stock photos only, or photos that don’t match the model name in the title.</li>
-        <li>“Untested” / “as-is” for a modern digital body (unless you’re buying for parts).</li>
+        <li>Stock photos only, or photos that donâ€™t match the model name in the title.</li>
+        <li>â€œUntestedâ€ / â€œas-isâ€ for a modern digital body (unless youâ€™re buying for parts).</li>
         <li>Missing serial/label photos, or seller refuses to provide close-ups.</li>
         <li>Price far below the typical range with vague explanation.</li>
       </ul>
@@ -1526,7 +1571,7 @@ export function renderGuidePageHtml({ canonicalUrl, topic }) {
   const bodyHtml = topic === "how-to-buy-used-camera" ? buyUsedCamera : topic === "how-to-check-lens-condition" ? checkLensCondition : null;
   if (!bodyHtml) {
     return documentHtml({
-      title: "Guide not found • Fast Focus",
+      title: "Guide not found â€¢ Fast Focus",
       description: "Unknown guide topic.",
       canonicalUrl,
       bodyHtml: `<h1>Guide not found</h1><p class="subtle">Unknown guide topic: <code>${safeTopic}</code>.</p><p><a href=\"/guides\">Back to guides</a></p>`,
@@ -1540,9 +1585,12 @@ export function renderGuidePageHtml({ canonicalUrl, topic }) {
       : "A practical checklist for evaluating lens condition: glass inspection, mechanics, and quick tests.";
 
   return documentHtml({
-    title: `${metaTitle} • Fast Focus`,
+    title: `${metaTitle} â€¢ Fast Focus`,
     description: metaDescription,
     canonicalUrl,
     bodyHtml,
   });
 }
+
+
+

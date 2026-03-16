@@ -1,3 +1,5 @@
+﻿import { PRIMARY_NAV_LINKS, SITE_TAGLINE } from "../launch_contract.js";
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -34,7 +36,7 @@ function countWords(text) {
 
 function softClampBio(sentences, { minWords = 80, maxWords = 200 } = {}) {
   const optionalTail = [
-    "If you’re buying used, prioritize clear photos, a clean functional test, and a seller with straightforward return terms.",
+    "If youâ€™re buying used, prioritize clear photos, a clean functional test, and a seller with straightforward return terms.",
     "Used prices can move with availability and demand, so treat any range as a snapshot rather than a guarantee.",
   ];
 
@@ -72,7 +74,7 @@ const SENSOR_FORMAT_LABELS = {
   one_over_2_5_inch: "1/2.5-inch",
   one_over_2_7_inch: "1/2.7-inch",
   one_over_3_0_inch: "1/3-inch",
-  medium_format_44x33: "Medium format (44×33)",
+  medium_format_44x33: "Medium format (44Ã—33)",
   medium_format_645: "Medium format (645)",
   other: "Other",
 };
@@ -97,9 +99,9 @@ const FILM_FORMAT_LABELS = {
   instax_mini: "Instax Mini",
   instax_wide: "Instax Wide",
   polaroid_600: "Polaroid 600",
-  polaroid_i_type: "Polaroid i‑Type",
-  "4x5": "4×5",
-  "8x10": "8×10",
+  polaroid_i_type: "Polaroid iâ€‘Type",
+  "4x5": "4Ã—5",
+  "8x10": "8Ã—10",
   other: "Other",
 };
 
@@ -146,19 +148,19 @@ function formatTimestamp(value) {
 
 function formatDimensionsMM({ dimensions_w_mm, dimensions_h_mm, dimensions_d_mm }) {
   if (!dimensions_w_mm || !dimensions_h_mm || !dimensions_d_mm) return null;
-  return `${dimensions_w_mm}×${dimensions_h_mm}×${dimensions_d_mm} mm`;
+  return `${dimensions_w_mm}Ã—${dimensions_h_mm}Ã—${dimensions_d_mm} mm`;
 }
 
 function formatFocalRangeMm(minMm, maxMm) {
   if (!Number.isFinite(Number(minMm)) || !Number.isFinite(Number(maxMm))) return null;
   if (Number(minMm) === Number(maxMm)) return `${Number(minMm)} mm`;
-  return `${Number(minMm)}–${Number(maxMm)} mm`;
+  return `${Number(minMm)}â€“${Number(maxMm)} mm`;
 }
 
 function formatMaxAperture(wideF, teleF) {
   if (!Number.isFinite(Number(wideF)) || !Number.isFinite(Number(teleF))) return null;
   if (Number(wideF) === Number(teleF)) return `f/${Number(wideF)}`;
-  return `f/${Number(wideF)}–${Number(teleF)}`;
+  return `f/${Number(wideF)}â€“${Number(teleF)}`;
 }
 
 function formatMount(mountCode) {
@@ -239,13 +241,12 @@ function renderBullets(items) {
 }
 
 function navHtml() {
+  const links = PRIMARY_NAV_LINKS.map(
+    (link) => `<a href="${escapeHtml(link.href)}" data-testid="${escapeHtml(link.testId)}">${escapeHtml(link.label)}</a>`,
+  ).join("");
   return `
-    <nav aria-label="Primary">
-      <a href="/cameras">Cameras</a>
-      <a href="/lenses">Lenses</a>
-      <a href="/brands">Brands</a>
-      <a href="/compare">Compare</a>
-      <a href="/guides">Guides</a>
+    <nav aria-label="Primary" data-testid="site-primary-nav">
+      ${links}
     </nav>
   `;
 }
@@ -291,11 +292,11 @@ function documentHtml({ title, description, canonicalUrl = null, robots = null, 
     </style>
   </head>
   <body>
-    <header>
+    <header data-testid="site-header">
       <div class="wrap">
         <div>
-          <strong><a href="/">Fast Focus</a></strong>
-          <span class="subtle">Used gear discovery</span>
+          <strong><a href="/" data-testid="site-logo-link">Fast Focus</a></strong>
+          <span class="subtle">${escapeHtml(SITE_TAGLINE)}</span>
         </div>
         ${navHtml()}
       </div>
@@ -303,10 +304,10 @@ function documentHtml({ title, description, canonicalUrl = null, robots = null, 
     <main>
       ${bodyHtml}
     </main>
-    <footer>
+    <footer data-testid="site-footer">
       <div>
-        Fast Focus MVP • Generated ${escapeHtml(new Date().toISOString())} • <a href="/about">About</a> • <a href="/privacy">Privacy</a> •
-        <a href="/sitemap.xml">Sitemap</a> • <a href="/llms.txt">LLMs</a>
+        Fast Focus MVP â€¢ Generated ${escapeHtml(new Date().toISOString())} â€¢ <a href="/about">About</a> â€¢ <a href="/privacy">Privacy</a> â€¢
+        <a href="/sitemap.xml">Sitemap</a> â€¢ <a href="/llms.txt">LLMs</a>
       </div>
     </footer>
   </body>
@@ -317,7 +318,7 @@ function documentHtml({ title, description, canonicalUrl = null, robots = null, 
 function renderSpecTable(rows) {
   const body = rows
     .map(({ label, value }) => {
-      const v = isNonEmptyString(value) ? value : "—";
+      const v = isNonEmptyString(value) ? value : "â€”";
       return `<tr><th scope="row">${escapeHtml(label)}</th><td>${escapeHtml(v)}</td></tr>`;
     })
     .join("");
@@ -480,7 +481,7 @@ function renderPriceBandCard(priceBand, { premiumPriceHistoryHref = null } = {})
   }
 
   const rows = [
-    { label: "Currency", value: priceBand.currency || "—" },
+    { label: "Currency", value: priceBand.currency || "â€”" },
     { label: "Observed date", value: priceBand.observed_date || null },
     { label: "Country", value: priceBand.country || null },
     { label: "Condition tier", value: priceBand.condition_physical_tier || null },
@@ -510,14 +511,14 @@ function renderListingCountsCard({ listingCounts, lastUpdatedAt }) {
     .map(
       (r) =>
         `<tr><td><code>${escapeHtml(r.marketplace_code)}</code></td><td>${escapeHtml(String(r.listing_count))}</td><td>${escapeHtml(
-          r.last_retrieved_at || "—",
+          r.last_retrieved_at || "â€”",
         )}</td></tr>`,
     )
     .join("");
 
   return `<div class="card">
   <h3>Listings snapshot</h3>
-  <div class="subtle">Last refresh: ${escapeHtml(lastUpdatedAt || "—")}</div>
+  <div class="subtle">Last refresh: ${escapeHtml(lastUpdatedAt || "â€”")}</div>
   <table aria-label="Listing counts by source">
     <thead><tr><th scope="col">Source</th><th scope="col">Count</th><th scope="col">Last retrieved</th></tr></thead>
     <tbody>${tableRows}</tbody>
@@ -540,7 +541,7 @@ function formatListingPrice(listing) {
       ? formatMoney(listing.shipping_amount, listing.shipping_currency || listing.price_currency)
       : null;
   if (price && ship) return `${price} + ${ship} ship`;
-  return price || "—";
+  return price || "â€”";
 }
 
 function renderListingsTable(listings) {
@@ -551,9 +552,9 @@ function renderListingsTable(listings) {
 
   const body = rows
     .map((l) => {
-      const loc = formatLocation(l) || "—";
-      const condition = enumLabel(l.condition_physical_tier) || "—";
-      const retrieved = l.last_retrieved_at || "—";
+      const loc = formatLocation(l) || "â€”";
+      const condition = enumLabel(l.condition_physical_tier) || "â€”";
+      const retrieved = l.last_retrieved_at || "â€”";
       const price = formatListingPrice(l);
       const source = isNonEmptyString(l.marketplace_display_name) ? l.marketplace_display_name : null;
       const sponsored = l.marketplace_is_sponsored === true;
@@ -562,7 +563,7 @@ function renderListingsTable(listings) {
       const sourceHtml = source
         ? `${escapeHtml(source)} <span class="subtle">(${escapeHtml(l.marketplace_code)})</span>${badgeHtml}`
         : `<code>${escapeHtml(l.marketplace_code)}</code>${badgeHtml}`;
-      const deal = l.deal_score !== null && l.deal_score !== undefined ? String(Math.round(Number(l.deal_score))) : "—";
+      const deal = l.deal_score !== null && l.deal_score !== undefined ? String(Math.round(Number(l.deal_score))) : "â€”";
       const go = `/go/listings/${encodeURIComponent(l.listing_id)}?page_type=model`;
       const explain = `/listings/${encodeURIComponent(l.listing_id)}`;
       return `<tr>
@@ -573,7 +574,7 @@ function renderListingsTable(listings) {
         <td>${escapeHtml(condition)}</td>
         <td>${escapeHtml(loc)}</td>
         <td>${escapeHtml(retrieved)}</td>
-        <td><a href="${escapeHtml(go)}" rel="nofollow sponsored noopener noreferrer" target="_blank">View</a> • <a href="${escapeHtml(
+        <td><a href="${escapeHtml(go)}" rel="nofollow sponsored noopener noreferrer" target="_blank">View</a> â€¢ <a href="${escapeHtml(
           explain,
         )}" rel="nofollow">Why</a></td>
       </tr>`;
@@ -639,50 +640,57 @@ export function renderCameraModelPageHtml(modelPage, { currency = "EUR", canonic
     { label: "Dimensions", value: formatDimensionsMM(camera) },
   ];
 
-  const title = `${camera.display_name} — specs, used checklist, and typical price`;
-  const description = bio.length > 160 ? `${bio.slice(0, 157)}…` : bio;
+  const title = `${camera.display_name} â€” specs, used checklist, and typical price`;
+  const description = `${camera.display_name}: specs, used-buyer checklist, price band, and live listings.`;
 
   const brandHref = camera.brand_slug ? `/brands/${encodeURIComponent(camera.brand_slug)}` : null;
   const crumbBrand = brandHref ? `<a href="${escapeHtml(brandHref)}">${escapeHtml(camera.brand_name || camera.brand_slug)}</a>` : "";
 
   const body = `
-    <h1>${escapeHtml(camera.display_name)}</h1>
-    <nav class="subtle" aria-label="Breadcrumb">
-      <a href="/cameras">Cameras</a>${crumbBrand ? ` • ${crumbBrand}` : ""}
+    <section data-testid="camera-model-page-${escapeHtml(camera.slug)}">
+    <h1 data-testid="camera-model-title-${escapeHtml(camera.slug)}">${escapeHtml(camera.display_name)}</h1>
+    <nav class="subtle" aria-label="Breadcrumb" data-testid="camera-model-header">
+      <a href="/cameras">Cameras</a>${crumbBrand ? ` â€¢ ${crumbBrand}` : ""}
     </nav>
-    <div class="subtle">${escapeHtml(camera.brand_name || "")}${camera.release_year ? ` • Released ${escapeHtml(String(camera.release_year))}` : ""}</div>
+    <div class="subtle" data-testid="camera-model-meta">${escapeHtml(camera.brand_name || "")}${camera.release_year ? ` â€¢ Released ${escapeHtml(String(camera.release_year))}` : ""}</div>
 
-    <h2>About</h2>
-    <p>${escapeHtml(bio)}</p>
-
+    <section data-testid="camera-model-specs-section">
     <h2>Specs</h2>
     ${renderSpecTable(specRows)}
+    </section>
 
     <div class="grid">
-      ${renderPriceBandCard(modelPage.price_band, { premiumPriceHistoryHref: `/premium/price-history/cameras/${encodeURIComponent(camera.slug)}` })}
+      <div data-testid="camera-model-price-band-card">${renderPriceBandCard(modelPage.price_band)}</div>
       ${renderListingCountsCard({ listingCounts: modelPage.listing_counts_by_source, lastUpdatedAt: modelPage.last_updated_at })}
     </div>
 
     <h2>Listings</h2>
-    <div class="subtle">Outbound links may be affiliate links. We may earn a commission.</div>
-    ${renderListingsTable(modelPage.listings)}
+    <div class="subtle" data-testid="camera-model-listings-summary">Outbound links may be affiliate links. We may earn a commission.</div>
+    <div data-testid="camera-model-listings">${renderListingsTable(modelPage.listings)}</div>
 
+    <section data-testid="camera-model-checklist">
     <h2>Used-buyer checklist</h2>
     ${renderBullets(checklistOut)}
+    </section>
 
+    <section data-testid="camera-model-known-issues">
     <h2>Known issues</h2>
     ${
       knownIssues.length
         ? renderBullets(knownIssues)
         : `<div class="subtle">No model-specific issues recorded yet. Use the checklist above and prefer listings with clear photos and return options.</div>`
     }
+    </section>
 
+    <section data-testid="camera-model-provenance">
     <h2>Data</h2>
     <ul>
       <li>Currency view: <code>${escapeHtml(currency)}</code> (change via <code>?currency=USD</code>)</li>
       <li>Camera JSON: <code>/api/v1/cameras/${escapeHtml(camera.slug)}</code></li>
       <li>Listings JSON: <code>/api/v1/listings?camera_slug=${escapeHtml(camera.slug)}</code></li>
     </ul>
+    </section>
+    </section>
   `;
 
   return documentHtml({ title, description, canonicalUrl, robots, bodyHtml: body });
@@ -726,8 +734,8 @@ export function renderLensModelPageHtml(modelPage, { currency = "EUR", canonical
     { label: "Groups", value: opticalSpecs.groups ? `${Number(opticalSpecs.groups)}` : null },
   ];
 
-  const title = `${lens.display_name} — specs, used checklist, and typical price`;
-  const description = bio.length > 160 ? `${bio.slice(0, 157)}…` : bio;
+  const title = `${lens.display_name} â€” specs, used checklist, and typical price`;
+  const description = `${lens.display_name}: specs, used-buyer checklist, price band, and live listings.`;
 
   const brandHref = lens.brand_slug ? `/brands/${encodeURIComponent(lens.brand_slug)}` : null;
   const crumbBrand = brandHref ? `<a href="${escapeHtml(brandHref)}">${escapeHtml(lens.brand_name || lens.brand_slug)}</a>` : "";
@@ -735,18 +743,15 @@ export function renderLensModelPageHtml(modelPage, { currency = "EUR", canonical
   const body = `
     <h1>${escapeHtml(lens.display_name)}</h1>
     <nav class="subtle" aria-label="Breadcrumb">
-      <a href="/lenses">Lenses</a>${crumbBrand ? ` • ${crumbBrand}` : ""}
+      <a href="/lenses">Lenses</a>${crumbBrand ? ` â€¢ ${crumbBrand}` : ""}
     </nav>
-    <div class="subtle">${escapeHtml(lens.brand_name || "")}${lens.release_year ? ` • Released ${escapeHtml(String(lens.release_year))}` : ""}</div>
-
-    <h2>About</h2>
-    <p>${escapeHtml(bio)}</p>
+    <div class="subtle">${escapeHtml(lens.brand_name || "")}${lens.release_year ? ` â€¢ Released ${escapeHtml(String(lens.release_year))}` : ""}</div>
 
     <h2>Specs</h2>
     ${renderSpecTable(specRows)}
 
     <div class="grid">
-      ${renderPriceBandCard(modelPage.price_band, { premiumPriceHistoryHref: `/premium/price-history/lenses/${encodeURIComponent(lens.slug)}` })}
+      ${renderPriceBandCard(modelPage.price_band)}
       ${renderListingCountsCard({ listingCounts: modelPage.listing_counts_by_source, lastUpdatedAt: modelPage.last_updated_at })}
     </div>
 
@@ -794,9 +799,9 @@ function renderDealScoreCard(listing, { isPremium = false } = {}) {
   const rows = factors
     .map((f) => {
       const key = isNonEmptyString(f?.key) ? f.key : "";
-      const weight = typeof f?.weight === "number" ? String(f.weight) : "—";
-      const value = typeof f?.value === "number" ? String(f.value) : "—";
-      const fc = typeof f?.confidence === "number" ? String(f.confidence) : "—";
+      const weight = typeof f?.weight === "number" ? String(f.weight) : "â€”";
+      const value = typeof f?.value === "number" ? String(f.value) : "â€”";
+      const fc = typeof f?.confidence === "number" ? String(f.confidence) : "â€”";
       return `<tr>
         <td><code>${escapeHtml(key)}</code></td>
         <td>${escapeHtml(weight)}</td>
@@ -808,7 +813,7 @@ function renderDealScoreCard(listing, { isPremium = false } = {}) {
 
   const table = breakdownHidden
     ? `<p class="subtle">
-        Factor breakdown is a Premium feature. ${isPremium ? "" : `<a href="/premium">Upgrade</a> to see the details.`}
+        Factor breakdown is reserved for the paid tracker beta.
       </p>`
     : rows
       ? `<table aria-label="Deal score factors">
@@ -840,23 +845,23 @@ export function renderListingDetailPageHtml(listing, { canonicalUrl = null, robo
   const sponsoredLabel = isNonEmptyString(listing.marketplace_sponsored_label) ? listing.marketplace_sponsored_label : "Sponsor (paid)";
   const sponsorBadgeHtml = sponsored ? ` <span class="badge badge-sponsored">${escapeHtml(sponsoredLabel)}</span>` : "";
   const price = formatListingPrice(listing);
-  const condition = enumLabel(listing.condition_physical_tier) || "—";
-  const loc = formatLocation(listing) || "—";
-  const retrieved = listing.last_retrieved_at || "—";
+  const condition = enumLabel(listing.condition_physical_tier) || "â€”";
+  const loc = formatLocation(listing) || "â€”";
+  const retrieved = listing.last_retrieved_at || "â€”";
   const go = `/go/listings/${encodeURIComponent(listing.listing_id)}?page_type=other&utm_source=ff_listing&utm_medium=internal`;
   const jsonHref = `/api/v1/listings/${encodeURIComponent(listing.listing_id)}`;
 
-  const title = `Listing • ${source}`;
+  const title = `Listing â€¢ ${source}`;
   const description = `Used listing from ${source}.`;
 
   const body = `
     <h1>Listing</h1>
-    <div class="subtle">${escapeHtml(source || "—")}${sponsorBadgeHtml}</div>
+    <div class="subtle">${escapeHtml(source || "â€”")}${sponsorBadgeHtml}</div>
 
     <section class="card" aria-label="Listing details">
       <h2>Details</h2>
       <ul>
-        <li><strong>Title:</strong> ${escapeHtml(listing.title || "—")}</li>
+        <li><strong>Title:</strong> ${escapeHtml(listing.title || "â€”")}</li>
         <li><strong>Price:</strong> ${escapeHtml(price)}</li>
         <li><strong>Condition:</strong> ${escapeHtml(condition)}</li>
         <li><strong>Location:</strong> ${escapeHtml(loc)}</li>
@@ -883,3 +888,7 @@ export function renderErrorPageHtml({ statusCode = 500, title, message }) {
   )}</p>`;
   return documentHtml({ title: safeTitle, description: safeMsg, bodyHtml: body });
 }
+
+
+
+

@@ -223,6 +223,12 @@ test("GET / returns homepage HTML when DB missing", async () => {
       assert.match(res.headers.get("content-type") || "", /text\/html/i);
       const html = await res.text();
       assert.match(html, /Fast Focus/);
+      assert.match(html, /Camera-body-first used market intelligence/i);
+      assert.doesNotMatch(html, />Lenses</);
+      assert.doesNotMatch(html, />Guides</);
+      assert.doesNotMatch(html, />Newsletter</);
+      assert.doesNotMatch(html, />Premium</);
+      assert.match(html, /data-testid="home-search-form"/);
     },
     {
       contractsRoot: fixturePath("./fixtures/contracts/"),
@@ -285,6 +291,9 @@ test("GET /llms.txt returns guidance text", async () => {
       const text = await res.text();
       assert.match(text, /Fast Focus/i);
       assert.match(text, /sitemap\.xml/i);
+      assert.match(text, /camera-body-first/i);
+      assert.doesNotMatch(text, /guides\/\{topic\}/i);
+      assert.doesNotMatch(text, /lenses\/\{slug\}/i);
     },
     {
       contractsRoot: fixturePath("./fixtures/contracts/"),
@@ -334,6 +343,20 @@ test("GET /guides/unknown-topic returns 404", async () => {
       assert.equal(res.status, 404);
       const html = await res.text();
       assert.match(html, /Guide not found/i);
+    },
+    {
+      contractsRoot: fixturePath("./fixtures/contracts/"),
+      specCurrentPath: fixturePath("./fixtures/spec/SPEC_CURRENT.md"),
+    },
+  );
+});
+
+test("GET /guides returns parked noindex header", async () => {
+  await withServer(
+    async ({ baseUrl }) => {
+      const res = await fetch(`${baseUrl}/guides`);
+      assert.equal(res.status, 200);
+      assert.equal(res.headers.get("x-robots-tag"), "noindex,follow");
     },
     {
       contractsRoot: fixturePath("./fixtures/contracts/"),

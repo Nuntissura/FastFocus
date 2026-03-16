@@ -31,7 +31,7 @@ import {
 import { getBotTrafficSummary, parseWindowMinutes } from "./db/bot_monitoring.js";
 import { getOpsStatus } from "./db/ops_status.js";
 import { getPartnerReport, listPartners, parseWindowDays } from "./db/partners.js";
-import { parsePageType, trackListingClickout } from "./db/events.js";
+import { getDemandSummary, parsePageType, trackCompareView, trackListingClickout, trackPageView, trackSiteSearch } from "./db/events.js";
 import { confirmSavedSearchByToken, createSavedSearch, insertEmailMessage, unsubscribeSavedSearchByToken } from "./db/alerts.js";
 import { listCameraPriceHistory, listLensPriceHistory, parseHistoryWindowDays } from "./db/price_history.js";
 import {
@@ -75,6 +75,7 @@ import {
   renderPremiumSignupPageHtml,
   renderPrivacyPageHtml,
 } from "./html/site_pages.js";
+import { buildLlmsText, PARKED_SURFACE_ROBOTS, SITEMAP_STATIC_PATHS } from "./launch_contract.js";
 
 async function readJsonBody(req, { maxBytes = 256_000 } = {}) {
   const chunks = [];
@@ -299,6 +300,91 @@ function parseUtm(url) {
   return out;
 }
 
+function trackingBase(req, url, pageType) {
+  const tracking = shouldAllowAttributionTracking(req);
+  if (!tracking.allowed) return null;
+  return {
+    tracking,
+    pageType,
+    path: url.pathname,
+    referrer: typeof req.headers.referer === "string" ? req.headers.referer : null,
+    userAgent: typeof req.headers["user-agent"] === "string" ? req.headers["user-agent"] : null,
+    ua: classifyUserAgent(typeof req.headers["user-agent"] === "string" ? req.headers["user-agent"] : null),
+    utm: parseUtm(url),
+  };
+}
+
+async function maybeTrackPageView(pool, req, res, url, { pageType, cameraId = null, compareCameraId = null, properties = {} }) {
+  if (!pool) return;
+  const base = trackingBase(req, url, pageType);
+  if (!base) return;
+  const sessionId = getOrSetSessionId(req, res);
+  await trackPageView(pool, {
+    sessionId,
+    pageType,
+    path: base.path,
+    cameraId,
+    compareCameraId,
+    referrer: base.referrer,
+    userAgent: base.userAgent,
+    isBot: base.ua.is_bot,
+    botName: base.ua.bot_name,
+    utm: base.utm,
+    properties: {
+      consent: base.tracking.source,
+      bot_kind: base.ua.bot_kind,
+      ...(properties && typeof properties === "object" ? properties : {}),
+    },
+  });
+}
+
+async function maybeTrackSiteSearch(pool, req, res, url, { pageType = "search", cameraId = null, compareCameraId = null, properties = {} }) {
+  if (!pool) return;
+  const base = trackingBase(req, url, pageType);
+  if (!base) return;
+  const sessionId = getOrSetSessionId(req, res);
+  await trackSiteSearch(pool, {
+    sessionId,
+    pageType,
+    path: base.path,
+    cameraId,
+    compareCameraId,
+    referrer: base.referrer,
+    userAgent: base.userAgent,
+    isBot: base.ua.is_bot,
+    botName: base.ua.bot_name,
+    utm: base.utm,
+    properties: {
+      consent: base.tracking.source,
+      bot_kind: base.ua.bot_kind,
+      ...(properties && typeof properties === "object" ? properties : {}),
+    },
+  });
+}
+
+async function maybeTrackCompareView(pool, req, res, url, { cameraId, compareCameraId, properties = {} }) {
+  if (!pool) return;
+  const base = trackingBase(req, url, "compare");
+  if (!base) return;
+  const sessionId = getOrSetSessionId(req, res);
+  await trackCompareView(pool, {
+    sessionId,
+    path: base.path,
+    cameraId,
+    compareCameraId,
+    referrer: base.referrer,
+    userAgent: base.userAgent,
+    isBot: base.ua.is_bot,
+    botName: base.ua.bot_name,
+    utm: base.utm,
+    properties: {
+      consent: base.tracking.source,
+      bot_kind: base.ua.bot_kind,
+      ...(properties && typeof properties === "object" ? properties : {}),
+    },
+  });
+}
+
 function envBool(name, fallback = false) {
   const raw = process.env[name];
   if (!raw || !raw.trim()) return fallback;
@@ -426,10 +512,9 @@ export async function handleRequest(req, res, ctx) {
         offset: 0,
         filters: { brand: null, captureMedium: null, mount: null, q: null },
       });
-      const featuredLenses = await listLenses(pool, {
-        limit: 6,
-        offset: 0,
-        filters: { brand: null, mount: null, category: null, q: null },
+      await maybeTrackPageView(pool, req, res, url, {
+        pageType: "other",
+        properties: { page_surface: "home", entity_kind: "camera" },
       });
 
       return sendHtml(
@@ -441,7 +526,6 @@ export async function handleRequest(req, res, ctx) {
           dbHint: ctx.dbHint,
           marketplaces,
           featuredCameras,
-          featuredLenses,
         }),
       );
     }
@@ -483,7 +567,7 @@ export async function handleRequest(req, res, ctx) {
 
     if (pathname === "/llms.txt") {
       if (method !== "GET") return sendMethodNotAllowed(res);
-      const llms = `# Fast Focus (MVP)\n\nFast Focus helps people research used cameras and lenses.\n\n## Discoverability\n- Prefer canonical URLs (no query params).\n- Use /sitemap.xml to discover indexable pages.\n\n## Canonical pages\n- /cameras/{slug}\n- /lenses/{slug}\n- /brands/{brand}\n- /compare/{modelA}-vs-{modelB}\n- /guides/{topic}\n\n## Notes\n- /go/* is an outbound tracking redirect and should not be indexed.\n- /api/v1/* provides JSON for the same entities.\n`;
+      const llms = buildLlmsText();
       return sendText(res, 200, llms, "text/plain; charset=utf-8");
     }
 
@@ -581,6 +665,7 @@ export async function handleRequest(req, res, ctx) {
       if (pathname === "/newsletter/") return sendRedirect(res, "/newsletter", 301);
 
       const canonicalUrl = `${origin}/newsletter`;
+      res.setHeader("x-robots-tag", PARKED_SURFACE_ROBOTS);
 
       if (method === "GET") {
         return sendHtml(res, 200, renderNewsletterSignupPageHtml({ canonicalUrl }));
@@ -696,6 +781,7 @@ export async function handleRequest(req, res, ctx) {
       if (pathname === "/premium/") return sendRedirect(res, "/premium", 301);
 
       const canonicalUrl = `${origin}/premium`;
+      res.setHeader("x-robots-tag", PARKED_SURFACE_ROBOTS);
 
       if (method === "GET") {
         return sendHtml(res, 200, renderPremiumSignupPageHtml({ canonicalUrl }));
@@ -926,6 +1012,7 @@ export async function handleRequest(req, res, ctx) {
               utm: parseUtm(url),
               properties: {
                 marketplace_code: listing.marketplace_code,
+                entity_kind: listing.lens_id ? "lens" : "camera",
                 destination_host: destHost,
                 affiliate_applied: affiliate.applied,
                 affiliate_params: affiliate.applied_params,
@@ -975,17 +1062,7 @@ export async function handleRequest(req, res, ctx) {
           ORDER BY cm.slug ASC
           `,
         );
-        const lensRows = await pool.query(
-          `
-          SELECT lm.slug, b.slug AS brand_slug
-          FROM lens_models lm
-          JOIN brands b ON b.brand_id = lm.brand_id
-          ORDER BY lm.slug ASC
-          `,
-        );
-
-        const staticPaths = ["/", "/cameras", "/lenses", "/brands", "/compare", "/guides", "/about", "/privacy"];
-        const guidePaths = ["/guides/how-to-buy-used-camera", "/guides/how-to-check-lens-condition"];
+        const staticPaths = SITEMAP_STATIC_PATHS;
 
         const brandRows = await pool.query(
           `
@@ -997,9 +1074,7 @@ export async function handleRequest(req, res, ctx) {
         const brandPaths = brandRows.rows.map((r) => `/brands/${encodeURIComponent(r.slug)}`);
 
         const cameraPaths = cameraRows.rows.map((r) => cameraCanonicalPath({ slug: r.slug }));
-        const lensPaths = lensRows.rows.map((r) => lensCanonicalPath({ slug: r.slug }));
-
-        const urls = [...staticPaths, ...guidePaths, ...brandPaths, ...cameraPaths, ...lensPaths]
+        const urls = [...staticPaths, ...brandPaths, ...cameraPaths]
           .map((p) => `<url><loc>${escapeXml(`${origin}${p}`)}</loc></url>`)
           .join("");
 
@@ -1020,6 +1095,32 @@ export async function handleRequest(req, res, ctx) {
 
       const canonicalUrl = `${origin}/cameras`;
       const robots = shouldNoindexListPage({ filters, limit, offset }) ? "noindex,follow" : null;
+      const hasSearchFilters = Object.values(filters || {}).some((v) => v !== null && v !== undefined && String(v).trim());
+      if (hasSearchFilters) {
+        await maybeTrackSiteSearch(pool, req, res, url, {
+          pageType: "search",
+          properties: {
+            entity_kind: "camera",
+            q: filters.q || null,
+            brand_slug: filters.brand || null,
+            capture_medium: filters.captureMedium || null,
+            mount_code: filters.mount || null,
+            result_count: cameras.length,
+            offset,
+            limit,
+          },
+        });
+      } else {
+        await maybeTrackPageView(pool, req, res, url, {
+          pageType: "search",
+          properties: {
+            entity_kind: "camera",
+            result_count: cameras.length,
+            offset,
+            limit,
+          },
+        });
+      }
 
       return sendHtml(res, 200, renderCameraIndexHtml({ canonicalUrl, robots, filters, brands, cameras, page: { limit, offset } }));
     }
@@ -1036,6 +1137,33 @@ export async function handleRequest(req, res, ctx) {
 
       const canonicalUrl = `${origin}/lenses`;
       const robots = shouldNoindexListPage({ filters, limit, offset }) ? "noindex,follow" : null;
+      if (robots) res.setHeader("x-robots-tag", PARKED_SURFACE_ROBOTS);
+      const hasSearchFilters = Object.values(filters || {}).some((v) => v !== null && v !== undefined && String(v).trim());
+      if (hasSearchFilters) {
+        await maybeTrackSiteSearch(pool, req, res, url, {
+          pageType: "search",
+          properties: {
+            entity_kind: "lens",
+            q: filters.q || null,
+            brand_slug: filters.brand || null,
+            mount_code: filters.mount || null,
+            category: filters.category || null,
+            result_count: lenses.length,
+            offset,
+            limit,
+          },
+        });
+      } else {
+        await maybeTrackPageView(pool, req, res, url, {
+          pageType: "search",
+          properties: {
+            entity_kind: "lens",
+            result_count: lenses.length,
+            offset,
+            limit,
+          },
+        });
+      }
 
       return sendHtml(res, 200, renderLensIndexHtml({ canonicalUrl, robots, filters, brands, lenses, page: { limit, offset } }));
     }
@@ -1047,6 +1175,10 @@ export async function handleRequest(req, res, ctx) {
 
       const brands = await listBrands(pool, { limit: 200, offset: 0 });
       const canonicalUrl = `${origin}/brands`;
+      await maybeTrackPageView(pool, req, res, url, {
+        pageType: "other",
+        properties: { page_surface: "brands_index", entity_kind: "camera" },
+      });
       return sendHtml(res, 200, renderBrandsIndexHtml({ canonicalUrl, brands }));
     }
 
@@ -1069,11 +1201,7 @@ export async function handleRequest(req, res, ctx) {
           offset: 0,
           filters: { brand: brand.slug, captureMedium: null, mount: null, q: q || null },
         });
-        const lenses = await listLenses(pool, {
-          limit: 200,
-          offset: 0,
-          filters: { brand: brand.slug, mount: null, category: null, q: q || null },
-        });
+        const lenses = [];
 
         const canonicalPath = `/brands/${encodeURIComponent(brand.slug)}`;
         if (pathname !== canonicalPath && pathname !== `${canonicalPath}/`) {
@@ -1082,6 +1210,28 @@ export async function handleRequest(req, res, ctx) {
 
         const canonicalUrl = `${origin}${canonicalPath}`;
         const robots = url.searchParams.size > 0 ? "noindex,follow" : null;
+        if (q) {
+          await maybeTrackSiteSearch(pool, req, res, url, {
+            pageType: "brand",
+            properties: {
+              entity_kind: "camera",
+              page_surface: "brand_hub",
+              brand_slug: brand.slug,
+              q,
+              result_count: cameras.length,
+            },
+          });
+        } else {
+          await maybeTrackPageView(pool, req, res, url, {
+            pageType: "brand",
+            properties: {
+              entity_kind: "camera",
+              page_surface: "brand_hub",
+              brand_slug: brand.slug,
+              result_count: cameras.length,
+            },
+          });
+        }
         return sendHtml(res, 200, renderBrandHubHtml({ canonicalUrl, robots, brand, cameras, lenses, q }));
       }
     }
@@ -1106,6 +1256,10 @@ export async function handleRequest(req, res, ctx) {
           limit: 200,
           offset: 0,
           filters: { brand: null, captureMedium: null, mount: null, q: null },
+        });
+        await maybeTrackPageView(ctx.dbPool, req, res, url, {
+          pageType: "compare",
+          properties: { page_surface: "compare_index", entity_kind: "camera" },
         });
       }
 
@@ -1146,6 +1300,16 @@ export async function handleRequest(req, res, ctx) {
         const pageB = await getCameraModelPage(pool, { slug: cameraB.slug, ...params });
 
         const comparisonSections = await loadDigitalCameraCompareSections();
+        await maybeTrackCompareView(pool, req, res, url, {
+          cameraId: cameraA.camera_id,
+          compareCameraId: cameraB.camera_id,
+          properties: {
+            entity_kind: "camera",
+            left_slug: cameraA.slug,
+            right_slug: cameraB.slug,
+            currency: params.currency,
+          },
+        });
 
         return sendHtml(
           res,
@@ -1167,6 +1331,7 @@ export async function handleRequest(req, res, ctx) {
     if (pathname === "/guides" || pathname === "/guides/") {
       if (method !== "GET") return sendMethodNotAllowed(res);
       const canonicalUrl = `${origin}/guides`;
+      res.setHeader("x-robots-tag", PARKED_SURFACE_ROBOTS);
       return sendHtml(res, 200, renderGuidesIndexHtml({ canonicalUrl }));
     }
 
@@ -1183,6 +1348,7 @@ export async function handleRequest(req, res, ctx) {
           return sendRedirect(res, `${canonicalPath}${url.search}`, 301);
         }
         const canonicalUrl = `${origin}${canonicalPath}`;
+        res.setHeader("x-robots-tag", PARKED_SURFACE_ROBOTS);
         return sendHtml(res, 200, renderGuidePageHtml({ canonicalUrl, topic: decoded }));
       }
     }
@@ -1221,6 +1387,16 @@ export async function handleRequest(req, res, ctx) {
         const canonicalPath = cameraCanonicalPath({ slug: page.camera.slug });
         const canonicalUrl = `${origin}${canonicalPath}`;
         const robots = url.searchParams.size > 0 ? "noindex,follow" : null;
+        await maybeTrackPageView(pool, req, res, url, {
+          pageType: "model",
+          cameraId: page.camera.camera_id,
+          properties: {
+            entity_kind: "camera",
+            model_slug: page.camera.slug,
+            brand_slug: page.camera.brand_slug || null,
+            listing_count: Array.isArray(page.listings) ? page.listings.length : 0,
+          },
+        });
 
         if (pathname !== canonicalPath && pathname !== `${canonicalPath}/`) {
           return sendRedirect(res, `${canonicalPath}${url.search}`, 301);
@@ -1252,6 +1428,16 @@ export async function handleRequest(req, res, ctx) {
         const canonicalPath = cameraCanonicalPath({ slug: page.camera.slug });
         const canonicalUrl = `${origin}${canonicalPath}`;
         const robots = url.searchParams.size > 0 ? "noindex,follow" : null;
+        await maybeTrackPageView(pool, req, res, url, {
+          pageType: "model",
+          cameraId: page.camera.camera_id,
+          properties: {
+            entity_kind: "camera",
+            model_slug: page.camera.slug,
+            brand_slug: page.camera.brand_slug || null,
+            listing_count: Array.isArray(page.listings) ? page.listings.length : 0,
+          },
+        });
 
         if (pathname !== canonicalPath && pathname !== `${canonicalPath}/`) {
           return sendRedirect(res, `${canonicalPath}${url.search}`, 301);
@@ -1295,6 +1481,17 @@ export async function handleRequest(req, res, ctx) {
         const canonicalPath = lensCanonicalPath({ slug: page.lens.slug });
         const canonicalUrl = `${origin}${canonicalPath}`;
         const robots = url.searchParams.size > 0 ? "noindex,follow" : null;
+        res.setHeader("x-robots-tag", PARKED_SURFACE_ROBOTS);
+        await maybeTrackPageView(pool, req, res, url, {
+          pageType: "model",
+          properties: {
+            entity_kind: "lens",
+            lens_id: page.lens.lens_id,
+            model_slug: page.lens.slug,
+            brand_slug: page.lens.brand_slug || null,
+            listing_count: Array.isArray(page.listings) ? page.listings.length : 0,
+          },
+        });
 
         if (pathname !== canonicalPath && pathname !== `${canonicalPath}/`) {
           return sendRedirect(res, `${canonicalPath}${url.search}`, 301);
@@ -1326,6 +1523,17 @@ export async function handleRequest(req, res, ctx) {
         const canonicalPath = lensCanonicalPath({ slug: page.lens.slug });
         const canonicalUrl = `${origin}${canonicalPath}`;
         const robots = url.searchParams.size > 0 ? "noindex,follow" : null;
+        res.setHeader("x-robots-tag", PARKED_SURFACE_ROBOTS);
+        await maybeTrackPageView(pool, req, res, url, {
+          pageType: "model",
+          properties: {
+            entity_kind: "lens",
+            lens_id: page.lens.lens_id,
+            model_slug: page.lens.slug,
+            brand_slug: page.lens.brand_slug || null,
+            listing_count: Array.isArray(page.listings) ? page.listings.length : 0,
+          },
+        });
 
         if (pathname !== canonicalPath && pathname !== `${canonicalPath}/`) {
           return sendRedirect(res, `${canonicalPath}${url.search}`, 301);
@@ -2079,6 +2287,17 @@ export async function handleRequest(req, res, ctx) {
       const windowMinutes = parseWindowMinutes(url, 60);
       const summary = await getBotTrafficSummary(pool, { windowMinutes });
       return sendJson(res, 200, { ok: true, summary });
+    }
+
+    if (pathname === "/api/v1/admin/analytics/demand" || pathname === "/api/v1/admin/analytics/demand/") {
+      if (method !== "GET") return sendMethodNotAllowed(res);
+      if (!requireAdmin(req, res, ctx)) return;
+      const pool = requireDb(res, ctx);
+      if (!pool) return;
+
+      const windowDays = parseWindowDays(url, 30);
+      const summary = await getDemandSummary(pool, { windowDays });
+      return sendJson(res, 200, summary);
     }
 
     if (pathname === "/api/v1/admin/audit-log" || pathname === "/api/v1/admin/audit-log/") {
