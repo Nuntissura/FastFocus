@@ -42,6 +42,11 @@ $env:FF_PG_PORT = "55434"
 npm.cmd run dev:demo
 ```
 
+Remember this:
+- `55432` is the default local Postgres port for Fast Focus.
+- If that port is busy, reuse `55434` as the fallback local port.
+- If you set `FF_PG_PORT`, use that same port everywhere else in the same shell session, especially in `DATABASE_URL`, smoke runs, and manual `docker compose` checks.
+
 Deployment notes: `DEPLOY.md`
 
 Optional (legacy): also seed the catalog with JSON seed files:
