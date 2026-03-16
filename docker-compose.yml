@@ -1,0 +1,21 @@
+name: fastfocus
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fastfocus
+      POSTGRES_PASSWORD: fastfocus
+      POSTGRES_DB: fastfocus
+    ports:
+      - "${FF_PG_PORT:-55432}:5432"
+    volumes:
+      - fastfocus_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fastfocus -d fastfocus"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  fastfocus_pgdata:

@@ -1,0 +1,4 @@
+# SPEC_CURRENT
+
+- fixture
+

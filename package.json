@@ -1,0 +1,33 @@
+{
+  "name": "fastfocus-platform",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:api": "node apps/api/src/server.js",
+    "dev:demo": "node apps/api/src/dev_demo.js",
+    "db:migrate": "node apps/api/src/db/migrate.js",
+    "db:seed:demo": "node apps/api/src/db/seed_demo.js",
+    "db:seed:catalog": "node apps/api/src/db/seed_catalog.js",
+    "db:import:datasheets": "node apps/api/src/db/import_camera_datasheets.js",
+    "db:purge:cameras": "node apps/api/src/db/purge_camera_models.js",
+    "db:seed:matching-samples": "node apps/api/src/db/seed_matching_samples.js",
+    "db:match:listings": "node apps/api/src/db/match_listings.js",
+    "db:dedupe:listings": "node apps/api/src/db/dedupe_listings.js",
+    "db:compute:price-bands": "node apps/api/src/db/compute_price_bands.js",
+    "db:compute:deal-scores": "node apps/api/src/db/compute_deal_scores.js",
+    "db:prune:retention": "node apps/api/src/db/prune_retention.js",
+    "alerts:run": "node apps/api/src/alerts/run_saved_search_alerts.js",
+    "newsletter:weekly": "node apps/api/src/newsletter/run_weekly_deals_newsletter.js",
+    "ingest:demo-ebay": "node apps/api/src/db/ingest_demo_ebay.js",
+    "ingest:retailer-feed-1": "node apps/api/src/db/ingest_retailer_feed_1.js",
+    "ingest:ebay": "node apps/api/src/db/ingest_ebay_browse_api.js",
+    "jobs:daily-refresh": "node apps/api/src/db/run_daily_refresh.js",
+    "smoke": "node apps/api/src/smoke.js",
+    "smoke:datasheets": "node apps/api/src/smoke_datasheets.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "pg": "^8.18.0",
+    "yaml": "^2.8.0"
+  }
+}

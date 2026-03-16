@@ -1,0 +1,196 @@
+import pg from "pg";
+
+import { getEbayAccessToken } from "../ingest/providers/ebay_oauth.js";
+import { normalizeEbayItemSummaryToListing, searchEbayBrowseApi } from "../ingest/providers/ebay_browse_api.js";
+import { ingestListingsOnce } from "../ingest/write_listings.js";
+
+const { Client } = pg;
+
+function envString(name, fallback) {
+  const raw = process.env[name];
+  return raw && raw.trim() ? raw.trim() : fallback;
+}
+
+function envInt(name, fallback, { min, max } = {}) {
+  const raw = process.env[name];
+  if (!raw || !raw.trim()) return fallback;
+  const n = Number(raw);
+  if (!Number.isInteger(n)) return fallback;
+  const lo = min === undefined ? n : Math.max(min, n);
+  const hi = max === undefined ? lo : Math.min(max, lo);
+  return hi;
+}
+
+function parseCsv(value) {
+  if (!value || typeof value !== "string") return [];
+  return value
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+async function loadCameraQueries(client, slugs) {
+  if (!slugs.length) return [];
+  const res = await client.query(
+    `
+    SELECT cm.slug, cm.display_name, b.name AS brand_name
+    FROM camera_models cm
+    JOIN brands b ON b.brand_id = cm.brand_id
+    WHERE cm.slug = ANY($1::text[])
+    `,
+    [slugs],
+  );
+
+  const bySlug = new Map(res.rows.map((r) => [r.slug, r]));
+  return slugs
+    .map((slug) => bySlug.get(slug))
+    .filter(Boolean)
+    .map((r) => ({
+      kind: "camera",
+      slug: r.slug,
+      query: `${r.display_name} body`,
+    }));
+}
+
+async function loadLensQueries(client, slugs) {
+  if (!slugs.length) return [];
+  const res = await client.query(
+    `
+    SELECT lm.slug, lm.display_name, b.name AS brand_name
+    FROM lens_models lm
+    JOIN brands b ON b.brand_id = lm.brand_id
+    WHERE lm.slug = ANY($1::text[])
+    `,
+    [slugs],
+  );
+
+  const bySlug = new Map(res.rows.map((r) => [r.slug, r]));
+  return slugs
+    .map((slug) => bySlug.get(slug))
+    .filter(Boolean)
+    .map((r) => ({
+      kind: "lens",
+      slug: r.slug,
+      query: `${r.display_name} lens`,
+    }));
+}
+
+function dedupeListings(listings) {
+  const byKey = new Map();
+  for (const l of listings) {
+    if (!l) continue;
+    const key = `${l.marketplace_code}:${l.source_item_id}`;
+    byKey.set(key, l);
+  }
+  return Array.from(byKey.values());
+}
+
+async function main() {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    console.error("Missing DATABASE_URL.");
+    process.exitCode = 2;
+    return;
+  }
+
+  const env = envString("EBAY_ENV", "sandbox");
+  const clientId = envString("EBAY_CLIENT_ID", "");
+  const clientSecret = envString("EBAY_CLIENT_SECRET", "");
+  const marketplaceId = envString("EBAY_MARKETPLACE_ID", "EBAY_US");
+
+  const cameraSlugs = parseCsv(envString("FF_EBAY_CAMERA_SLUGS", "sony-a7-iv,nikon-z6-ii,fujifilm-x-t30"));
+  const lensSlugs = parseCsv(envString("FF_EBAY_LENS_SLUGS", "olympus-m-zuiko-12-40mm-f2-8-pro,canon-rf-24-70mm-f2-8l-is-usm"));
+
+  const extraQueries = parseCsv(envString("FF_EBAY_EXTRA_QUERIES", ""));
+
+  const limitPerQuery = envInt("FF_EBAY_LIMIT_PER_QUERY", 25, { min: 1, max: 200 });
+  const pagesPerQuery = envInt("FF_EBAY_PAGES_PER_QUERY", 1, { min: 1, max: 20 });
+
+  const categoryIds = parseCsv(envString("EBAY_CATEGORY_IDS", ""));
+
+  const marketplaceCode = envString("FF_INGEST_MARKETPLACE_CODE", "ebay");
+  const jobName = envString("FF_INGEST_JOB_NAME", `ingest_${marketplaceCode}_browse_${env}`).slice(0, 64);
+
+  const db = new Client({ connectionString });
+  await db.connect();
+
+  try {
+    const modelQueries = [
+      ...(await loadCameraQueries(db, cameraSlugs)),
+      ...(await loadLensQueries(db, lensSlugs)),
+      ...extraQueries.map((q) => ({ kind: "custom", slug: null, query: q })),
+    ];
+
+    if (modelQueries.length === 0) {
+      console.error("No queries configured. Set FF_EBAY_CAMERA_SLUGS / FF_EBAY_LENS_SLUGS and/or FF_EBAY_EXTRA_QUERIES.");
+      process.exitCode = 2;
+      return;
+    }
+
+    const accessToken = await getEbayAccessToken({ env, clientId, clientSecret });
+
+    const allListings = [];
+    const startedAt = new Date().toISOString();
+
+    for (const q of modelQueries) {
+      for (let page = 0; page < pagesPerQuery; page += 1) {
+        const offset = page * limitPerQuery;
+        const resp = await searchEbayBrowseApi({
+          env,
+          accessToken,
+          marketplaceId,
+          q: q.query,
+          limit: limitPerQuery,
+          offset,
+          categoryIds: categoryIds.length ? categoryIds : null,
+        });
+
+        const retrievedAt = new Date().toISOString();
+        for (const item of resp.items) {
+          const listing = normalizeEbayItemSummaryToListing(item, {
+            marketplaceCode,
+            retrievedAt,
+            env,
+            query: q.query,
+          });
+          if (listing) allListings.push(listing);
+        }
+
+        if (resp.items.length < limitPerQuery) break;
+      }
+    }
+
+    const listings = dedupeListings(allListings);
+
+    const result = await ingestListingsOnce(db, {
+      jobName,
+      marketplaceCode,
+      marketplaceDisplayName: env === "sandbox" ? "eBay (sandbox)" : "eBay",
+      affiliateSupported: true,
+      listings,
+    });
+
+    if (!result.ok) {
+      console.error("Ingestion failed:", result.error);
+      process.exitCode = 1;
+      return;
+    }
+
+    console.log("Ingested eBay Browse API listings OK:");
+    console.log("- env:", env);
+    console.log("- marketplace_id:", marketplaceId);
+    console.log("- job_name:", jobName);
+    console.log("- started_at:", startedAt);
+    console.log("- queries:", modelQueries.length);
+    console.log("- listings_deduped:", listings.length);
+    console.log("- run_id:", result.run_id);
+    console.log("- stats:", result.stats);
+  } finally {
+    await db.end();
+  }
+}
+
+main().catch((err) => {
+  console.error(err instanceof Error ? err.message : err);
+  process.exitCode = 1;
+});

@@ -1,0 +1,4 @@
+item_id,title,url,price_amount,price_currency,shipping_amount,shipping_currency,condition,functional_status,country,city,image_urls,included_items,is_active
+"ff-ret-1001","Sony A7 IV Mirrorless Camera (Body)","https://partner.example.com/listings/ff-ret-1001",1499.95,EUR,15,EUR,"Used - Excellent","Working",BE,"Brussels","https://partner.example.com/images/ff-ret-1001-1.jpg;https://partner.example.com/images/ff-ret-1001-2.jpg","body cap;battery;charger",true
+"ff-ret-2001","Sony FE 24-70mm F2.8 GM Lens","https://partner.example.com/listings/ff-ret-2001",999.99,EUR,0,EUR,"Like New","Working",BE,"Antwerp","https://partner.example.com/images/ff-ret-2001-1.jpg","front cap;rear cap;hood",true
+"ff-ret-bad","Invalid row missing URL","",123.45,EUR,0,EUR,"Used - Good","Working",BE,"Ghent","https://partner.example.com/images/ff-ret-bad-1.jpg","",true

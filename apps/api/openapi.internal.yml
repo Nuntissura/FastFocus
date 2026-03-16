@@ -1,0 +1,674 @@
+openapi: 3.1.0
+info:
+  title: Fast Focus Internal API
+  version: 0.3.0
+  description: |
+    Internal API for Fast Focus Phase 1.
+    Source of truth for product intent: FF - gov/SPEC_CURRENT.md (docx-backed).
+
+servers:
+  - url: http://127.0.0.1:8787
+
+components:
+  securitySchemes:
+    AdminToken:
+      type: apiKey
+      in: header
+      name: x-admin-token
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: OK
+
+  /api/v1/contracts:
+    get:
+      summary: List Phase 1 contract artifacts
+      responses:
+        "200":
+          description: OK
+
+  /api/v1/contracts/schemas:
+    get:
+      summary: List available JSON Schemas
+      responses:
+        "200":
+          description: OK
+
+  /api/v1/contracts/schemas/{schemaFile}:
+    get:
+      summary: Fetch one JSON Schema
+      parameters:
+        - name: schemaFile
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not found
+
+  /api/v1/contracts/postgres_schema.sql:
+    get:
+      summary: Fetch the Phase 1 Postgres schema (SQL)
+      responses:
+        "200":
+          description: OK
+
+  /api/v1/spec/current:
+    get:
+      summary: Return SPEC_CURRENT pointer markdown
+      responses:
+        "200":
+          description: OK
+
+  /api/v1/saved-searches:
+    post:
+      summary: Create a saved search (double opt-in)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                camera_slug: { type: [string, "null"] }
+                lens_slug: { type: [string, "null"] }
+                marketplace: { type: [string, "null"] }
+                country: { type: [string, "null"] }
+                currency: { type: [string, "null"] }
+                max_total_price_amount: { type: [number, "null"] }
+                max_total_price_currency: { type: [string, "null"] }
+                min_interval_hours: { type: integer }
+                max_results_per_email: { type: integer }
+              required: [email]
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad request
+        "503":
+          description: DB not configured
+
+  /api/v1/newsletter/subscriptions:
+    post:
+      summary: Subscribe to weekly deals newsletter (double opt-in)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                segment: { type: [string, "null"], enum: [all, street, hybrid, video, retro] }
+              required: [email]
+      responses:
+        "201":
+          description: Created (confirmation required)
+        "200":
+          description: Already subscribed/confirmed
+        "400":
+          description: Bad request
+        "503":
+          description: DB not configured
+
+  /api/v1/premium/subscriptions:
+    post:
+      summary: Request Premium (Pro) subscription (double opt-in)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+              required: [email]
+      responses:
+        "201":
+          description: Created (confirmation required)
+        "200":
+          description: Already active
+        "400":
+          description: Bad request
+        "503":
+          description: DB not configured
+
+  /api/v1/premium/status:
+    get:
+      summary: Return Premium status for the current device (ff_pro cookie)
+      responses:
+        "200":
+          description: OK
+        "503":
+          description: DB not configured
+
+  /api/v1/premium/cameras/{slug}/price-history:
+    get:
+      summary: Premium camera price history (requires ff_pro cookie)
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+        - name: currency
+          in: query
+          schema: { type: string }
+        - name: country
+          in: query
+          schema: { type: string }
+        - name: condition
+          in: query
+          schema: { type: string }
+        - name: window_days
+          in: query
+          schema: { type: integer, minimum: 7, maximum: 365, default: 180 }
+      responses:
+        "200":
+          description: OK
+        "403":
+          description: Premium required
+        "404":
+          description: Not found
+        "503":
+          description: DB not configured
+
+  /api/v1/premium/lenses/{slug}/price-history:
+    get:
+      summary: Premium lens price history (requires ff_pro cookie)
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+        - name: currency
+          in: query
+          schema: { type: string }
+        - name: country
+          in: query
+          schema: { type: string }
+        - name: condition
+          in: query
+          schema: { type: string }
+        - name: window_days
+          in: query
+          schema: { type: integer, minimum: 7, maximum: 365, default: 180 }
+      responses:
+        "200":
+          description: OK
+        "403":
+          description: Premium required
+        "404":
+          description: Not found
+        "503":
+          description: DB not configured
+
+  /api/v1/price-bands/methodology:
+    get:
+      summary: Explain price band methodology (v0)
+      responses:
+        "200":
+          description: OK
+
+  /api/v1/brands:
+    get:
+      summary: List brands
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer }
+        - name: offset
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+        "503":
+          description: DB not configured
+
+  /api/v1/marketplaces:
+    get:
+      summary: List marketplaces + freshness signals
+      responses:
+        "200":
+          description: OK
+        "503":
+          description: DB not configured
+
+  /api/v1/cameras:
+    get:
+      summary: List camera models
+      parameters:
+        - name: brand
+          in: query
+          schema: { type: string }
+        - name: capture_medium
+          in: query
+          schema: { type: string, enum: [digital, film] }
+        - name: mount
+          in: query
+          schema: { type: string }
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer }
+        - name: offset
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+        "503":
+          description: DB not configured
+
+  /api/v1/cameras/{slug}/price-band:
+    get:
+      summary: Get one camera price band (observation-backed)
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+        - name: currency
+          in: query
+          schema: { type: string }
+        - name: country
+          in: query
+          schema: { type: string }
+        - name: condition
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not found
+        "503":
+          description: DB not configured
+
+  /api/v1/cameras/{slug}:
+    get:
+      summary: Get one camera model by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not found
+
+  /api/v1/lenses:
+    get:
+      summary: List lens models
+      parameters:
+        - name: brand
+          in: query
+          schema: { type: string }
+        - name: mount
+          in: query
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string, enum: [prime, zoom, teleconverter, other] }
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer }
+        - name: offset
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+        "503":
+          description: DB not configured
+
+  /api/v1/lenses/{slug}/price-band:
+    get:
+      summary: Get one lens price band (observation-backed)
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+        - name: currency
+          in: query
+          schema: { type: string }
+        - name: country
+          in: query
+          schema: { type: string }
+        - name: condition
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not found
+        "503":
+          description: DB not configured
+
+  /api/v1/lenses/{slug}:
+    get:
+      summary: Get one lens model by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not found
+
+  /api/v1/listings:
+    get:
+      summary: List listings
+      parameters:
+        - name: active
+          in: query
+          schema: { type: boolean }
+        - name: camera_slug
+          in: query
+          schema: { type: string }
+        - name: lens_slug
+          in: query
+          schema: { type: string }
+        - name: marketplace
+          in: query
+          schema: { type: string }
+        - name: currency
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer }
+        - name: offset
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+        "503":
+          description: DB not configured
+
+  /api/v1/listings/{listingId}:
+    get:
+      summary: Get one listing by id
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not found
+        "503":
+          description: DB not configured
+
+  /api/v1/admin/openapi.internal.yml:
+    get:
+      summary: Fetch this OpenAPI document (internal)
+      security:
+        - AdminToken: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "503":
+          description: Admin not configured
+
+  /api/v1/admin/ingestion/runs:
+    get:
+      summary: List ingestion runs (internal)
+      security:
+        - AdminToken: []
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer }
+        - name: offset
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "503":
+          description: Admin or DB not configured
+
+  /api/v1/admin/ops/status:
+    get:
+      summary: Ops status summary (internal)
+      security:
+        - AdminToken: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "503":
+          description: Admin or DB not configured
+
+  /api/v1/admin/partners:
+    get:
+      summary: List partner marketplaces (internal)
+      security:
+        - AdminToken: []
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "503":
+          description: Admin or DB not configured
+
+  /api/v1/admin/partners/{marketplaceCode}/report:
+    get:
+      summary: Partner attribution report (internal)
+      security:
+        - AdminToken: []
+      parameters:
+        - name: marketplaceCode
+          in: path
+          required: true
+          schema: { type: string }
+        - name: window_days
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 365, default: 30 }
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+        "503":
+          description: Admin or DB not configured
+
+  /api/v1/admin/bots/summary:
+    get:
+      summary: Bot/crawler monitoring summary (internal)
+      security:
+        - AdminToken: []
+      parameters:
+        - name: window_minutes
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 1440 }
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "503":
+          description: Admin or DB not configured
+
+  /api/v1/admin/audit-log:
+    get:
+      summary: List audit log entries (internal)
+      security:
+        - AdminToken: []
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer }
+        - name: offset
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "503":
+          description: Admin or DB not configured
+
+  /api/v1/admin/matching/review-queue:
+    get:
+      summary: List listings for matching review
+      security:
+        - AdminToken: []
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [unmatched, matched, needs_review, verified] }
+        - name: max_confidence
+          in: query
+          schema: { type: number, minimum: 0, maximum: 1 }
+        - name: marketplace
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer }
+        - name: offset
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "503":
+          description: Admin or DB not configured
+
+  /api/v1/admin/matching/override:
+    post:
+      summary: Preview/apply a manual match override (defaults to dry-run)
+      security:
+        - AdminToken: []
+      parameters:
+        - name: dry_run
+          in: query
+          schema: { type: boolean, default: true }
+          description: When true, returns diff only (no mutation).
+        - name: confirm
+          in: query
+          schema: { type: boolean, default: false }
+          description: Required when dry_run=false.
+        - name: x-actor-id
+          in: header
+          required: false
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                listing_id: { type: string }
+                camera_slug: { type: [string, "null"] }
+                lens_slug: { type: [string, "null"] }
+                reason: { type: [string, "null"] }
+              required: [listing_id]
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "503":
+          description: Admin or DB not configured
+
+  /api/v1/admin/dedupe/edges:
+    get:
+      summary: List dedupe edges (internal)
+      security:
+        - AdminToken: []
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer }
+        - name: offset
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "503":
+          description: Admin or DB not configured
+    post:
+      summary: Preview/apply upsert of a manual dedupe edge (defaults to dry-run)
+      security:
+        - AdminToken: []
+      parameters:
+        - name: dry_run
+          in: query
+          schema: { type: boolean, default: true }
+          description: When true, returns diff only (no mutation).
+        - name: confirm
+          in: query
+          schema: { type: boolean, default: false }
+          description: Required when dry_run=false.
+        - name: x-actor-id
+          in: header
+          required: false
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                canonical_listing_id: { type: string }
+                duplicate_listing_id: { type: string }
+                confidence: { type: number, minimum: 0, maximum: 1 }
+                reason: { type: [string, "null"] }
+              required: [canonical_listing_id, duplicate_listing_id]
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "503":
+          description: Admin or DB not configured
