@@ -7,6 +7,14 @@ function envOrNull(name) {
   return value && value.trim() ? value.trim() : null;
 }
 
+function pathExists(targetPath) {
+  try {
+    return fs.existsSync(targetPath);
+  } catch {
+    return false;
+  }
+}
+
 export function resolveRepoRoot() {
   const thisFile = fileURLToPath(import.meta.url);
   const thisDir = path.dirname(thisFile);
@@ -25,6 +33,11 @@ export function resolveWorkspaceRoot() {
 export function resolveGovRoot() {
   const override = envOrNull("FF_GOV_ROOT");
   if (override) return path.resolve(override);
+
+  // Deployment-friendly fallback: if the product repo contains an in-repo
+  // runtime snapshot, prefer that over the sibling workspace layout.
+  const repoSnapshot = path.resolve(resolveRepoRoot(), "gov-snapshot");
+  if (pathExists(repoSnapshot)) return repoSnapshot;
 
   const workspaceRoot = resolveWorkspaceRoot();
   return path.resolve(workspaceRoot, "FF - gov");
@@ -50,10 +63,10 @@ export function assertPathsExist(pathsToCheck) {
       ...lines,
       "",
       "Fix by either:",
+      "- keeping an in-repo `gov-snapshot/` directory, or",
       "- keeping the expected workspace layout (FF - gov/ and FF - worktrees/ as siblings), or",
       "- setting FF_WORKSPACE_ROOT / FF_GOV_ROOT environment variables.",
     ].join("\n");
     throw new Error(hint);
   }
 }
-
