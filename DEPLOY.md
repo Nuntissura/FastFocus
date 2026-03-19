@@ -58,3 +58,41 @@ Verify:
 - `GET /cameras/canon-eos-r5` (after import)
 - `GET /compare/canon-eos-r5-vs-canon-eos-r6` (after import)
 
+## Clever Cloud Node runtime (lowest-cost current path)
+
+For Clever Cloud, use the Node runtime rather than the Docker runtime.
+
+Why:
+- the current Dockerfile expects the workspace root as build context so it can see `FF - gov/`,
+- Clever Cloud cron is available for Node apps, but not for Docker apps,
+- the low-cost production path is one Node app + one managed Postgres add-on.
+
+Prep the deployable repo snapshot locally:
+
+```powershell
+npm.cmd run gov:snapshot
+```
+
+This creates `gov-snapshot/` inside the product repo so the deployed app can set:
+
+```powershell
+$env:FF_GOV_ROOT = "./gov-snapshot"
+```
+
+Recommended Clever Cloud settings:
+- `CC_RUN_COMMAND=$ROOT/bin/start.sh`
+- `CC_PRE_RUN_HOOK=$ROOT/bin/pre-run.sh`
+- `CC_HEALTH_CHECK_PATH=/health`
+- `CC_NODE_VERSION=24`
+- `CC_NODE_BUILD_TOOL=npm-ci`
+
+Recommended app env:
+- `FF_PUBLIC_BASE_URL=https://fastfocus.camera`
+- `FF_TRUST_PROXY=1`
+- `FF_COOKIE_SECURE=1`
+- `FF_GOV_ROOT=./gov-snapshot`
+- `HOST=0.0.0.0`
+
+Scheduler:
+- `clevercloud/cron.json` runs `$ROOT/bin/daily-refresh.sh` once per day.
+- Keep third-party ingest toggles off until the corresponding credentials are set in production.

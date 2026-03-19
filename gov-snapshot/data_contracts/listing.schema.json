@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fastfocus.example/schemas/listing.schema.json",
+  "title": "Listing",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "listing_id",
+    "source",
+    "source_item_id",
+    "url",
+    "retrieved_at",
+    "matched",
+    "title",
+    "price",
+    "pricing_extras",
+    "condition",
+    "seller",
+    "location",
+    "included_items",
+    "extracted_attributes",
+    "media",
+    "raw_ref",
+    "meta"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "listing_id": {
+      "$ref": "common.schema.json#/$defs/UUID"
+    },
+    "source": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]{2,32}$"
+    },
+    "source_item_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "maxLength": 2048
+    },
+    "retrieved_at": {
+      "$ref": "common.schema.json#/$defs/Timestamp"
+    },
+    "matched": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "camera_id",
+        "lens_id",
+        "match_confidence",
+        "match_method",
+        "match_status"
+      ],
+      "properties": {
+        "camera_id": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lens_id": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "match_confidence": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "match_method": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 64
+        },
+        "match_status": {
+          "type": "string",
+          "enum": [
+            "unmatched",
+            "matched",
+            "needs_review",
+            "verified"
+          ]
+        }
+      }
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "price": {
+      "$ref": "common.schema.json#/$defs/Money"
+    },
+    "pricing_extras": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "shipping",
+        "fees_included"
+      ],
+      "properties": {
+        "shipping": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/Money"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fees_included": {
+          "type": "boolean"
+        }
+      }
+    },
+    "condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "raw",
+        "physical_tier",
+        "functional_status"
+      ],
+      "properties": {
+        "raw": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 128
+        },
+        "physical_tier": {
+          "$ref": "common.schema.json#/$defs/ConditionPhysicalTier"
+        },
+        "functional_status": {
+          "$ref": "common.schema.json#/$defs/FunctionalStatus"
+        }
+      }
+    },
+    "seller": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seller_type",
+        "seller_id",
+        "seller_rating"
+      ],
+      "properties": {
+        "seller_type": {
+          "$ref": "common.schema.json#/$defs/SellerType"
+        },
+        "seller_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 128
+        },
+        "seller_rating": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 5.0
+        }
+      }
+    },
+    "location": {
+      "$ref": "common.schema.json#/$defs/Location"
+    },
+    "included_items": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/IncludedItem"
+      },
+      "maxItems": 50
+    },
+    "extracted_attributes": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/ExtractedAttribute"
+      },
+      "maxItems": 200
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/MediaItem"
+      },
+      "maxItems": 50
+    },
+    "raw_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "snapshot_id",
+        "storage_key"
+      ],
+      "properties": {
+        "snapshot_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 128
+        },
+        "storage_key": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 512
+        }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "first_seen_at",
+        "last_seen_at"
+      ],
+      "properties": {
+        "first_seen_at": {
+          "$ref": "common.schema.json#/$defs/Timestamp"
+        },
+        "last_seen_at": {
+          "$ref": "common.schema.json#/$defs/Timestamp"
+        }
+      }
+    }
+  }
+}

@@ -3,8 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "start": "node apps/api/src/server.js",
     "dev:api": "node apps/api/src/server.js",
     "dev:demo": "node apps/api/src/dev_demo.js",
+    "gov:snapshot": "powershell -ExecutionPolicy Bypass -File scripts/refresh_gov_snapshot.ps1",
     "db:migrate": "node apps/api/src/db/migrate.js",
     "db:seed:demo": "node apps/api/src/db/seed_demo.js",
     "db:seed:catalog": "node apps/api/src/db/seed_catalog.js",

@@ -1,0 +1,482 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fastfocus.example/schemas/common.schema.json",
+  "title": "Fast Focus Common Definitions",
+  "type": "object",
+  "$defs": {
+    "UUID": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "Slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+){0,127}$",
+      "minLength": 3,
+      "maxLength": 128
+    },
+    "ISODate": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "Currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "Money": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "properties": {
+        "amount": {
+          "type": "number"
+        },
+        "currency": {
+          "$ref": "#/$defs/Currency"
+        }
+      }
+    },
+    "CountryCode": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$"
+    },
+    "Severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "CaptureMedium": {
+      "type": "string",
+      "enum": [
+        "digital",
+        "film"
+      ]
+    },
+    "LensSystemType": {
+      "type": "string",
+      "enum": [
+        "interchangeable",
+        "fixed"
+      ]
+    },
+    "MountCode": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]{2,40}$"
+    },
+    "LensCategory": {
+      "type": "string",
+      "enum": [
+        "prime",
+        "zoom",
+        "teleconverter",
+        "other"
+      ]
+    },
+    "CameraCategory": {
+      "type": "string",
+      "enum": [
+        "mirrorless",
+        "dslr",
+        "compact",
+        "rangefinder",
+        "slr_film",
+        "tlr_film",
+        "medium_format",
+        "instant",
+        "other"
+      ]
+    },
+    "SensorFormat": {
+      "type": "string",
+      "enum": [
+        "full_frame",
+        "aps_c",
+        "aps_h",
+        "micro_four_thirds",
+        "one_inch",
+        "one_over_1_6_inch",
+        "one_over_1_7_inch",
+        "one_over_1_8_inch",
+        "one_over_2_0_inch",
+        "one_over_2_3_inch",
+        "one_over_2_5_inch",
+        "one_over_2_7_inch",
+        "one_over_3_0_inch",
+        "medium_format_44x33",
+        "medium_format_645",
+        "other"
+      ]
+    },
+    "FilmFormat": {
+      "type": "string",
+      "enum": [
+        "135",
+        "120",
+        "110",
+        "220",
+        "instax_mini",
+        "instax_wide",
+        "polaroid_600",
+        "polaroid_i_type",
+        "4x5",
+        "8x10",
+        "other"
+      ]
+    },
+    "ConditionPhysicalTier": {
+      "type": "string",
+      "enum": [
+        "new",
+        "like_new",
+        "used_excellent",
+        "used_good",
+        "used_fair",
+        "for_parts"
+      ]
+    },
+    "FunctionalStatus": {
+      "type": "string",
+      "enum": [
+        "working",
+        "untested",
+        "not_working",
+        "unknown"
+      ]
+    },
+    "SellerType": {
+      "type": "string",
+      "enum": [
+        "private",
+        "business",
+        "unknown"
+      ]
+    },
+    "Location": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "country": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CountryCode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "region": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 128
+        },
+        "city": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 128
+        },
+        "pickup_possible": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      }
+    },
+    "DimensionsMM": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "w": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500
+        },
+        "h": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500
+        },
+        "d": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500
+        }
+      },
+      "required": [
+        "w",
+        "h",
+        "d"
+      ]
+    },
+    "IncludedItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "quantity"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "battery",
+            "charger",
+            "box",
+            "strap",
+            "cap",
+            "manual",
+            "case",
+            "lens",
+            "flash",
+            "film",
+            "memory_card",
+            "adapter",
+            "cable",
+            "other"
+          ]
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 99
+        }
+      }
+    },
+    "MediaItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "url"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "image",
+            "video"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "width": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "height": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 10000
+        }
+      }
+    },
+    "ExtractedAttribute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "type",
+        "confidence"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]{2,64}$"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "int",
+            "float",
+            "string",
+            "bool",
+            "enum"
+          ]
+        },
+        "unit": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 32
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "evidence_text": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 512
+        },
+        "value_int": {
+          "type": "integer"
+        },
+        "value_float": {
+          "type": "number"
+        },
+        "value_string": {
+          "type": "string"
+        },
+        "value_bool": {
+          "type": "boolean"
+        },
+        "value_enum": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "int"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "value_int"
+            ]
+          },
+          "else": true
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "float"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "value_float"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "string"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "value_string"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "bool"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "value_bool"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "enum"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "value_enum"
+            ]
+          }
+        }
+      ]
+    },
+    "ChecklistItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "label",
+        "severity"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]{2,64}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 200
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        }
+      }
+    },
+    "KnownIssue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "label",
+        "severity"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]{2,64}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 200
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        }
+      }
+    }
+  }
+}

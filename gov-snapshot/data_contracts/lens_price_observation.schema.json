@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fastfocus.example/schemas/lens_price_observation.schema.json",
+  "title": "LensPriceObservation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "lens_id",
+    "observed_date",
+    "currency",
+    "region",
+    "condition_physical_tier",
+    "sample_size",
+    "p25",
+    "median",
+    "p75",
+    "min",
+    "max",
+    "computed_at",
+    "method"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "lens_id": {
+      "$ref": "common.schema.json#/$defs/UUID"
+    },
+    "observed_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "currency": {
+      "$ref": "common.schema.json#/$defs/Currency"
+    },
+    "region": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "country"
+      ],
+      "properties": {
+        "country": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/CountryCode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "region": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 128
+        }
+      }
+    },
+    "condition_physical_tier": {
+      "anyOf": [
+        {
+          "$ref": "common.schema.json#/$defs/ConditionPhysicalTier"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "sample_size": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000000
+    },
+    "p25": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "median": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "p75": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "min": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "max": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "computed_at": {
+      "$ref": "common.schema.json#/$defs/Timestamp"
+    },
+    "method": {
+      "type": "string",
+      "maxLength": 120
+    }
+  }
+}
+

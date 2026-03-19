@@ -54,6 +54,33 @@ Remember this:
 
 Deployment notes: `DEPLOY.md`
 
+### Clever Cloud (low-cost production path)
+
+For the current cheapest sensible production setup on Clever Cloud:
+- use one Node app in Paris,
+- use one paid PostgreSQL add-on,
+- defer staging until production is verified.
+
+Before deploying from this repo, refresh the in-repo governance runtime snapshot:
+
+```powershell
+npm.cmd run gov:snapshot
+```
+
+This populates `gov-snapshot/`, which production can reference with:
+
+```powershell
+$env:FF_GOV_ROOT = "./gov-snapshot"
+$env:HOST = "0.0.0.0"
+$env:PORT = "8080"
+```
+
+The Clever-specific wrappers live in:
+- `bin/start.sh`
+- `bin/pre-run.sh`
+- `bin/daily-refresh.sh`
+- `clevercloud/cron.json`
+
 Optional (legacy): also seed the catalog with JSON seed files:
 ```powershell
 $env:FF_DEMO_SEED_CATALOG = "1"
@@ -168,6 +195,13 @@ $env:FF_PUBLIC_BASE_URL = "https://fastfocus.camera"
 
 # if you run behind a reverse proxy that sets X-Forwarded-Proto/Host
 $env:FF_TRUST_PROXY = "1"
+
+# if the deployed repo contains an in-repo governance snapshot
+# (used by the current Clever Cloud path)
+$env:FF_GOV_ROOT = "./gov-snapshot"
+
+# Clever Cloud Node apps must listen on all interfaces.
+$env:HOST = "0.0.0.0"
 
 # optional: add per-bot disallow blocks in robots.txt (comma-separated)
 $env:FF_ROBOTS_DISALLOW_USER_AGENTS = "GPTBot,Google-Extended"

@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fastfocus.example/schemas/saved_search.schema.json",
+  "title": "SavedSearch",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "saved_search_id",
+    "email_norm",
+    "target",
+    "filters",
+    "schedule",
+    "state",
+    "tokens",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "saved_search_id": {
+      "$ref": "common.schema.json#/$defs/UUID"
+    },
+    "email_norm": {
+      "type": "string",
+      "maxLength": 254
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "camera_id",
+        "lens_id"
+      ],
+      "properties": {
+        "camera_id": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lens_id": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "filters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "marketplace",
+        "country",
+        "currency",
+        "max_total_price_amount",
+        "max_total_price_currency"
+      ],
+      "properties": {
+        "marketplace": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-z0-9_]{2,32}$"
+        },
+        "country": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/CountryCode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/Currency"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "max_total_price_amount": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "max_total_price_currency": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/Currency"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "schedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "min_interval_hours",
+        "max_results_per_email"
+      ],
+      "properties": {
+        "min_interval_hours": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 168
+        },
+        "max_results_per_email": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        }
+      }
+    },
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "confirmed_at",
+        "unsubscribed_at",
+        "last_checked_at",
+        "last_email_sent_at"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "confirmed_at": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unsubscribed_at": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last_checked_at": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last_email_sent_at": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "tokens": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "confirm_token",
+        "unsubscribe_token"
+      ],
+      "properties": {
+        "confirm_token": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 96
+        },
+        "unsubscribe_token": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 96
+        }
+      }
+    },
+    "created_at": {
+      "$ref": "common.schema.json#/$defs/Timestamp"
+    },
+    "updated_at": {
+      "$ref": "common.schema.json#/$defs/Timestamp"
+    }
+  }
+}
+

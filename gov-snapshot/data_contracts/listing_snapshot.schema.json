@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fastfocus.example/schemas/listing_snapshot.schema.json",
+  "title": "ListingSnapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "snapshot_id",
+    "listing_id",
+    "source",
+    "source_item_id",
+    "retrieved_at",
+    "is_active",
+    "price",
+    "condition",
+    "snapshot"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "snapshot_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "listing_id": {
+      "$ref": "common.schema.json#/$defs/UUID"
+    },
+    "source": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]{2,32}$"
+    },
+    "source_item_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "retrieved_at": {
+      "$ref": "common.schema.json#/$defs/Timestamp"
+    },
+    "is_active": {
+      "type": "boolean"
+    },
+    "price": {
+      "$ref": "common.schema.json#/$defs/Money"
+    },
+    "condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "physical_tier",
+        "functional_status"
+      ],
+      "properties": {
+        "physical_tier": {
+          "$ref": "common.schema.json#/$defs/ConditionPhysicalTier"
+        },
+        "functional_status": {
+          "$ref": "common.schema.json#/$defs/FunctionalStatus"
+        }
+      }
+    },
+    "camera_id": {
+      "anyOf": [
+        {
+          "$ref": "common.schema.json#/$defs/UUID"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "lens_id": {
+      "anyOf": [
+        {
+          "$ref": "common.schema.json#/$defs/UUID"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "snapshot": {
+      "type": "object"
+    }
+  }
+}

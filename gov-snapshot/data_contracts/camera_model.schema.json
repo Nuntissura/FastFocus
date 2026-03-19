@@ -1,0 +1,547 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fastfocus.example/schemas/camera_model.schema.json",
+  "title": "CameraModel",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "camera_id",
+    "slug",
+    "brand",
+    "display_name",
+    "capture_medium",
+    "camera_category",
+    "lens_system",
+    "release",
+    "production",
+    "body",
+    "digital_specs",
+    "film_specs",
+    "aliases",
+    "links",
+    "content_modules",
+    "evidence",
+    "meta"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "camera_id": {
+      "$ref": "common.schema.json#/$defs/UUID"
+    },
+    "slug": {
+      "$ref": "common.schema.json#/$defs/Slug"
+    },
+    "brand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "brand_id",
+        "name"
+      ],
+      "properties": {
+        "brand_id": {
+          "$ref": "common.schema.json#/$defs/UUID"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "slug": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/Slug"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 120
+    },
+    "capture_medium": {
+      "$ref": "common.schema.json#/$defs/CaptureMedium"
+    },
+    "camera_category": {
+      "$ref": "common.schema.json#/$defs/CameraCategory"
+    },
+    "lens_system": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "mount",
+        "fixed_lens"
+      ],
+      "properties": {
+        "type": {
+          "$ref": "common.schema.json#/$defs/LensSystemType"
+        },
+        "mount": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-z0-9_]{2,40}$"
+        },
+        "fixed_lens": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "focal_length_basis",
+            "focal_length_min_mm",
+            "focal_length_max_mm",
+            "max_aperture_wide_f",
+            "max_aperture_tele_f"
+          ],
+          "properties": {
+            "focal_length_basis": {
+              "type": "string",
+              "enum": [
+                "physical",
+                "equiv_35mm"
+              ]
+            },
+            "focal_length_min_mm": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2000
+            },
+            "focal_length_max_mm": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2000
+            },
+            "max_aperture_wide_f": {
+              "type": "number",
+              "minimum": 0.7,
+              "maximum": 32.0
+            },
+            "max_aperture_tele_f": {
+              "type": "number",
+              "minimum": 0.7,
+              "maximum": 32.0
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "focal_length_min_mm": {
+                    "type": "integer"
+                  },
+                  "focal_length_max_mm": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "focal_length_max_mm": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "interchangeable"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "mount": {
+                "type": "string",
+                "pattern": "^[a-z0-9_]{2,40}$"
+              },
+              "fixed_lens": {
+                "const": null
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "fixed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "mount": {
+                "const": null
+              },
+              "fixed_lens": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "announce_date",
+        "release_year",
+        "msrp"
+      ],
+      "properties": {
+        "announce_date": {
+          "$ref": "common.schema.json#/$defs/ISODate"
+        },
+        "release_year": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1900,
+          "maximum": 2100
+        },
+        "msrp": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/Money"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "production": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start_year",
+        "end_year",
+        "is_discontinued",
+        "confidence"
+      ],
+      "properties": {
+        "start_year": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1900,
+          "maximum": 2100
+        },
+        "end_year": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1900,
+          "maximum": 2100
+        },
+        "is_discontinued": {
+          "type": "boolean"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        }
+      }
+    },
+    "body": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "weight_g",
+        "weather_sealed",
+        "dimensions_mm"
+      ],
+      "properties": {
+        "weight_g": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 5000
+        },
+        "weather_sealed": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "dimensions_mm": {
+          "$ref": "common.schema.json#/$defs/DimensionsMM"
+        }
+      }
+    },
+    "digital_specs": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sensor_format": {
+          "$ref": "common.schema.json#/$defs/SensorFormat"
+        },
+        "sensor_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 30
+        },
+        "resolution_mp": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0.1,
+          "maximum": 200.0
+        },
+        "ibis": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "video_max": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 20
+        },
+        "storage_media": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]{2,40}$"
+          },
+          "maxItems": 10
+        },
+        "battery_model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 40
+        }
+      }
+    },
+    "film_specs": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "film_format": {
+          "$ref": "common.schema.json#/$defs/FilmFormat"
+        },
+        "frame_size": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 30
+        },
+        "dx_coding": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "metering": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 20
+        },
+        "focus_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 20
+        },
+        "flash": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 20
+        },
+        "shutter_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 20
+        }
+      }
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 64
+      },
+      "maxItems": 50
+    },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "manufacturer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "manual": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "wikidata": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "wikipedia": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        }
+      }
+    },
+    "content_modules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "used_buying_checklist",
+        "known_issues"
+      ],
+      "properties": {
+        "bio": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 4000
+        },
+        "used_buying_checklist": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/ChecklistItem"
+          },
+          "maxItems": 50
+        },
+        "known_issues": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/KnownIssue"
+          },
+          "maxItems": 50
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "source_evidence.schema.json"
+      },
+      "maxItems": 200
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+        "created_at": {
+          "$ref": "common.schema.json#/$defs/Timestamp"
+        },
+        "updated_at": {
+          "$ref": "common.schema.json#/$defs/Timestamp"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "capture_medium": {
+            "const": "digital"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "digital_specs": {
+            "type": "object"
+          },
+          "film_specs": {
+            "const": null
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "capture_medium": {
+            "const": "film"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "film_specs": {
+            "type": "object"
+          },
+          "digital_specs": {
+            "const": null
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fastfocus.example/schemas/event.schema.json",
+  "title": "Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_id",
+    "occurred_at",
+    "event_name",
+    "session_id",
+    "page",
+    "context",
+    "properties"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "event_id": {
+      "$ref": "common.schema.json#/$defs/UUID"
+    },
+    "occurred_at": {
+      "$ref": "common.schema.json#/$defs/Timestamp"
+    },
+    "event_name": {
+      "type": "string",
+      "enum": [
+        "page_view",
+        "site_search",
+        "compare_view",
+        "listing_impression",
+        "listing_clickout",
+        "outbound_clickout",
+        "newsletter_signup",
+        "alert_created",
+        "error"
+      ]
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 64
+    },
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "page_type",
+        "path"
+      ],
+      "properties": {
+        "page_type": {
+          "type": "string",
+          "enum": [
+            "model",
+            "compare",
+            "brand",
+            "guide",
+            "search",
+            "other"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "camera_id": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "compare_camera_id": {
+          "anyOf": [
+            {
+              "$ref": "common.schema.json#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "referrer",
+        "utm",
+        "user_agent",
+        "bot"
+      ],
+      "properties": {
+        "referrer": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 2048
+        },
+        "utm": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "source": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 64
+            },
+            "medium": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 64
+            },
+            "campaign": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 128
+            },
+            "content": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 128
+            },
+            "term": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 128
+            }
+          }
+        },
+        "user_agent": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 512
+        },
+        "bot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "is_bot",
+            "bot_name"
+          ],
+          "properties": {
+            "is_bot": {
+              "type": "boolean"
+            },
+            "bot_name": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 64
+            }
+          }
+        }
+      }
+    },
+    "properties": {
+      "type": "object"
+    }
+  }
+}

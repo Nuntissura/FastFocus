@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fastfocus.example/schemas/email_message.schema.json",
+  "title": "EmailMessage",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "email_message_id",
+    "message_type",
+    "saved_search_id",
+    "to_email",
+    "from_email",
+    "subject",
+    "body_text",
+    "status",
+    "provider",
+    "provider_message_id",
+    "error",
+    "created_at",
+    "sent_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "email_message_id": {
+      "$ref": "common.schema.json#/$defs/UUID"
+    },
+    "message_type": {
+      "type": "string",
+      "enum": [
+        "saved_search_confirm",
+        "saved_search_alert"
+      ]
+    },
+    "saved_search_id": {
+      "anyOf": [
+        {
+          "$ref": "common.schema.json#/$defs/UUID"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "to_email": {
+      "type": "string",
+      "maxLength": 254
+    },
+    "from_email": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 254
+    },
+    "subject": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "body_text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50000
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "sent",
+        "failed",
+        "simulated"
+      ]
+    },
+    "provider": {
+      "type": "string",
+      "maxLength": 32
+    },
+    "provider_message_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 256
+    },
+    "error": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "created_at": {
+      "$ref": "common.schema.json#/$defs/Timestamp"
+    },
+    "sent_at": {
+      "anyOf": [
+        {
+          "$ref": "common.schema.json#/$defs/Timestamp"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}
+
