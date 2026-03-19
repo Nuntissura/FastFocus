@@ -159,6 +159,15 @@ async function main() {
     }
 
     {
+      const { res, json } = await fetchJson(`${baseUrl}/api/v1/status/freshness`);
+      assert(res.status === 200, `/api/v1/status/freshness expected 200, got ${res.status}`);
+      assert(json.ok === true, "/api/v1/status/freshness ok=true");
+      assert(typeof json.status === "object" && json.status !== null, "expected freshness status object");
+      assert(typeof json.status.batch_refresh === "object" && json.status.batch_refresh !== null, "expected batch_refresh object");
+      assert(typeof json.status.batch_refresh.max_age_hours === "number", "expected max_age_hours number");
+    }
+
+    {
       const { res, json } = await fetchJson(`${baseUrl}/api/v1/cameras?brand=canon&limit=3`);
       assert(res.status === 200, `/api/v1/cameras?brand=canon expected 200, got ${res.status}`);
       assert(json.ok === true, "/api/v1/cameras ok=true");

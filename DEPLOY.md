@@ -54,6 +54,7 @@ docker run --rm -p 8787:8787 `
 
 Verify:
 - `GET /health` (expects HTTP 200 and `db_ok=true`)
+- `GET /api/v1/status/freshness` (public batch-refresh freshness summary for external monitors)
 - `GET /`
 - `GET /cameras/canon-eos-r5` (after import)
 - `GET /compare/canon-eos-r5-vs-canon-eos-r6` (after import)

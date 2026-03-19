@@ -101,6 +101,11 @@ Health check:
 irm http://127.0.0.1:8787/health
 ```
 
+Public ops freshness summary:
+```powershell
+irm http://127.0.0.1:8787/api/v1/status/freshness
+```
+
 ## Local Postgres (Phase 1)
 Start DB:
 ```powershell

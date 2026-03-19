@@ -29,7 +29,7 @@ import {
   parseReviewQueueFilters,
 } from "./db/admin.js";
 import { getBotTrafficSummary, parseWindowMinutes } from "./db/bot_monitoring.js";
-import { getOpsStatus } from "./db/ops_status.js";
+import { getOpsStatus, summarizePublicOpsFreshness } from "./db/ops_status.js";
 import { getPartnerReport, listPartners, parseWindowDays } from "./db/partners.js";
 import { getDemandSummary, parsePageType, trackCompareView, trackListingClickout, trackPageView, trackSiteSearch } from "./db/events.js";
 import { confirmSavedSearchByToken, createSavedSearch, insertEmailMessage, unsubscribeSavedSearchByToken } from "./db/alerts.js";
@@ -492,6 +492,24 @@ export async function handleRequest(req, res, ctx) {
           db_enabled: true,
           db_ok: false,
           db_ping_ms: Date.now() - startedMs,
+        });
+      }
+    }
+
+    if (pathname === "/api/v1/status/freshness" || pathname === "/api/v1/status/freshness/") {
+      if (method !== "GET") return sendMethodNotAllowed(res);
+      const pool = requireDb(res, ctx);
+      if (!pool) return;
+
+      try {
+        const status = await getOpsStatus(pool, { ingestionRunsLimit: 5 });
+        const freshness = summarizePublicOpsFreshness(status);
+        return sendJson(res, 200, { ok: true, status: freshness });
+      } catch {
+        return sendJson(res, 503, {
+          ok: false,
+          error: "ops_status_unavailable",
+          hint: "Check /health for DB reachability and review production logs.",
         });
       }
     }
