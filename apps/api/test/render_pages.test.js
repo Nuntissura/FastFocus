@@ -76,6 +76,28 @@ test("renderHomePageHtml shows eBay highlights and live coverage cards", () => {
   assert.match(html, /Open camera page/);
 });
 
+test("renderHomePageHtml warns when live coverage is thin", () => {
+  const html = renderHomePageHtml({
+    canonicalUrl: "https://fastfocus.camera/",
+    dbEnabled: true,
+    marketplaces: [
+      {
+        marketplace_code: "ebay",
+        display_name: "eBay",
+        active_listing_count: 0,
+        last_listing_retrieved_at: null,
+        last_run_status: "succeeded",
+      },
+    ],
+    featuredCameras: [],
+    featuredCameraSourceLabel: "eBay",
+    liveDeals: [],
+    recentArrivals: [],
+  });
+
+  assert.match(html, /Live listing coverage is thin right now/i);
+});
+
 test("renderCameraModelPageHtml shows bio and market read", () => {
   const html = renderCameraModelPageHtml(
     {
@@ -167,4 +189,61 @@ test("renderCameraModelPageHtml shows bio and market read", () => {
   assert.match(html, /Market read/);
   assert.match(html, /active matched listings right now/i);
   assert.match(html, /Best current scored listing/i);
+});
+
+test("renderCameraModelPageHtml calls out stale and thin market coverage", () => {
+  const html = renderCameraModelPageHtml(
+    {
+      camera: {
+        slug: "sony-a7-iv",
+        display_name: "Sony A7 IV",
+        brand_name: "Sony",
+        brand_slug: "sony",
+        capture_medium: "digital",
+        camera_category: "mirrorless",
+        lens_system_type: "interchangeable",
+        mount_code: "sony_e",
+        release_year: 2021,
+        announce_date: "2021-10-21",
+        resolution_mp: 33,
+        sensor_format: "full_frame",
+        ibis: true,
+      },
+      market_summary: {
+        active_listing_count: 2,
+        recent_listing_count_7d: 0,
+        strongest_source: {
+          marketplace_code: "ebay",
+          listing_count: 2,
+          last_retrieved_at: "2020-01-01T00:00:00.000Z",
+        },
+        best_deal: {
+          listing_id: "33333333-3333-4333-8333-333333333333",
+          marketplace_code: "ebay",
+          marketplace_display_name: "eBay",
+          title: "Sony A7 IV body",
+          price_amount: 1799,
+          price_currency: "EUR",
+          shipping_amount: 25,
+          shipping_currency: "EUR",
+          deal_score: 71,
+        },
+        last_updated_at: "2020-01-01T00:00:00.000Z",
+      },
+      listing_counts_by_source: [
+        {
+          marketplace_code: "ebay",
+          listing_count: 2,
+          last_retrieved_at: "2020-01-01T00:00:00.000Z",
+        },
+      ],
+      last_updated_at: "2020-01-01T00:00:00.000Z",
+      price_band: null,
+      listings: [],
+    },
+    { canonicalUrl: "https://fastfocus.camera/cameras/sony-a7-iv" },
+  );
+
+  assert.match(html, /Coverage is still thin/i);
+  assert.match(html, /Coverage looks stale/i);
 });

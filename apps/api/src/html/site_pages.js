@@ -30,6 +30,14 @@ function formatMaybeIso(ts) {
   }
 }
 
+function ageHoursFromNow(ts) {
+  if (!isNonEmptyString(ts)) return null;
+  const ms = Date.parse(ts);
+  if (!Number.isFinite(ms)) return null;
+  const diffHours = (Date.now() - ms) / (1000 * 60 * 60);
+  return Number.isFinite(diffHours) && diffHours >= 0 ? diffHours : null;
+}
+
 function formatBool(value) {
   if (value === true) return "Yes";
   if (value === false) return "No";
@@ -261,6 +269,20 @@ export function renderHomePageHtml({
   liveDeals = [],
   recentArrivals = [],
 }) {
+  const activeListingTotal = marketplaces.reduce((sum, m) => sum + Number(m?.active_listing_count || 0), 0);
+  const freshestMarketAgeHours = marketplaces.reduce((best, m) => {
+    const ageHours = ageHoursFromNow(m?.last_listing_retrieved_at);
+    if (ageHours === null) return best;
+    if (best === null) return ageHours;
+    return ageHours < best ? ageHours : best;
+  }, null);
+  const liveCoverageWarning =
+    activeListingTotal <= 0 && liveDeals.length === 0 && recentArrivals.length === 0
+      ? "Live listing coverage is thin right now. Use the specs, compare pages, and buyer checklists first, and treat market conclusions as incomplete until ingest catches up."
+      : freshestMarketAgeHours !== null && freshestMarketAgeHours > 48
+        ? "The latest marketplace snapshot looks stale. Check the freshness table before trusting thin price-band or listing conclusions."
+        : null;
+
   const marketRows = marketplaces
     .map((m) => {
       const name = escapeHtml(m.display_name || m.marketplace_code);
@@ -420,6 +442,7 @@ export function renderHomePageHtml({
 
       <section class="card" aria-label="Useful right now">
         <h2>Useful right now</h2>
+        ${liveCoverageWarning ? `<p class="warn">${escapeHtml(liveCoverageWarning)}</p>` : ""}
         <ul>
           <li>Open the best current eBay matches and compare them against the model-level price band.</li>
           <li>Start with camera pages that have real listing coverage, not just a placeholder shell.</li>

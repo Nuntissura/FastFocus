@@ -32,13 +32,13 @@ docker run --rm `
 
 ## Import datasheets (one-time bootstrap, repeat as needed)
 
-Example: Canon only
+Example: active Sony launch wave
 
 ```powershell
 docker run --rm `
   -e DATABASE_URL="postgres://..." `
   fastfocus-platform:latest `
-  node apps/api/src/db/import_camera_datasheets.js --brand-slug canon --confirm
+  node apps/api/src/db/import_camera_datasheets.js --brand-slug sony --confirm
 ```
 
 ## Start the web service
@@ -56,8 +56,8 @@ Verify:
 - `GET /health` (expects HTTP 200 and `db_ok=true`)
 - `GET /api/v1/status/freshness` (public batch-refresh freshness summary for external monitors)
 - `GET /`
-- `GET /cameras/canon-eos-r5` (after import)
-- `GET /compare/canon-eos-r5-vs-canon-eos-r6` (after import)
+- `GET /cameras/sony-a7-iv` (after import)
+- `GET /compare/sony-a7-iv-vs-sony-a7-c-ii` (after import)
 
 ## Clever Cloud Node runtime (lowest-cost current path)
 
@@ -92,7 +92,14 @@ Recommended app env:
 - `FF_TRUST_PROXY=1`
 - `FF_COOKIE_SECURE=1`
 - `FF_GOV_ROOT=./gov-snapshot`
+- `FF_ACTIVE_CAMERA_BRANDS=sony`
+- `FF_SYNC_ACTIVE_CAMERA_BRANDS=1`
 - `HOST=0.0.0.0`
+
+Why `FF_SYNC_ACTIVE_CAMERA_BRANDS=1` matters:
+- deploy/startup should converge the DB to the current active camera wave
+- without it, old camera brands can linger in Postgres even after governance resets the live catalog
+- that drift makes production surfaces look stale or misleading even when the in-repo catalog has moved on
 
 Scheduler:
 - `clevercloud/cron.json` runs `$ROOT/bin/daily-refresh.sh` once per day.

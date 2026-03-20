@@ -146,6 +146,14 @@ function formatTimestamp(value) {
   return value;
 }
 
+function ageHoursFromNow(value) {
+  if (!isNonEmptyString(value)) return null;
+  const ms = Date.parse(value);
+  if (!Number.isFinite(ms)) return null;
+  const ageHours = (Date.now() - ms) / (1000 * 60 * 60);
+  return Number.isFinite(ageHours) && ageHours >= 0 ? ageHours : null;
+}
+
 function formatDimensionsMM({ dimensions_w_mm, dimensions_h_mm, dimensions_d_mm }) {
   if (!dimensions_w_mm || !dimensions_h_mm || !dimensions_d_mm) return null;
   return `${dimensions_w_mm}Ã—${dimensions_h_mm}Ã—${dimensions_d_mm} mm`;
@@ -504,8 +512,16 @@ function renderPriceBandCard(priceBand, { premiumPriceHistoryHref = null } = {})
 
 function renderListingCountsCard({ listingCounts, lastUpdatedAt }) {
   if (!listingCounts || listingCounts.length === 0) {
-    return `<div class="card"><h3>Listings snapshot</h3><div class="subtle">No active matched listings for this model yet.</div></div>`;
+    return `<div class="card"><h3>Listings snapshot</h3><div class="subtle">No active matched listings for this model yet. The page is still useful for specs and checklist context, but it does not have live market depth yet.</div></div>`;
   }
+
+  const freshnessAgeHours = ageHoursFromNow(lastUpdatedAt);
+  const freshnessHint =
+    freshnessAgeHours !== null && freshnessAgeHours > 72
+      ? "Coverage looks stale. Verify the freshness table or rerun ingest before trusting a thin sample."
+      : freshnessAgeHours !== null && freshnessAgeHours > 36
+        ? "Coverage is aging. Treat thin listing samples with caution until the next batch refresh lands."
+        : null;
 
   const tableRows = listingCounts
     .map(
@@ -519,6 +535,7 @@ function renderListingCountsCard({ listingCounts, lastUpdatedAt }) {
   return `<div class="card">
   <h3>Listings snapshot</h3>
   <div class="subtle">Last refresh: ${escapeHtml(lastUpdatedAt || "â€”")}</div>
+  ${freshnessHint ? `<div class="subtle">${escapeHtml(freshnessHint)}</div>` : ""}
   <table aria-label="Listing counts by source">
     <thead><tr><th scope="col">Source</th><th scope="col">Count</th><th scope="col">Last retrieved</th></tr></thead>
     <tbody>${tableRows}</tbody>
@@ -546,14 +563,26 @@ function formatListingPrice(listing) {
 
 function renderMarketReadCard(marketSummary) {
   if (!marketSummary || Number(marketSummary.active_listing_count || 0) <= 0) {
-    return `<div class="card" data-testid="camera-model-market-read-card"><h3>Market read</h3><div class="subtle">No active matched listings yet for this model.</div></div>`;
+    return `<div class="card" data-testid="camera-model-market-read-card"><h3>Market read</h3><div class="subtle">No active matched listings yet for this model. Use the specs and checklist first, and treat this page as catalog context rather than live market evidence.</div></div>`;
   }
 
   const lines = [];
+  const freshnessAgeHours = ageHoursFromNow(marketSummary.last_updated_at);
   lines.push(`${escapeHtml(String(marketSummary.active_listing_count))} active matched listings right now.`);
 
   if (Number.isFinite(Number(marketSummary.recent_listing_count_7d))) {
     lines.push(`${escapeHtml(String(marketSummary.recent_listing_count_7d))} listings first seen in the last 7 days.`);
+  }
+  if (Number(marketSummary.active_listing_count || 0) < 3) {
+    lines.push("Coverage is still thin, so compare several listings before trusting the current range.");
+  }
+  if (Number(marketSummary.recent_listing_count_7d || 0) === 0) {
+    lines.push("No new matched listings were first seen in the last 7 days, so price movement may be slow or coverage may still be shallow.");
+  }
+  if (freshnessAgeHours !== null && freshnessAgeHours > 72) {
+    lines.push("Coverage looks stale. The latest matched snapshot is older than 72 hours.");
+  } else if (freshnessAgeHours !== null && freshnessAgeHours > 36) {
+    lines.push("Coverage is aging. The latest matched snapshot is older than 36 hours.");
   }
 
   if (marketSummary.strongest_source?.marketplace_code) {

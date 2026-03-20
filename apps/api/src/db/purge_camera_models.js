@@ -5,6 +5,7 @@ const { Client } = pg;
 function parseArgs(argv) {
   const result = {
     brandSlug: null,
+    excludeBrands: [],
     confirm: false,
     help: false,
   };
@@ -26,7 +27,21 @@ function parseArgs(argv) {
       i++;
       continue;
     }
+    if (arg === "--exclude-brands") {
+      const value = argv[i + 1];
+      if (!value) throw new Error("--exclude-brands requires a comma-separated value");
+      result.excludeBrands = value
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
+      i++;
+      continue;
+    }
     throw new Error(`Unknown argument: ${arg}`);
+  }
+
+  if (result.brandSlug && result.excludeBrands.length > 0) {
+    throw new Error("Use either --brand-slug or --exclude-brands, not both.");
   }
 
   return result;
@@ -39,11 +54,12 @@ function printUsage() {
       "Purge camera models (and dependent rows) from Postgres.",
       "",
       "Usage:",
-      "  node apps/api/src/db/purge_camera_models.js [--brand-slug canon] [--confirm]",
+      "  node apps/api/src/db/purge_camera_models.js [--brand-slug canon] [--exclude-brands sony,nikon] [--confirm]",
       "",
       "Notes:",
       "- Default is dry-run (no changes).",
       "- Pass --confirm to apply deletes.",
+      "- --exclude-brands keeps the listed brands and purges every other camera brand.",
       "- Requires DATABASE_URL.",
     ].join("\n"),
   );
@@ -75,10 +91,15 @@ async function main() {
       SELECT cm.camera_id, cm.slug
       FROM camera_models cm
       JOIN brands b ON b.brand_id = cm.brand_id
-      WHERE ($1::text IS NULL OR b.slug = $1)
+      WHERE
+        ($1::text IS NULL OR b.slug = $1)
+        AND (
+          COALESCE(array_length($2::text[], 1), 0) = 0
+          OR NOT (b.slug = ANY($2::text[]))
+        )
       ORDER BY b.slug, cm.slug
       `,
-      [args.brandSlug],
+      [args.brandSlug, args.excludeBrands],
     );
 
     const cameraIds = cameraRes.rows.map((r) => r.camera_id);
@@ -89,6 +110,10 @@ async function main() {
     if (args.brandSlug) {
       // eslint-disable-next-line no-console
       console.log("- brand_slug:", args.brandSlug);
+    }
+    if (args.excludeBrands.length > 0) {
+      // eslint-disable-next-line no-console
+      console.log("- keeping brands:", args.excludeBrands.join(", "));
     }
     if (cameraSlugs.length > 0) {
       const preview = cameraSlugs.slice(0, 20);

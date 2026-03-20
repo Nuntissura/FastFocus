@@ -7,6 +7,16 @@ function normalizeEnv(value) {
   return v === "sandbox" ? "sandbox" : "production";
 }
 
+export function normalizeEbaySearchSort(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!normalized || normalized === "best" || normalized === "bestmatch" || normalized === "default") return null;
+  if (normalized === "newlylisted") return "newlyListed";
+  if (normalized === "endingsoonest") return "endingSoonest";
+  if (normalized === "price") return "price";
+  if (normalized === "distance") return "distance";
+  return null;
+}
+
 function clampText(value, max) {
   if (value === null || value === undefined) return null;
   const s = String(value);
@@ -46,7 +56,7 @@ function normalizeMedia(item) {
   return out;
 }
 
-export function normalizeEbayItemSummaryToListing(item, { marketplaceCode = "ebay", retrievedAt, env, query } = {}) {
+export function normalizeEbayItemSummaryToListing(item, { marketplaceCode = "ebay", retrievedAt, env, query, sort = null, filter = null } = {}) {
   const now = retrievedAt || new Date().toISOString();
 
   const itemId = item && item.itemId ? String(item.itemId) : null;
@@ -111,6 +121,8 @@ export function normalizeEbayItemSummaryToListing(item, { marketplaceCode = "eba
       provider: "ebay_browse_api",
       env,
       query,
+      sort,
+      filter,
     },
 
     first_seen_at: now,
@@ -120,6 +132,8 @@ export function normalizeEbayItemSummaryToListing(item, { marketplaceCode = "eba
       provider: "ebay_browse_api",
       env,
       query,
+      sort,
+      filter,
       item_summary: item,
       retrieved_at: now,
     },
@@ -134,6 +148,8 @@ export async function searchEbayBrowseApi({
   limit = 25,
   offset = 0,
   categoryIds = null,
+  sort = null,
+  filter = null,
   fetchImpl = fetch,
 } = {}) {
   const normalizedEnv = normalizeEnv(env);
@@ -148,6 +164,13 @@ export async function searchEbayBrowseApi({
 
   if (categoryIds && Array.isArray(categoryIds) && categoryIds.length) {
     url.searchParams.set("category_ids", categoryIds.map(String).join(","));
+  }
+  const normalizedSort = normalizeEbaySearchSort(sort);
+  if (normalizedSort) {
+    url.searchParams.set("sort", normalizedSort);
+  }
+  if (typeof filter === "string" && filter.trim()) {
+    url.searchParams.set("filter", filter.trim());
   }
 
   const res = await fetchImpl(url.toString(), {
@@ -170,4 +193,3 @@ export async function searchEbayBrowseApi({
 
   return { items, total, href: data.href || null };
 }
-

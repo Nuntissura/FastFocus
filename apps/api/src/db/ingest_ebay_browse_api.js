@@ -1,7 +1,7 @@
 import pg from "pg";
 
 import { getEbayAccessToken } from "../ingest/providers/ebay_oauth.js";
-import { normalizeEbayItemSummaryToListing, searchEbayBrowseApi } from "../ingest/providers/ebay_browse_api.js";
+import { normalizeEbayItemSummaryToListing, normalizeEbaySearchSort, searchEbayBrowseApi } from "../ingest/providers/ebay_browse_api.js";
 import { ingestListingsOnce } from "../ingest/write_listings.js";
 
 const { Client } = pg;
@@ -27,6 +27,22 @@ function parseCsv(value) {
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
+}
+
+function parseSearchSorts(value) {
+  const rawSorts = parseCsv(value);
+  const out = [];
+  const seen = new Set();
+
+  for (const raw of rawSorts.length ? rawSorts : ["best"]) {
+    const normalized = normalizeEbaySearchSort(raw);
+    const key = normalized || "best";
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(key);
+  }
+
+  return out;
 }
 
 async function loadCameraQueries(client, slugs) {
@@ -105,6 +121,8 @@ async function main() {
 
   const limitPerQuery = envInt("FF_EBAY_LIMIT_PER_QUERY", 25, { min: 1, max: 200 });
   const pagesPerQuery = envInt("FF_EBAY_PAGES_PER_QUERY", 1, { min: 1, max: 20 });
+  const searchSorts = parseSearchSorts(envString("FF_EBAY_SORTS", "best,newlyListed"));
+  const searchFilter = envString("FF_EBAY_FILTER", "");
 
   const categoryIds = parseCsv(envString("EBAY_CATEGORY_IDS", ""));
 
@@ -133,30 +151,36 @@ async function main() {
     const startedAt = new Date().toISOString();
 
     for (const q of modelQueries) {
-      for (let page = 0; page < pagesPerQuery; page += 1) {
-        const offset = page * limitPerQuery;
-        const resp = await searchEbayBrowseApi({
-          env,
-          accessToken,
-          marketplaceId,
-          q: q.query,
-          limit: limitPerQuery,
-          offset,
-          categoryIds: categoryIds.length ? categoryIds : null,
-        });
-
-        const retrievedAt = new Date().toISOString();
-        for (const item of resp.items) {
-          const listing = normalizeEbayItemSummaryToListing(item, {
-            marketplaceCode,
-            retrievedAt,
+      for (const searchSort of searchSorts) {
+        for (let page = 0; page < pagesPerQuery; page += 1) {
+          const offset = page * limitPerQuery;
+          const resp = await searchEbayBrowseApi({
             env,
-            query: q.query,
+            accessToken,
+            marketplaceId,
+            q: q.query,
+            limit: limitPerQuery,
+            offset,
+            categoryIds: categoryIds.length ? categoryIds : null,
+            sort: searchSort,
+            filter: searchFilter || null,
           });
-          if (listing) allListings.push(listing);
-        }
 
-        if (resp.items.length < limitPerQuery) break;
+          const retrievedAt = new Date().toISOString();
+          for (const item of resp.items) {
+            const listing = normalizeEbayItemSummaryToListing(item, {
+              marketplaceCode,
+              retrievedAt,
+              env,
+              query: q.query,
+              sort: searchSort,
+              filter: searchFilter || null,
+            });
+            if (listing) allListings.push(listing);
+          }
+
+          if (resp.items.length < limitPerQuery) break;
+        }
       }
     }
 
@@ -182,6 +206,8 @@ async function main() {
     console.log("- job_name:", jobName);
     console.log("- started_at:", startedAt);
     console.log("- queries:", modelQueries.length);
+    console.log("- sorts:", searchSorts.join(", "));
+    if (searchFilter) console.log("- filter:", searchFilter);
     console.log("- listings_deduped:", listings.length);
     console.log("- run_id:", result.run_id);
     console.log("- stats:", result.stats);

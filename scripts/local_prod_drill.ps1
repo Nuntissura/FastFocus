@@ -30,6 +30,9 @@ $repoRoot = Resolve-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath "..")
 $workspaceRoot = Find-WorkspaceRoot -startDir $repoRoot
 $activeCameraBrandsRaw = $env:FF_ACTIVE_CAMERA_BRANDS
 if (-not $activeCameraBrandsRaw) { $activeCameraBrandsRaw = "sony" }
+$syncActiveCameraBrandsRaw = $env:FF_SYNC_ACTIVE_CAMERA_BRANDS
+if (-not $syncActiveCameraBrandsRaw) { $syncActiveCameraBrandsRaw = "1" }
+$syncActiveCameraBrands = @("1", "true", "yes", "on") -contains $syncActiveCameraBrandsRaw.Trim().ToLowerInvariant()
 $activeCameraBrands = @(
   $activeCameraBrandsRaw.Split(",") |
     ForEach-Object { $_.Trim() } |
@@ -76,6 +79,11 @@ try {
 
   Write-Step "Run DB migrations (inside image)"
   docker run --rm --network $networkName -e DATABASE_URL=$dbUrl $imageTag node apps/api/src/db/migrate.js
+
+  if ($syncActiveCameraBrands) {
+    Write-Step "Sync active camera brands (keep: $activeCameraBrandsRaw)"
+    docker run --rm --network $networkName -e DATABASE_URL=$dbUrl $imageTag node apps/api/src/db/purge_camera_models.js --exclude-brands $activeCameraBrandsRaw --confirm
+  }
 
   foreach ($brandSlug in $activeCameraBrands) {
     Write-Step "Import $brandSlug camera datasheets (inside image)"
