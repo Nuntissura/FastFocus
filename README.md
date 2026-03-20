@@ -71,7 +71,7 @@ This populates `gov-snapshot/`, which production can reference with:
 
 ```powershell
 $env:FF_GOV_ROOT = "./gov-snapshot"
-$env:FF_ACTIVE_CAMERA_BRANDS = "sony"
+$env:FF_ACTIVE_CAMERA_BRANDS = "sony,nikon"
 $env:FF_SYNC_ACTIVE_CAMERA_BRANDS = "1"
 $env:HOST = "0.0.0.0"
 $env:PORT = "8080"
@@ -151,7 +151,7 @@ npm.cmd run db:import:datasheets -- --brand-slug sony --confirm
 ```
 
 Startup/drill helpers default to:
-- `FF_ACTIVE_CAMERA_BRANDS=sony`
+- `FF_ACTIVE_CAMERA_BRANDS=sony,nikon`
 - `FF_SYNC_ACTIVE_CAMERA_BRANDS=1` so deploy/startup converges the DB to the active camera wave instead of leaving archived brands in place
 - Override with a comma-separated list if you want a different launch set.
 
@@ -235,7 +235,7 @@ npm.cmd run smoke
 ```
 
 ## One-command smoke test (datasheet-first)
-Runs: docker db up -> migrate -> purge cameras -> import active datasheet brands (`FF_ACTIVE_CAMERA_BRANDS`, default `sony`) -> demo ingest -> match -> compute price bands -> compute deal scores -> API/SSR smoke requests.
+Runs: docker db up -> migrate -> purge cameras -> import active datasheet brands (`FF_ACTIVE_CAMERA_BRANDS`, default `sony,nikon`) -> demo ingest -> match -> compute price bands -> compute deal scores -> API/SSR smoke requests.
 
 ```powershell
 npm.cmd run smoke:datasheets

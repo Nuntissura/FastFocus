@@ -30,8 +30,25 @@ Preferred workflow:
 
 Current active checkpoint:
 
-- `WP-0062` now has three real Sony anchor entries in the active tree:
+- `WP-0062` is complete and the active Sony launch wave now includes eight real entries:
+  - `sony-a7-iii`
+  - `sony-a7-c-ii`
   - `sony-a7-iv`
+  - `sony-a7-r-v`
+  - `sony-a7-s-iii`
+  - `sony-a6600`
   - `sony-a6700`
   - `sony-zv-e10`
-- Those three entries now include official Sony links, sourced core facts, editorial utility, and CC-licensed hero media with local attribution files.
+- Those eight entries now include official Sony links, sourced core facts, editorial utility, and CC-licensed hero media with local attribution files.
+- The product repo `gov-snapshot` has been refreshed from this active tree, and the datasheet smoke now verifies the Sony-first runtime path end to end.
+- `WP-0063` is now complete in the governance tree and adds eight Nikon launch-wave entries:
+  - `nikon-z6-iii`
+  - `nikon-z8`
+  - `nikon-z6-ii`
+  - `nikon-z7-ii`
+  - `nikon-z5`
+  - `nikon-z50`
+  - `nikon-z9`
+  - `nikon-d850`
+- Those Nikon entries now include official Nikon links, sourced core facts, buyer-focused editorial utility, and local hero media attribution.
+- The next catalog execution focus is `WP-0064` (Fujifilm), while the product repo still needs a follow-up snapshot/runtime refresh if Nikon should become live immediately.

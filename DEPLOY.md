@@ -92,7 +92,7 @@ Recommended app env:
 - `FF_TRUST_PROXY=1`
 - `FF_COOKIE_SECURE=1`
 - `FF_GOV_ROOT=./gov-snapshot`
-- `FF_ACTIVE_CAMERA_BRANDS=sony`
+- `FF_ACTIVE_CAMERA_BRANDS=sony,nikon`
 - `FF_SYNC_ACTIVE_CAMERA_BRANDS=1`
 - `HOST=0.0.0.0`
 

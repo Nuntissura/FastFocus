@@ -29,7 +29,7 @@ function Write-Step([string]$msg) {
 $repoRoot = Resolve-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath "..")
 $workspaceRoot = Find-WorkspaceRoot -startDir $repoRoot
 $activeCameraBrandsRaw = $env:FF_ACTIVE_CAMERA_BRANDS
-if (-not $activeCameraBrandsRaw) { $activeCameraBrandsRaw = "sony" }
+if (-not $activeCameraBrandsRaw) { $activeCameraBrandsRaw = "sony,nikon" }
 $syncActiveCameraBrandsRaw = $env:FF_SYNC_ACTIVE_CAMERA_BRANDS
 if (-not $syncActiveCameraBrandsRaw) { $syncActiveCameraBrandsRaw = "1" }
 $syncActiveCameraBrands = @("1", "true", "yes", "on") -contains $syncActiveCameraBrandsRaw.Trim().ToLowerInvariant()
@@ -126,6 +126,10 @@ try {
   if ($activeCameraBrands -contains "sony") {
     Assert-Http200 "http://localhost:8787/cameras/sony-a7-iv"
     Assert-Http200 "http://localhost:8787/compare/sony-a7-iv-vs-sony-a7-c-ii"
+  }
+  if ($activeCameraBrands -contains "nikon") {
+    Assert-Http200 "http://localhost:8787/cameras/nikon-z8"
+    Assert-Http200 "http://localhost:8787/compare/nikon-z8-vs-nikon-z6-iii"
   }
   Assert-Http200 "http://localhost:8787/api/v1/admin/ops/status" @{ "x-admin-token" = "drill-admin" }
 

@@ -100,7 +100,7 @@ async function main() {
   const databaseUrl = envString("DATABASE_URL", defaultDatabaseUrl);
   const adminToken = envString("FF_ADMIN_TOKEN", "dev-admin");
   const observedDate = envString("FF_PRICE_BANDS_DATE", utcTodayDate());
-  const activeCameraBrands = parseCsv(envString("FF_ACTIVE_CAMERA_BRANDS", "sony"));
+  const activeCameraBrands = parseCsv(envString("FF_ACTIVE_CAMERA_BRANDS", "sony,nikon"));
 
   await ensureDependenciesInstalled(repoRoot);
 
@@ -186,6 +186,14 @@ async function main() {
       assert(json.cameras.length >= 1, "expected at least 1 sony camera");
     }
 
+    if (activeCameraBrands.includes("nikon")) {
+      const { res, json } = await fetchJson(`${baseUrl}/api/v1/cameras?brand=nikon&limit=6`);
+      assert(res.status === 200, `/api/v1/cameras?brand=nikon expected 200, got ${res.status}`);
+      assert(json.ok === true, "/api/v1/cameras ok=true for nikon");
+      assert(Array.isArray(json.cameras), "/api/v1/cameras nikon cameras is array");
+      assert(json.cameras.length >= 1, "expected at least 1 nikon camera");
+    }
+
     {
       const { res, html } = await fetchHtml(`${baseUrl}/`);
       assert(res.status === 200, `/ expected 200, got ${res.status}`);
@@ -202,11 +210,25 @@ async function main() {
       assert(/<h2>Listings<\/h2>/i.test(html), "expected Sony camera page to render Listings section");
     }
 
+    if (activeCameraBrands.includes("nikon")) {
+      const { res, html } = await fetchHtml(`${baseUrl}/cameras/nikon-z8`);
+      assert(res.status === 200, `/cameras/nikon-z8 expected 200, got ${res.status}`);
+      assert(/Nikon Z8/i.test(html), "expected Nikon camera page to contain Nikon Z8");
+      assert(/<h2>Specs<\/h2>/i.test(html), "expected Nikon camera page to render Specs section");
+    }
+
     {
       const { res, html } = await fetchHtml(`${baseUrl}/compare/sony-a7-iv-vs-sony-a7-c-ii`);
       assert(res.status === 200, `/compare/sony-a7-iv-vs-sony-a7-c-ii expected 200, got ${res.status}`);
       assert(/Sony A7 IV/i.test(html), "expected compare page to contain Sony A7 IV");
       assert(/Sony A7C II/i.test(html), "expected compare page to contain Sony A7C II");
+    }
+
+    if (activeCameraBrands.includes("nikon")) {
+      const { res, html } = await fetchHtml(`${baseUrl}/compare/nikon-z8-vs-nikon-z6-iii`);
+      assert(res.status === 200, `/compare/nikon-z8-vs-nikon-z6-iii expected 200, got ${res.status}`);
+      assert(/Nikon Z8/i.test(html), "expected compare page to contain Nikon Z8");
+      assert(/Nikon Z6 III/i.test(html), "expected compare page to contain Nikon Z6 III");
     }
 
     let listingId;
