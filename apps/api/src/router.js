@@ -46,10 +46,17 @@ import {
   getActivePremiumSubscriptionByAccessToken,
   isPremiumEmail,
 } from "./db/premium.js";
+import {
+  createPremiumTrackerWatch,
+  disablePremiumTrackerWatch,
+  listPremiumTrackerWatches,
+  mapPremiumTrackerErrorToStatus,
+} from "./db/premium_tracker.js";
 import { buildSavedSearchConfirmEmail, getEmailFrom, sendEmail } from "./alerts/email.js";
 import { buildNewsletterConfirmEmail } from "./newsletter/email.js";
 import { buildPremiumConfirmEmail } from "./premium/email.js";
 import { getCameraModelPage, getLensModelPage, parseModelPageParams } from "./db/model_pages.js";
+import { getHomepageMarketHighlights } from "./db/home_page.js";
 import { renderCameraModelPageHtml, renderErrorPageHtml, renderLensModelPageHtml, renderListingDetailPageHtml } from "./html/model_pages.js";
 import { loadDigitalCameraCompareSections } from "./compare/digital_camera_compare_sections.js";
 import {
@@ -151,6 +158,12 @@ function parseSingleSlug(pathname, prefix) {
   const parts = pathname.slice(prefix.length).split("/").filter(Boolean);
   if (parts.length !== 1) return null;
   return parts[0];
+}
+
+function isUuid(value) {
+  return (
+    typeof value === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+  );
 }
 
 function parseTwoSlugs(pathname, prefix) {
@@ -525,11 +538,15 @@ export async function handleRequest(req, res, ctx) {
 
       const pool = ctx.dbPool;
       const marketplaces = await listMarketplaces(pool);
-      const featuredCameras = await listCameras(pool, {
-        limit: 6,
-        offset: 0,
-        filters: { brand: null, captureMedium: null, mount: null, q: null },
-      });
+      const homeHighlights = await getHomepageMarketHighlights(pool, { marketplaceCode: "ebay", limitDeals: 6, limitRecent: 6, limitCameras: 6 });
+      const featuredCameras =
+        homeHighlights.camera_coverage.length > 0
+          ? homeHighlights.camera_coverage
+          : await listCameras(pool, {
+              limit: 6,
+              offset: 0,
+              filters: { brand: null, captureMedium: null, mount: null, q: null },
+            });
       await maybeTrackPageView(pool, req, res, url, {
         pageType: "other",
         properties: { page_surface: "home", entity_kind: "camera" },
@@ -544,6 +561,9 @@ export async function handleRequest(req, res, ctx) {
           dbHint: ctx.dbHint,
           marketplaces,
           featuredCameras,
+          featuredCameraSourceLabel: "eBay",
+          liveDeals: homeHighlights.top_deals,
+          recentArrivals: homeHighlights.recent_arrivals,
         }),
       );
     }
@@ -1852,6 +1872,104 @@ export async function handleRequest(req, res, ctx) {
         ok: true,
         premium: Boolean(sub),
         plan_code: sub ? sub.plan_code : null,
+      });
+    }
+
+    if (pathname === "/api/v1/premium/tracker/watches" || pathname === "/api/v1/premium/tracker/watches/") {
+      const pool = requireDb(res, ctx);
+      if (!pool) return;
+
+      const premium = await getPremiumSubscriptionFromReq(pool, req);
+      if (!premium) return sendJson(res, 403, { ok: false, error: "premium_required" });
+
+      if (method === "GET") {
+        const { limit, offset } = parseLimitOffset(url);
+        const watches = await listPremiumTrackerWatches(pool, {
+          premiumSubscriptionId: premium.premium_subscription_id,
+          limit,
+          offset,
+        });
+        return sendJson(res, 200, {
+          ok: true,
+          watches,
+          page: { limit, offset },
+        });
+      }
+
+      if (method === "POST") {
+        let body;
+        try {
+          body = await readJsonBody(req);
+        } catch (err) {
+          return sendJson(res, 400, {
+            ok: false,
+            error: "bad_request",
+            message: err instanceof Error ? err.message : String(err),
+          });
+        }
+
+        if (!body || typeof body !== "object") return sendJson(res, 400, { ok: false, error: "bad_request" });
+
+        const result = await createPremiumTrackerWatch(pool, {
+          premiumSubscriptionId: premium.premium_subscription_id,
+          camera_slug: body.camera_slug ?? null,
+          lens_slug: body.lens_slug ?? null,
+          marketplace: body.marketplace ?? "ebay",
+          currency: body.currency ?? "EUR",
+          country: body.country ?? null,
+          condition_physical_tier: body.condition_physical_tier ?? null,
+          target_price_amount: body.target_price_amount,
+          trigger_metric: body.trigger_metric ?? "median",
+          min_interval_hours: body.min_interval_hours ?? 24,
+        });
+        if (!result.ok) {
+          return sendJson(res, mapPremiumTrackerErrorToStatus(result.error), {
+            ok: false,
+            error: result.error,
+          });
+        }
+
+        return sendJson(res, result.reused ? 200 : 201, {
+          ok: true,
+          status: result.reused ? "already_exists" : "created",
+          watch: result.watch,
+        });
+      }
+
+      return sendMethodNotAllowed(res);
+    }
+
+    if (pathname.startsWith("/api/v1/premium/tracker/watches/") && (pathname.endsWith("/disable") || pathname.endsWith("/disable/"))) {
+      if (method !== "POST") return sendMethodNotAllowed(res);
+      const pool = requireDb(res, ctx);
+      if (!pool) return;
+
+      const premium = await getPremiumSubscriptionFromReq(pool, req);
+      if (!premium) return sendJson(res, 403, { ok: false, error: "premium_required" });
+
+      const rest = pathname.slice("/api/v1/premium/tracker/watches/".length);
+      const parts = rest.split("/").filter(Boolean);
+      if (parts.length !== 2 || parts[1] !== "disable") return sendNotFound(res);
+
+      const watchId = parts[0];
+      if (!isUuid(watchId)) return sendNotFound(res);
+
+      const result = await disablePremiumTrackerWatch(pool, {
+        premiumSubscriptionId: premium.premium_subscription_id,
+        watchId,
+      });
+      if (!result.ok) {
+        return sendJson(res, mapPremiumTrackerErrorToStatus(result.error), {
+          ok: false,
+          error: result.error,
+        });
+      }
+
+      return sendJson(res, 200, {
+        ok: true,
+        premium_tracker_watch_id: watchId,
+        already_disabled: Boolean(result.already_disabled),
+        disabled_at: result.watch?.disabled_at ? new Date(result.watch.disabled_at).toISOString() : null,
       });
     }
 

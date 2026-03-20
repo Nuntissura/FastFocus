@@ -150,6 +150,74 @@ paths:
         "503":
           description: DB not configured
 
+  /api/v1/premium/tracker/watches:
+    get:
+      summary: List Premium tracker watches for the current device (eBay-only beta)
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+        - name: offset
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
+      responses:
+        "200":
+          description: OK
+        "403":
+          description: Premium required
+        "503":
+          description: DB not configured
+    post:
+      summary: Create a Premium tracker watch for the current device (eBay-only beta)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                camera_slug: { type: [string, "null"] }
+                lens_slug: { type: [string, "null"] }
+                marketplace: { type: string, enum: [ebay], default: ebay }
+                currency: { type: string, default: EUR }
+                country: { type: [string, "null"] }
+                condition_physical_tier: { type: [string, "null"] }
+                trigger_metric: { type: string, enum: [median, min], default: median }
+                target_price_amount: { type: number }
+                min_interval_hours: { type: integer, minimum: 1, maximum: 168, default: 24 }
+              required: [target_price_amount]
+      responses:
+        "200":
+          description: Already exists
+        "201":
+          description: Created
+        "400":
+          description: Bad request
+        "403":
+          description: Premium required
+        "404":
+          description: Target not found
+        "503":
+          description: DB not configured
+
+  /api/v1/premium/tracker/watches/{watchId}/disable:
+    post:
+      summary: Disable a Premium tracker watch for the current device
+      parameters:
+        - name: watchId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Disabled
+        "403":
+          description: Premium required
+        "404":
+          description: Not found
+        "503":
+          description: DB not configured
+
   /api/v1/premium/cameras/{slug}/price-history:
     get:
       summary: Premium camera price history (requires ff_pro cookie)

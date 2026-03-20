@@ -177,6 +177,22 @@ test("POST /api/v1/premium/subscriptions returns 503 when DATABASE_URL missing",
   );
 });
 
+test("GET /api/v1/premium/tracker/watches returns 503 when DATABASE_URL missing", async () => {
+  await withServer(
+    async ({ baseUrl }) => {
+      const res = await fetch(`${baseUrl}/api/v1/premium/tracker/watches`);
+      assert.equal(res.status, 503);
+      const data = await res.json();
+      assert.equal(data.ok, false);
+      assert.equal(data.error, "db_not_configured");
+    },
+    {
+      contractsRoot: fixturePath("./fixtures/contracts/"),
+      specCurrentPath: fixturePath("./fixtures/spec/SPEC_CURRENT.md"),
+    },
+  );
+});
+
 test("Admin endpoints return 503 when FF_ADMIN_TOKEN missing", async () => {
   await withServer(
     async ({ baseUrl }) => {

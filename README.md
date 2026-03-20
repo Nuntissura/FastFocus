@@ -236,3 +236,22 @@ Execute:
 ```powershell
 npm.cmd run jobs:daily-refresh -- --confirm
 ```
+
+If `FF_SCHEDULER_RUN_ALERTS=1`, the daily refresh now runs both saved-search alerts and the Premium tracker beta alert job.
+
+## Premium tracker beta (eBay-only)
+Dry-run:
+```powershell
+npm.cmd run premium:tracker-alerts
+```
+
+Execute:
+```powershell
+npm.cmd run premium:tracker-alerts -- --confirm
+```
+
+Current beta scope:
+- eBay-only tracker watches
+- Premium-gated API management
+- threshold alerts against current matched active listing snapshots
+- batch-first delivery through the existing email transport

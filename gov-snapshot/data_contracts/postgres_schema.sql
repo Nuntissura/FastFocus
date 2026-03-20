@@ -787,11 +787,48 @@ CREATE INDEX IF NOT EXISTS idx_premium_subscriptions_status ON premium_subscript
 CREATE INDEX IF NOT EXISTS idx_premium_subscriptions_confirmed ON premium_subscriptions(confirmed_at) WHERE confirmed_at IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_premium_subscriptions_canceled ON premium_subscriptions(canceled_at) WHERE canceled_at IS NOT NULL;
 
+CREATE TABLE IF NOT EXISTS premium_tracker_watches (
+  premium_tracker_watch_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  schema_version TEXT NOT NULL DEFAULT '1.0' CHECK (schema_version ~ '^\d+\.\d+$'),
+
+  premium_subscription_id UUID NOT NULL REFERENCES premium_subscriptions(premium_subscription_id) ON DELETE CASCADE,
+
+  camera_id UUID NULL REFERENCES camera_models(camera_id),
+  lens_id UUID NULL REFERENCES lens_models(lens_id),
+
+  marketplace_code TEXT NOT NULL REFERENCES marketplaces(marketplace_code),
+  currency CHAR(3) NOT NULL CHECK (currency ~ '^[A-Z]{3}$'),
+  country CHAR(2) NULL CHECK (country IS NULL OR country ~ '^[A-Z]{2}$'),
+  condition_physical_tier condition_physical_tier_enum NULL,
+
+  trigger_metric TEXT NOT NULL DEFAULT 'median' CHECK (trigger_metric IN ('median','min')),
+  target_price_amount NUMERIC(12,2) NOT NULL CHECK (target_price_amount >= 0),
+  min_interval_hours INT NOT NULL DEFAULT 24 CHECK (min_interval_hours BETWEEN 1 AND 168),
+
+  last_checked_at TIMESTAMPTZ NULL,
+  last_alerted_at TIMESTAMPTZ NULL,
+  disabled_at TIMESTAMPTZ NULL,
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  CONSTRAINT premium_tracker_watches_has_target CHECK (camera_id IS NOT NULL OR lens_id IS NOT NULL),
+  CONSTRAINT premium_tracker_watches_single_target CHECK (NOT (camera_id IS NOT NULL AND lens_id IS NOT NULL))
+);
+
+DROP TRIGGER IF EXISTS trg_premium_tracker_watches_updated_at ON premium_tracker_watches;
+CREATE TRIGGER trg_premium_tracker_watches_updated_at
+BEFORE UPDATE ON premium_tracker_watches
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE INDEX IF NOT EXISTS idx_premium_tracker_watches_subscription ON premium_tracker_watches(premium_subscription_id);
+CREATE INDEX IF NOT EXISTS idx_premium_tracker_watches_active ON premium_tracker_watches(disabled_at) WHERE disabled_at IS NULL;
+
 CREATE TABLE IF NOT EXISTS email_messages (
   email_message_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   schema_version TEXT NOT NULL DEFAULT '1.0' CHECK (schema_version ~ '^\d+\.\d+$'),
 
-  message_type TEXT NOT NULL CHECK (message_type IN ('saved_search_confirm','saved_search_alert','newsletter_confirm','newsletter_weekly','premium_confirm')),
+  message_type TEXT NOT NULL CHECK (message_type IN ('saved_search_confirm','saved_search_alert','newsletter_confirm','newsletter_weekly','premium_confirm','premium_tracker_alert')),
   saved_search_id UUID NULL REFERENCES saved_searches(saved_search_id) ON DELETE SET NULL,
   newsletter_subscription_id UUID NULL REFERENCES newsletter_subscriptions(newsletter_subscription_id) ON DELETE SET NULL,
   premium_subscription_id UUID NULL REFERENCES premium_subscriptions(premium_subscription_id) ON DELETE SET NULL,
@@ -821,7 +858,7 @@ ALTER TABLE email_messages
 ALTER TABLE email_messages DROP CONSTRAINT IF EXISTS email_messages_message_type_check;
 ALTER TABLE email_messages
   ADD CONSTRAINT email_messages_message_type_check CHECK (
-    message_type IN ('saved_search_confirm','saved_search_alert','newsletter_confirm','newsletter_weekly','premium_confirm')
+    message_type IN ('saved_search_confirm','saved_search_alert','newsletter_confirm','newsletter_weekly','premium_confirm','premium_tracker_alert')
   );
 
 CREATE INDEX IF NOT EXISTS idx_email_messages_saved_search_time ON email_messages(saved_search_id, created_at DESC);
@@ -829,6 +866,24 @@ CREATE INDEX IF NOT EXISTS idx_email_messages_newsletter_time ON email_messages(
 CREATE INDEX IF NOT EXISTS idx_email_messages_premium_time ON email_messages(premium_subscription_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_email_messages_to_time ON email_messages(to_email, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_email_messages_type_time ON email_messages(message_type, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS premium_tracker_notifications (
+  premium_tracker_notification_id BIGSERIAL PRIMARY KEY,
+  premium_tracker_watch_id UUID NOT NULL REFERENCES premium_tracker_watches(premium_tracker_watch_id) ON DELETE CASCADE,
+  observed_date DATE NOT NULL,
+  trigger_metric TEXT NOT NULL CHECK (trigger_metric IN ('median','min')),
+  trigger_value NUMERIC(12,2) NOT NULL CHECK (trigger_value >= 0),
+  target_price_amount NUMERIC(12,2) NOT NULL CHECK (target_price_amount >= 0),
+  sample_size INTEGER NOT NULL DEFAULT 0 CHECK (sample_size >= 0),
+  email_message_id UUID NULL REFERENCES email_messages(email_message_id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  sent_at TIMESTAMPTZ NULL,
+
+  CONSTRAINT uq_premium_tracker_notifications UNIQUE (premium_tracker_watch_id, observed_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_premium_tracker_notifications_watch_time
+  ON premium_tracker_notifications(premium_tracker_watch_id, created_at DESC);
 
 CREATE TABLE IF NOT EXISTS saved_search_listing_deliveries (
   delivery_id BIGSERIAL PRIMARY KEY,

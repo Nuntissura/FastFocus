@@ -228,6 +228,20 @@ export async function getCameraModelPage(pool, { slug, currency, country = null,
           }
       : null;
 
+  const recentListingsRes = await pool.query(
+    `
+    SELECT
+      COUNT(*)::int AS recent_listing_count_7d
+    FROM listings
+    WHERE
+      camera_id = $1
+      AND is_active = TRUE
+      AND match_status IN ('matched','verified')
+      AND COALESCE(first_seen_at, last_seen_at, last_retrieved_at) >= NOW() - INTERVAL '7 days'
+    `,
+    [camera.camera_id],
+  );
+
   const listingsRes = await pool.query(
     `
     SELECT
@@ -274,6 +288,40 @@ export async function getCameraModelPage(pool, { slug, currency, country = null,
     [camera.camera_id],
   );
 
+  const listings = listingsRes.rows.map((r) => ({
+    listing_id: r.listing_id,
+    marketplace_code: r.marketplace_code,
+    marketplace_display_name: r.marketplace_display_name,
+    marketplace_is_sponsored: Boolean(r.marketplace_is_sponsored),
+    marketplace_sponsored_label: r.marketplace_sponsored_label,
+    marketplace_sponsored_rank: Number(r.marketplace_sponsored_rank || 0),
+    source_item_id: r.source_item_id,
+    url: r.url,
+    title: r.title,
+    last_retrieved_at: r.last_retrieved_at ? new Date(r.last_retrieved_at).toISOString() : null,
+    price_amount: r.price_amount,
+    price_currency: r.price_currency,
+    shipping_amount: r.shipping_amount,
+    shipping_currency: r.shipping_currency,
+    fees_included: r.fees_included,
+    condition_physical_tier: r.condition_physical_tier,
+    functional_status: r.functional_status,
+    seller_type: r.seller_type,
+    seller_rating: r.seller_rating,
+    country: r.country,
+    region: r.region,
+    city: r.city,
+    pickup_possible: r.pickup_possible,
+    match_status: r.match_status,
+    deal_score: r.deal_score,
+    deal_score_version: r.deal_score_version,
+    deal_score_confidence: r.deal_score_confidence,
+  }));
+
+  const activeListingCount = listingCountsRes.rows.reduce((sum, row) => sum + Number(row.listing_count || 0), 0);
+  const strongestSource = listingCountsRes.rows[0] || null;
+  const bestDeal = listings.find((listing) => listing.deal_score !== null && listing.deal_score !== undefined) || listings[0] || null;
+
   return {
     camera,
     listing_counts_by_source: listingCountsRes.rows.map((r) => ({
@@ -282,36 +330,33 @@ export async function getCameraModelPage(pool, { slug, currency, country = null,
       last_retrieved_at: r.last_retrieved_at ? new Date(r.last_retrieved_at).toISOString() : null,
     })),
     last_updated_at: lastUpdatedAt,
+    market_summary: {
+      active_listing_count: activeListingCount,
+      recent_listing_count_7d: Number(recentListingsRes.rows[0]?.recent_listing_count_7d || 0),
+      strongest_source: strongestSource
+        ? {
+            marketplace_code: strongestSource.marketplace_code,
+            listing_count: Number(strongestSource.listing_count || 0),
+            last_retrieved_at: strongestSource.last_retrieved_at ? new Date(strongestSource.last_retrieved_at).toISOString() : null,
+          }
+        : null,
+      best_deal: bestDeal
+        ? {
+            listing_id: bestDeal.listing_id,
+            marketplace_code: bestDeal.marketplace_code,
+            marketplace_display_name: bestDeal.marketplace_display_name,
+            title: bestDeal.title,
+            price_amount: bestDeal.price_amount,
+            price_currency: bestDeal.price_currency,
+            shipping_amount: bestDeal.shipping_amount,
+            shipping_currency: bestDeal.shipping_currency,
+            deal_score: bestDeal.deal_score,
+          }
+        : null,
+      last_updated_at: lastUpdatedAt,
+    },
     price_band: priceBand,
-    listings: listingsRes.rows.map((r) => ({
-      listing_id: r.listing_id,
-      marketplace_code: r.marketplace_code,
-      marketplace_display_name: r.marketplace_display_name,
-      marketplace_is_sponsored: Boolean(r.marketplace_is_sponsored),
-      marketplace_sponsored_label: r.marketplace_sponsored_label,
-      marketplace_sponsored_rank: Number(r.marketplace_sponsored_rank || 0),
-      source_item_id: r.source_item_id,
-      url: r.url,
-      title: r.title,
-      last_retrieved_at: r.last_retrieved_at ? new Date(r.last_retrieved_at).toISOString() : null,
-      price_amount: r.price_amount,
-      price_currency: r.price_currency,
-      shipping_amount: r.shipping_amount,
-      shipping_currency: r.shipping_currency,
-      fees_included: r.fees_included,
-      condition_physical_tier: r.condition_physical_tier,
-      functional_status: r.functional_status,
-      seller_type: r.seller_type,
-      seller_rating: r.seller_rating,
-      country: r.country,
-      region: r.region,
-      city: r.city,
-      pickup_possible: r.pickup_possible,
-      match_status: r.match_status,
-      deal_score: r.deal_score,
-      deal_score_version: r.deal_score_version,
-      deal_score_confidence: r.deal_score_confidence,
-    })),
+    listings,
   };
 }
 

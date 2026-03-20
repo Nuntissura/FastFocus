@@ -19,6 +19,7 @@
     "db:compute:deal-scores": "node apps/api/src/db/compute_deal_scores.js",
     "db:prune:retention": "node apps/api/src/db/prune_retention.js",
     "alerts:run": "node apps/api/src/alerts/run_saved_search_alerts.js",
+    "premium:tracker-alerts": "node apps/api/src/premium/run_tracker_alerts.js",
     "newsletter:weekly": "node apps/api/src/newsletter/run_weekly_deals_newsletter.js",
     "ingest:demo-ebay": "node apps/api/src/db/ingest_demo_ebay.js",
     "ingest:retailer-feed-1": "node apps/api/src/db/ingest_retailer_feed_1.js",

@@ -544,6 +544,49 @@ function formatListingPrice(listing) {
   return price || "â€”";
 }
 
+function renderMarketReadCard(marketSummary) {
+  if (!marketSummary || Number(marketSummary.active_listing_count || 0) <= 0) {
+    return `<div class="card" data-testid="camera-model-market-read-card"><h3>Market read</h3><div class="subtle">No active matched listings yet for this model.</div></div>`;
+  }
+
+  const lines = [];
+  lines.push(`${escapeHtml(String(marketSummary.active_listing_count))} active matched listings right now.`);
+
+  if (Number.isFinite(Number(marketSummary.recent_listing_count_7d))) {
+    lines.push(`${escapeHtml(String(marketSummary.recent_listing_count_7d))} listings first seen in the last 7 days.`);
+  }
+
+  if (marketSummary.strongest_source?.marketplace_code) {
+    const sourceName = marketSummary.strongest_source.marketplace_code;
+    const listingCount = marketSummary.strongest_source.listing_count;
+    lines.push(`${escapeHtml(sourceName)} is currently the strongest source with ${escapeHtml(String(listingCount))} active matches.`);
+  }
+
+  if (marketSummary.best_deal?.listing_id) {
+    const bestDealPrice = formatListingPrice(marketSummary.best_deal);
+    const bestDealScore =
+      marketSummary.best_deal.deal_score !== null && marketSummary.best_deal.deal_score !== undefined
+        ? `${Math.round(Number(marketSummary.best_deal.deal_score))}/100`
+        : "unscored";
+    const bestDealHref = `/listings/${encodeURIComponent(marketSummary.best_deal.listing_id)}`;
+    const bestDealSource = marketSummary.best_deal.marketplace_display_name || marketSummary.best_deal.marketplace_code;
+    lines.push(
+      `Best current scored listing: <a href="${escapeHtml(bestDealHref)}" rel="nofollow">${escapeHtml(
+        bestDealSource,
+      )}</a> at ${escapeHtml(bestDealPrice)} (${escapeHtml(bestDealScore)}).`,
+    );
+  }
+
+  const listHtml = lines.map((line) => `<li>${line}</li>`).join("");
+  const lastUpdatedAt = isNonEmptyString(marketSummary.last_updated_at) ? marketSummary.last_updated_at : "â€”";
+
+  return `<div class="card" data-testid="camera-model-market-read-card">
+    <h3>Market read</h3>
+    <ul>${listHtml}</ul>
+    <div class="subtle">Last refresh: ${escapeHtml(lastUpdatedAt)}</div>
+  </div>`;
+}
+
 function renderListingsTable(listings) {
   const rows = Array.isArray(listings) ? listings : [];
   if (rows.length === 0) {
@@ -640,7 +683,7 @@ export function renderCameraModelPageHtml(modelPage, { currency = "EUR", canonic
     { label: "Dimensions", value: formatDimensionsMM(camera) },
   ];
 
-  const title = `${camera.display_name} â€” specs, used checklist, and typical price`;
+  const title = `${camera.display_name} - specs, used checklist, and typical price`;
   const description = `${camera.display_name}: specs, used-buyer checklist, price band, and live listings.`;
 
   const brandHref = camera.brand_slug ? `/brands/${encodeURIComponent(camera.brand_slug)}` : null;
@@ -650,9 +693,16 @@ export function renderCameraModelPageHtml(modelPage, { currency = "EUR", canonic
     <section data-testid="camera-model-page-${escapeHtml(camera.slug)}">
     <h1 data-testid="camera-model-title-${escapeHtml(camera.slug)}">${escapeHtml(camera.display_name)}</h1>
     <nav class="subtle" aria-label="Breadcrumb" data-testid="camera-model-header">
-      <a href="/cameras">Cameras</a>${crumbBrand ? ` â€¢ ${crumbBrand}` : ""}
+      <a href="/cameras">Cameras</a>${crumbBrand ? ` | ${crumbBrand}` : ""}
     </nav>
-    <div class="subtle" data-testid="camera-model-meta">${escapeHtml(camera.brand_name || "")}${camera.release_year ? ` â€¢ Released ${escapeHtml(String(camera.release_year))}` : ""}</div>
+    <div class="subtle" data-testid="camera-model-meta">${escapeHtml(camera.brand_name || "")}${camera.release_year ? ` | Released ${escapeHtml(String(camera.release_year))}` : ""}</div>
+
+    <section class="card" aria-label="At a glance" data-testid="camera-model-at-a-glance">
+    <h2>At a glance</h2>
+    <p>${escapeHtml(bio)}</p>
+    </section>
+
+    <div data-testid="camera-model-market-read">${renderMarketReadCard(modelPage.market_summary)}</div>
 
     <section data-testid="camera-model-specs-section">
     <h2>Specs</h2>

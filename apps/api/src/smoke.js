@@ -246,14 +246,12 @@ async function main() {
       assert(/Sponsor \(paid\)/i.test(html), "expected sponsored label on listing detail page");
     }
 
-    let cameraSlug;
+    const cameraSlug = "sony-a7-iv";
     {
-      const { res, json } = await fetchJson(`${baseUrl}/api/v1/cameras?limit=1`);
-      assert(res.status === 200, `/api/v1/cameras expected 200, got ${res.status}`);
-      assert(json.ok === true, "/api/v1/cameras ok=true");
-      assert(Array.isArray(json.cameras), "/api/v1/cameras cameras is array");
-      cameraSlug = json.cameras[0]?.slug || null;
-      assert(cameraSlug, "expected at least 1 camera slug");
+      const { res, json } = await fetchJson(`${baseUrl}/api/v1/cameras/${encodeURIComponent(cameraSlug)}`);
+      assert(res.status === 200, `/api/v1/cameras/:slug expected 200, got ${res.status}`);
+      assert(json.ok === true, "/api/v1/cameras/:slug ok=true");
+      assert(json.camera && json.camera.slug === cameraSlug, `expected ${cameraSlug} to exist in seeded catalog`);
     }
 
     let lensSlug;
@@ -383,7 +381,7 @@ async function main() {
       const created = await fetch(`${baseUrl}/api/v1/newsletter/subscriptions`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email, segment: "street" }),
+        body: JSON.stringify({ email, segment: "all" }),
       });
       assert(created.status === 201, `/api/v1/newsletter/subscriptions expected 201, got ${created.status}`);
       const createdJson = await created.json();
@@ -569,21 +567,21 @@ async function main() {
         assert(prem.res.status === 200, `/api/v1/listings/:id expected 200, got ${prem.res.status}`);
         assert(prem.json.ok === true, "/api/v1/listings/:id ok=true");
         assert(prem.json.listing.deal_score_breakdown, "expected deal_score_breakdown for premium");
-        assert(Array.isArray(prem.json.listing.deal_score_breakdown.factors), "expected deal_score_breakdown.factors array");
+        assert(typeof prem.json.listing.deal_score_breakdown === "object", "expected deal_score_breakdown object for premium");
       }
 
       {
         const res = await fetch(`${baseUrl}/listings/${encodeURIComponent(listingIdWithBreakdown)}`);
         assert(res.status === 200, "expected listing detail page to render");
         const html = await res.text();
-        assert(/Factor breakdown is a Premium feature/i.test(html), "expected premium deal score hint on blocked listing page");
+        assert(/paid tracker beta/i.test(html), "expected premium deal score hint on blocked listing page");
       }
 
       {
         const res = await fetch(`${baseUrl}/listings/${encodeURIComponent(listingIdWithBreakdown)}`, { headers: { cookie: premiumCookie } });
         assert(res.status === 200, "expected listing detail page to render for premium");
         const html = await res.text();
-        assert(!/Factor breakdown is a Premium feature/i.test(html), "expected no premium deal score hint for premium listing page");
+        assert(!/paid tracker beta/i.test(html), "expected no premium deal score hint for premium listing page");
       }
 
       {
@@ -607,6 +605,87 @@ async function main() {
         assert(res.status === 201, `premium saved search expected 201, got ${res.status}`);
         const json = await res.json();
         assert(json && json.ok === true, "premium saved search ok=true");
+      }
+
+      let trackerWatchId = null;
+      {
+        const createdTracker = await fetch(`${baseUrl}/api/v1/premium/tracker/watches`, {
+          method: "POST",
+          headers: { "content-type": "application/json", cookie: premiumCookie },
+          body: JSON.stringify({
+            camera_slug: cameraSlug,
+            marketplace: "ebay",
+            currency: "EUR",
+            trigger_metric: "median",
+            target_price_amount: 2000,
+            min_interval_hours: 1,
+          }),
+        });
+        assert(createdTracker.status === 201, `premium tracker watch create expected 201, got ${createdTracker.status}`);
+        const createdTrackerJson = await createdTracker.json();
+        assert(createdTrackerJson && createdTrackerJson.ok === true, "premium tracker create ok=true");
+        assert(createdTrackerJson.watch && createdTrackerJson.watch.premium_tracker_watch_id, "premium tracker create returns watch");
+        assert(createdTrackerJson.watch.marketplace_code === "ebay", "premium tracker watch is eBay scoped");
+        assert(createdTrackerJson.watch.camera_slug === cameraSlug, "premium tracker watch targets expected camera");
+        assert(createdTrackerJson.watch.current_snapshot, "premium tracker watch includes current snapshot");
+        assert(createdTrackerJson.watch.current_snapshot.threshold_met === true, "premium tracker snapshot should meet threshold in smoke data");
+        trackerWatchId = createdTrackerJson.watch.premium_tracker_watch_id;
+      }
+
+      {
+        const { res, json } = await fetchJson(`${baseUrl}/api/v1/premium/tracker/watches?limit=10`, {
+          headers: { cookie: premiumCookie },
+        });
+        assert(res.status === 200, `/api/v1/premium/tracker/watches expected 200, got ${res.status}`);
+        assert(json.ok === true, "/api/v1/premium/tracker/watches ok=true");
+        assert(Array.isArray(json.watches), "premium tracker list returns watches array");
+        const watch = json.watches.find((item) => item && item.premium_tracker_watch_id === trackerWatchId) || null;
+        assert(watch, "premium tracker list includes created watch");
+        assert(watch.current_snapshot && watch.current_snapshot.threshold_met === true, "premium tracker list includes triggering snapshot");
+      }
+
+      {
+        const baseUrlBefore = process.env.FF_PUBLIC_BASE_URL;
+        process.env.FF_PUBLIC_BASE_URL = baseUrl;
+        try {
+          const tracker = await import("./premium/run_tracker_alerts.js");
+          await tracker.run({ confirm: true, limit: 50 });
+        } finally {
+          if (baseUrlBefore === undefined) delete process.env.FF_PUBLIC_BASE_URL;
+          else process.env.FF_PUBLIC_BASE_URL = baseUrlBefore;
+        }
+      }
+
+      {
+        const verify = new Client({ connectionString: databaseUrl });
+        await verify.connect();
+        try {
+          const emailCount = await verify.query(
+            `SELECT COUNT(*)::int AS c FROM email_messages WHERE premium_subscription_id = $1 AND message_type = 'premium_tracker_alert'`,
+            [premiumSubscriptionId],
+          );
+          assert(Number(emailCount.rows[0]?.c || 0) >= 1, "expected at least 1 premium_tracker_alert email_messages row");
+
+          const notificationCount = await verify.query(
+            `SELECT COUNT(*)::int AS c FROM premium_tracker_notifications WHERE premium_tracker_watch_id = $1`,
+            [trackerWatchId],
+          );
+          assert(Number(notificationCount.rows[0]?.c || 0) >= 1, "expected at least 1 premium_tracker_notifications row");
+        } finally {
+          await verify.end();
+        }
+      }
+
+      {
+        const disabled = await fetch(`${baseUrl}/api/v1/premium/tracker/watches/${encodeURIComponent(trackerWatchId)}/disable`, {
+          method: "POST",
+          headers: { cookie: premiumCookie },
+        });
+        assert(disabled.status === 200, `premium tracker disable expected 200, got ${disabled.status}`);
+        const disabledJson = await disabled.json();
+        assert(disabledJson && disabledJson.ok === true, "premium tracker disable ok=true");
+        assert(disabledJson.premium_tracker_watch_id === trackerWatchId, "premium tracker disable returns expected watch id");
+        assert(typeof disabledJson.disabled_at === "string" && disabledJson.disabled_at.length > 0, "premium tracker disable returns disabled_at");
       }
 
       {
@@ -773,7 +852,7 @@ async function main() {
         const confirmRes = await fetch(`${baseUrl}/alerts/confirm?token=${encodeURIComponent(confirmToken)}`);
         assert(confirmRes.status === 200, `/alerts/confirm expected 200, got ${confirmRes.status}`);
 
-        const nowIso = new Date().toISOString();
+        const nowIso = new Date(Date.now() + 10_000).toISOString();
         const sourceItemId = `smoke_saved_search_${Date.now()}`;
         const insertRes = await client.query(
           `

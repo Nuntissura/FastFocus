@@ -250,7 +250,17 @@ function documentHtml({ title, description, canonicalUrl = null, robots = null, 
 `;
 }
 
-export function renderHomePageHtml({ canonicalUrl, dbEnabled, dbHint, marketplaces = [], featuredCameras = [], featuredLenses = [] }) {
+export function renderHomePageHtml({
+  canonicalUrl,
+  dbEnabled,
+  dbHint,
+  marketplaces = [],
+  featuredCameras = [],
+  featuredLenses = [],
+  featuredCameraSourceLabel = null,
+  liveDeals = [],
+  recentArrivals = [],
+}) {
   const marketRows = marketplaces
     .map((m) => {
       const name = escapeHtml(m.display_name || m.marketplace_code);
@@ -262,29 +272,73 @@ export function renderHomePageHtml({ canonicalUrl, dbEnabled, dbHint, marketplac
     })
     .join("");
 
+  const coverageMode = Boolean(featuredCameraSourceLabel) && featuredCameras.some((camera) => typeof camera.active_listing_count === "number");
   const cameraItems = featuredCameras
     .map((c) => {
       const href = cameraCanonicalPath(c);
       const label = escapeHtml(c.display_name || c.slug);
+
+      if (coverageMode) {
+        const metrics = [
+          `${escapeHtml(String(c.active_listing_count || 0))} live matches`,
+          `${escapeHtml(String(c.recent_listing_count_7d || 0))} new this week`,
+          c.best_deal_score !== null && c.best_deal_score !== undefined ? `best deal ${escapeHtml(String(Math.round(Number(c.best_deal_score))))}/100` : null,
+          c.last_retrieved_at ? `updated ${escapeHtml(formatMaybeIso(c.last_retrieved_at))}` : null,
+        ]
+          .filter(Boolean)
+          .join(" | ");
+        return `<article class="card" data-testid="home-live-camera-card-${escapeHtml(c.slug)}"><h3>${label}</h3><div class="subtle">${escapeHtml(
+          c.brand_name || c.brand_slug || "",
+        )}</div><p class="subtle">${metrics}</p><p><a href="${href}">Open camera page</a></p></article>`;
+      }
+
       const meta = [c.brand_name || c.brand_slug, c.release_year, c.sensor_format, c.mount_code]
         .filter((v) => v !== null && v !== undefined && String(v).trim())
         .map((v) => escapeHtml(String(v)))
-        .join(" â€¢ ");
+        .join(" | ");
       return `<li><a class="card-link" href="${href}" data-testid="home-featured-camera-card-${escapeHtml(c.slug)}"><strong>${label}</strong><div class="subtle">${meta}</div></a></li>`;
     })
     .join("");
 
-  const lensItems = featuredLenses
-    .map((l) => {
-      const href = lensCanonicalPath(l);
-      const label = escapeHtml(l.display_name || l.slug);
-      const meta = [l.brand_name || l.brand_slug, l.release_year, l.mount_code, l.lens_category]
-        .filter((v) => v !== null && v !== undefined && String(v).trim())
-        .map((v) => escapeHtml(String(v)))
-        .join(" â€¢ ");
-      return `<li><a href="${href}">${label}</a><div class="subtle">${meta}</div></li>`;
-    })
-    .join("");
+  const renderHighlightCards = (items, { testId, emptyMessage, emphasis }) => {
+    if (!items.length) return `<p class="subtle">${escapeHtml(emptyMessage)}</p>`;
+    const cards = items
+      .map((item) => {
+        const detailHref = `/listings/${encodeURIComponent(item.listing_id)}`;
+        const modelHref = item.camera_slug ? cameraCanonicalPath({ slug: item.camera_slug }) : null;
+        const source = item.marketplace_display_name || item.marketplace_code || "Marketplace";
+        const model = item.camera_display_name || item.title;
+        const price = formatMoney(item.price_amount, item.price_currency);
+        const shipping =
+          item.shipping_amount !== null && item.shipping_amount !== undefined
+            ? formatMoney(item.shipping_amount, item.shipping_currency || item.price_currency)
+            : null;
+        const priceLine = shipping ? `${price} + ${shipping} ship` : price;
+        const condition = isNonEmptyString(item.condition_physical_tier) ? humanLabel(item.condition_physical_tier) : null;
+        const leadMetric =
+          emphasis === "deal" && item.deal_score !== null && item.deal_score !== undefined
+            ? `${Math.round(Number(item.deal_score))}/100 deal`
+            : item.first_visible_at
+              ? `first seen ${formatMaybeIso(item.first_visible_at)}`
+              : null;
+        const meta = [priceLine, condition, item.last_retrieved_at ? `retrieved ${formatMaybeIso(item.last_retrieved_at)}` : null]
+          .filter(Boolean)
+          .map((value) => escapeHtml(String(value)))
+          .join(" | ");
+        return `<article class="card" data-testid="${escapeHtml(testId)}-${escapeHtml(item.listing_id)}">
+          <div class="meta-row">
+            <strong>${escapeHtml(model)}</strong>
+            ${leadMetric ? `<span class="pill">${escapeHtml(leadMetric)}</span>` : ""}
+            <span class="pill">${escapeHtml(source)}</span>
+          </div>
+          <p>${escapeHtml(item.title)}</p>
+          <p class="subtle">${meta}</p>
+          <p><a href="${escapeHtml(detailHref)}" rel="nofollow">Listing context</a>${modelHref ? ` | <a href="${escapeHtml(modelHref)}">Camera page</a>` : ""}</p>
+        </article>`;
+      })
+      .join("");
+    return `<div class="tri-grid">${cards}</div>`;
+  };
 
   const dbBlock = dbEnabled
     ? ""
@@ -292,6 +346,11 @@ export function renderHomePageHtml({ canonicalUrl, dbEnabled, dbHint, marketplac
         <strong>Database not configured</strong>
         <div class="subtle">${escapeHtml(dbHint || "Set DATABASE_URL to enable DB-backed pages.")}</div>
       </div>`;
+
+  const featuredCameraTitle = coverageMode ? `Camera pages with live ${featuredCameraSourceLabel} coverage` : "Featured cameras";
+  const featuredCameraLead = coverageMode
+    ? `Start with the camera pages that currently have real ${featuredCameraSourceLabel} coverage instead of empty surface area.`
+    : "Browse camera pages with specs, price bands, and live listings.";
 
   const bodyHtml = `
     <section class="hero stack" data-testid="home-page">
@@ -325,6 +384,28 @@ export function renderHomePageHtml({ canonicalUrl, dbEnabled, dbHint, marketplac
     </section>
 
     <div class="grid">
+      <section class="card" aria-label="Best current deals" data-testid="home-live-deals">
+        <h2>Best current eBay deals</h2>
+        <p class="section-lead subtle">The strongest scored matched listings visible right now. This is the fastest way to see whether the live market data is useful.</p>
+        ${renderHighlightCards(liveDeals, {
+          testId: "home-live-deal-card",
+          emptyMessage: "No scored eBay listings yet. Keep the freshness table in view until ingest catches up.",
+          emphasis: "deal",
+        })}
+      </section>
+
+      <section class="card" aria-label="Fresh arrivals" data-testid="home-recent-arrivals">
+        <h2>Fresh eBay arrivals</h2>
+        <p class="section-lead subtle">Newer matched listings surfaced recently, so you can spot movement before the typical price view catches up.</p>
+        ${renderHighlightCards(recentArrivals, {
+          testId: "home-recent-arrival-card",
+          emptyMessage: "No recent eBay arrivals yet.",
+          emphasis: "recent",
+        })}
+      </section>
+    </div>
+
+    <div class="grid">
       <section class="card" aria-label="Live market">
         <h2>Live market (freshness)</h2>
         ${
@@ -337,22 +418,20 @@ export function renderHomePageHtml({ canonicalUrl, dbEnabled, dbHint, marketplac
         }
       </section>
 
-      <section class="card" aria-label="Launch promise">
-        <h2>Launch promise</h2>
+      <section class="card" aria-label="Useful right now">
+        <h2>Useful right now</h2>
         <ul>
-          <li>Canonical camera-body pages with specs, used-buyer checklist, price bands, and live listings.</li>
-          <li>Stable navigation for humans and browser agents.</li>
-          <li>First-party demand tracking to shape later expansion.</li>
+          <li>Open the best current eBay matches and compare them against the model-level price band.</li>
+          <li>Start with camera pages that have real listing coverage, not just a placeholder shell.</li>
+          <li>Use the freshness table to see whether a source is active before trusting a thin page.</li>
         </ul>
       </section>
     </div>
 
     <section class="card" aria-label="Featured cameras" data-testid="home-featured-cameras">
-      <h2>Featured cameras</h2>
-      ${cameraItems ? `<ul class="clean tri-grid">${cameraItems}</ul>` : `<p class="subtle">No cameras yet.</p>`}
-    </section>
-    </section>
-    </section>
+      <h2>${escapeHtml(featuredCameraTitle)}</h2>
+      <p class="section-lead subtle">${escapeHtml(featuredCameraLead)}</p>
+      ${cameraItems ? (coverageMode ? `<div class="tri-grid">${cameraItems}</div>` : `<ul class="clean tri-grid">${cameraItems}</ul>`) : `<p class="subtle">No cameras yet.</p>`}
     </section>
   `;
 
@@ -1179,8 +1258,9 @@ export function renderPrivacyPageHtml({ canonicalUrl }) {
     <section class="card" aria-label="Premium">
       <h2>Premium</h2>
       <p class="subtle">
-        If you request Premium, Fast Focus stores your email address and a subscription record including confirmation/cancel tokens. Premium confirmation is
-        double opt-in (you must click the confirmation link).
+        If you request Premium, Fast Focus stores your email address and a subscription record including confirmation/cancel tokens. If you create Premium
+        tracker watches, Fast Focus also stores the tracked model, source, currency, optional country/condition filters, target price, and a record of
+        tracker alert emails sent. Premium confirmation is double opt-in (you must click the confirmation link).
       </p>
       <p class="subtle">
         Default retention targets (production): unconfirmed premium requests are deleted after 14 days; canceled premium subscriptions after 30 days; and
@@ -1310,7 +1390,7 @@ export function renderPremiumSignupPageHtml({ canonicalUrl, status = null, error
     ? `<p class="subtle"><strong>Error:</strong> ${escapeHtml(String(error))}</p>`
     : status
       ? `<p class="subtle">${escapeHtml(String(status))}</p>`
-      : `<p class="subtle">Premium (Pro). Double opt-in via email. Cancel any time.</p>`;
+      : `<p class="subtle">Premium (Pro). Double opt-in via email. Cancel any time. Current beta includes price history and eBay-only tracker alerts.</p>`;
 
   const bodyHtml = `
     <h1>Premium</h1>
@@ -1323,6 +1403,7 @@ export function renderPremiumSignupPageHtml({ canonicalUrl, status = null, error
         <p style="margin-top: 1rem;"><button type="submit">Send confirmation link</button></p>
       </form>
       <p class="subtle">Confirm via the email link to enable premium features on this device.</p>
+      <p class="subtle">Tracker beta management is currently API-first and eBay-only while the Phase 2 surface hardens.</p>
       <p class="subtle"><a href="/privacy">Privacy</a></p>
     </section>
   `;

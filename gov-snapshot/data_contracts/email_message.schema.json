@@ -9,6 +9,8 @@
     "email_message_id",
     "message_type",
     "saved_search_id",
+    "newsletter_subscription_id",
+    "premium_subscription_id",
     "to_email",
     "from_email",
     "subject",
@@ -32,10 +34,34 @@
       "type": "string",
       "enum": [
         "saved_search_confirm",
-        "saved_search_alert"
+        "saved_search_alert",
+        "newsletter_confirm",
+        "newsletter_weekly",
+        "premium_confirm",
+        "premium_tracker_alert"
       ]
     },
     "saved_search_id": {
+      "anyOf": [
+        {
+          "$ref": "common.schema.json#/$defs/UUID"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "newsletter_subscription_id": {
+      "anyOf": [
+        {
+          "$ref": "common.schema.json#/$defs/UUID"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "premium_subscription_id": {
       "anyOf": [
         {
           "$ref": "common.schema.json#/$defs/UUID"
@@ -107,4 +133,3 @@
     }
   }
 }
-

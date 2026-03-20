@@ -85,7 +85,7 @@ function printUsage() {
       "  - FF_SCHEDULER_RUN_EBAY=0 to skip eBay ingest.",
       "  - FF_SCHEDULER_RUN_RETAILER_FEED_1=0 to skip retailer feed ingest.",
       "- Optional comms jobs:",
-      "  - FF_SCHEDULER_RUN_ALERTS=1 to run saved-search alerts (uses FF_EMAIL_TRANSPORT).",
+      "  - FF_SCHEDULER_RUN_ALERTS=1 to run saved-search alerts and premium tracker alerts (uses FF_EMAIL_TRANSPORT).",
       "  - FF_SCHEDULER_RUN_NEWSLETTER=1 to run weekly deals newsletter (uses FF_EMAIL_TRANSPORT).",
     ].join("\n"),
   );
@@ -143,7 +143,10 @@ async function main() {
   steps.push({ name: "db:compute:deal-scores", cmd: "node", args: ["apps/api/src/db/compute_deal_scores.js", "--confirm"] });
   steps.push({ name: "db:prune:retention", cmd: "node", args: ["apps/api/src/db/prune_retention.js", "--confirm"] });
 
-  if (runAlerts) steps.push({ name: "alerts:run", cmd: "node", args: ["apps/api/src/alerts/run_saved_search_alerts.js", "--confirm"] });
+  if (runAlerts) {
+    steps.push({ name: "alerts:run", cmd: "node", args: ["apps/api/src/alerts/run_saved_search_alerts.js", "--confirm"] });
+    steps.push({ name: "premium:tracker-alerts", cmd: "node", args: ["apps/api/src/premium/run_tracker_alerts.js", "--confirm"] });
+  }
   if (runNewsletter) steps.push({ name: "newsletter:weekly", cmd: "node", args: ["apps/api/src/newsletter/run_weekly_deals_newsletter.js", "--confirm"] });
 
   if (!args.confirm) {
