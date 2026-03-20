@@ -117,8 +117,32 @@ async function main() {
     );
     const listingIds = listingRes.rows.map((r) => r.listing_id);
 
+    const savedSearchRes = await client.query(
+      `
+      SELECT saved_search_id
+      FROM saved_searches
+      WHERE camera_id = ANY($1::uuid[])
+      `,
+      [cameraIds],
+    );
+    const savedSearchIds = savedSearchRes.rows.map((r) => r.saved_search_id);
+
+    const trackerWatchRes = await client.query(
+      `
+      SELECT premium_tracker_watch_id
+      FROM premium_tracker_watches
+      WHERE camera_id = ANY($1::uuid[])
+      `,
+      [cameraIds],
+    );
+    const trackerWatchIds = trackerWatchRes.rows.map((r) => r.premium_tracker_watch_id);
+
     // eslint-disable-next-line no-console
     console.log("Dependent listings matched:", listingIds.length);
+    // eslint-disable-next-line no-console
+    console.log("Dependent saved searches matched:", savedSearchIds.length);
+    // eslint-disable-next-line no-console
+    console.log("Dependent premium tracker watches matched:", trackerWatchIds.length);
 
     if (!args.confirm) {
       await client.query("ROLLBACK");
@@ -130,6 +154,14 @@ async function main() {
     if (listingIds.length > 0) {
       await client.query(`DELETE FROM listing_snapshots WHERE listing_id = ANY($1::uuid[])`, [listingIds]);
       await client.query(`DELETE FROM listings WHERE listing_id = ANY($1::uuid[])`, [listingIds]);
+    }
+
+    if (savedSearchIds.length > 0) {
+      await client.query(`DELETE FROM saved_searches WHERE saved_search_id = ANY($1::uuid[])`, [savedSearchIds]);
+    }
+
+    if (trackerWatchIds.length > 0) {
+      await client.query(`DELETE FROM premium_tracker_watches WHERE premium_tracker_watch_id = ANY($1::uuid[])`, [trackerWatchIds]);
     }
 
     await client.query(`DELETE FROM price_observations WHERE camera_id = ANY($1::uuid[])`, [cameraIds]);
@@ -153,4 +185,3 @@ main().catch((err) => {
   console.error(err);
   process.exitCode = 1;
 });
-

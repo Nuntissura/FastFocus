@@ -71,6 +71,7 @@ This populates `gov-snapshot/`, which production can reference with:
 
 ```powershell
 $env:FF_GOV_ROOT = "./gov-snapshot"
+$env:FF_ACTIVE_CAMERA_BRANDS = "sony"
 $env:HOST = "0.0.0.0"
 $env:PORT = "8080"
 ```
@@ -143,7 +144,14 @@ npm.cmd run db:import:datasheets -- --brand-slug canon
 
 # apply (upserts import-ready datasheets):
 npm.cmd run db:import:datasheets -- --brand-slug canon --confirm
+
+# example: import Sony
+npm.cmd run db:import:datasheets -- --brand-slug sony --confirm
 ```
+
+Startup/drill helpers default to:
+- `FF_ACTIVE_CAMERA_BRANDS=sony`
+- Override with a comma-separated list if you want a different launch set.
 
 Seed selection (optional):
 - Default seed files:
@@ -220,7 +228,7 @@ npm.cmd run smoke
 ```
 
 ## One-command smoke test (datasheet-first)
-Runs: docker db up -> migrate -> import Canon datasheets -> demo ingest -> match -> compute price bands -> compute deal scores -> API/SSR smoke requests.
+Runs: docker db up -> migrate -> import active datasheet brands (`FF_ACTIVE_CAMERA_BRANDS`, default `sony`) -> demo ingest -> match -> compute price bands -> compute deal scores -> API/SSR smoke requests.
 
 ```powershell
 npm.cmd run smoke:datasheets

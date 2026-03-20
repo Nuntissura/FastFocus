@@ -1,0 +1,6 @@
+brand_slug	slug	display_name	release_year	sensor_format	camera_category	intake_status	priority	notes
+panasonic	panasonic-lumix-s5-ii	Panasonic Lumix S5 II	2023	full_frame	mirrorless	selected	1	Current full-frame priority body.
+panasonic	panasonic-lumix-s5	Panasonic Lumix S5	2020	full_frame	mirrorless	selected	2	Key used full-frame value body.
+panasonic	panasonic-lumix-gh6	Panasonic Lumix GH6	2022	micro_four_thirds	mirrorless	selected	3	Video-first Micro Four Thirds anchor.
+panasonic	panasonic-lumix-g9-ii	Panasonic Lumix G9 II	2023	micro_four_thirds	mirrorless	selected	4	Current photo/video hybrid priority.
+panasonic	panasonic-lumix-gh5	Panasonic Lumix GH5	2017	micro_four_thirds	mirrorless	selected	5	Long-lived used-market reference body.

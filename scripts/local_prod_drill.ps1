@@ -28,6 +28,13 @@ function Write-Step([string]$msg) {
 
 $repoRoot = Resolve-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath "..")
 $workspaceRoot = Find-WorkspaceRoot -startDir $repoRoot
+$activeCameraBrandsRaw = $env:FF_ACTIVE_CAMERA_BRANDS
+if (-not $activeCameraBrandsRaw) { $activeCameraBrandsRaw = "sony" }
+$activeCameraBrands = @(
+  $activeCameraBrandsRaw.Split(",") |
+    ForEach-Object { $_.Trim() } |
+    Where-Object { $_ }
+)
 
 Push-Location $workspaceRoot
 try {
@@ -70,8 +77,10 @@ try {
   Write-Step "Run DB migrations (inside image)"
   docker run --rm --network $networkName -e DATABASE_URL=$dbUrl $imageTag node apps/api/src/db/migrate.js
 
-  Write-Step "Import Canon camera datasheets (inside image)"
-  docker run --rm --network $networkName -e DATABASE_URL=$dbUrl $imageTag node apps/api/src/db/import_camera_datasheets.js --brand-slug canon --confirm
+  foreach ($brandSlug in $activeCameraBrands) {
+    Write-Step "Import $brandSlug camera datasheets (inside image)"
+    docker run --rm --network $networkName -e DATABASE_URL=$dbUrl $imageTag node apps/api/src/db/import_camera_datasheets.js --brand-slug $brandSlug --confirm
+  }
 
   Write-Step "Start web service container (http://localhost:8787)"
   docker rm -f $apiContainerName 2>$null | Out-Null
@@ -102,8 +111,14 @@ try {
   if (-not $serverUp) { throw "Web server did not become ready in time." }
 
   Assert-Http200 "http://localhost:8787/"
-  Assert-Http200 "http://localhost:8787/cameras/canon-eos-r5"
-  Assert-Http200 "http://localhost:8787/compare/canon-eos-r5-vs-canon-eos-r6"
+  if ($activeCameraBrands -contains "canon") {
+    Assert-Http200 "http://localhost:8787/cameras/canon-eos-r5"
+    Assert-Http200 "http://localhost:8787/compare/canon-eos-r5-vs-canon-eos-r6"
+  }
+  if ($activeCameraBrands -contains "sony") {
+    Assert-Http200 "http://localhost:8787/cameras/sony-a7-iv"
+    Assert-Http200 "http://localhost:8787/compare/sony-a7-iv-vs-sony-a7-c-ii"
+  }
   Assert-Http200 "http://localhost:8787/api/v1/admin/ops/status" @{ "x-admin-token" = "drill-admin" }
 
   Write-Step "Done"

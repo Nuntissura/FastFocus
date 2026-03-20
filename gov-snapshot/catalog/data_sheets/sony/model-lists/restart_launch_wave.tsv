@@ -1,0 +1,16 @@
+brand_slug	slug	display_name	release_year	sensor_format	camera_category	intake_status	priority	notes
+sony	sony-a7-iv	Sony A7 IV	2021	full_frame	mirrorless	selected	1	Core mainstream full-frame body.
+sony	sony-a7-iii	Sony A7 III	2018	full_frame	mirrorless	selected	2	Key used-market volume body.
+sony	sony-a7-c-ii	Sony A7C II	2023	full_frame	mirrorless	selected	3	Compact full-frame option with strong buyer demand.
+sony	sony-a7-r-v	Sony A7R V	2022	full_frame	mirrorless	selected	4	High-resolution flagship for premium used buyers.
+sony	sony-a6700	Sony A6700	2023	aps_c	mirrorless	selected	5	Top APS-C hybrid body in current demand.
+sony	sony-a6600	Sony A6600	2019	aps_c	mirrorless	selected	6	Used-value APS-C anchor.
+sony	sony-a7-s-iii	Sony A7S III	2020	full_frame	mirrorless	selected	7	Video-first full-frame reference body.
+sony	sony-zv-e10	Sony ZV-E10	2021	aps_c	mirrorless	selected	8	Creator entry point with strong volume.
+sony	sony-a6400	Sony A6400	2019	aps_c	mirrorless	reserve	9	Reserve APS-C body if coverage depth is needed.
+sony	sony-a7-c	Sony A7C	2020	full_frame	mirrorless	reserve	10	Reserve compact full-frame body.
+sony	sony-a1	Sony A1	2021	full_frame	mirrorless	reserve	11	Halo model; less important than core used-volume bodies.
+sony	sony-a9-ii	Sony A9 II	2019	full_frame	mirrorless	reserve	12	Sports niche; later than generalist buyer models.
+sony	sony-a7-r-iv	Sony A7R IV	2019	full_frame	mirrorless	reserve	13	Older high-resolution reserve body.
+sony	sony-a7-ii	Sony A7 II	2014	full_frame	mirrorless	reserve	14	Legacy body; useful later for budget coverage.
+sony	sony-a7-r-iii	Sony A7R III	2017	full_frame	mirrorless	reserve	15	Legacy high-resolution reserve body.

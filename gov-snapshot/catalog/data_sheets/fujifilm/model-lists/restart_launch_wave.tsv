@@ -1,0 +1,13 @@
+brand_slug	slug	display_name	release_year	sensor_format	camera_category	intake_status	priority	notes
+fujifilm	fujifilm-x-s20	Fujifilm X-S20	2023	aps_c	mirrorless	selected	1	Strong mainstream APS-C hybrid body.
+fujifilm	fujifilm-x-h2	Fujifilm X-H2	2022	aps_c	mirrorless	selected	2	High-resolution APS-C flagship.
+fujifilm	fujifilm-x-h2s	Fujifilm X-H2S	2022	aps_c	mirrorless	selected	3	Speed/video flagship with strong enthusiast pull.
+fujifilm	fujifilm-x-t5	Fujifilm X-T5	2022	aps_c	mirrorless	selected	4	Core enthusiast body.
+fujifilm	fujifilm-x-t4	Fujifilm X-T4	2020	aps_c	mirrorless	selected	5	Key used-market predecessor.
+fujifilm	fujifilm-x-e4	Fujifilm X-E4	2021	aps_c	mirrorless	selected	6	Compact rangefinder-style option.
+fujifilm	fujifilm-x-t30-ii	Fujifilm X-T30 II	2021	aps_c	mirrorless	selected	7	Midrange APS-C value body.
+fujifilm	fujifilm-gfx-100s	Fujifilm GFX 100S	2021	medium_format_44x33	medium_format	selected	8	Medium-format halo model.
+fujifilm	fujifilm-gfx-50s-ii	Fujifilm GFX 50S II	2021	medium_format_44x33	medium_format	reserve	9	Reserve medium-format value option.
+fujifilm	fujifilm-x-s10	Fujifilm X-S10	2020	aps_c	mirrorless	reserve	10	Reserve predecessor to X-S20.
+fujifilm	fujifilm-x-pro3	Fujifilm X-Pro3	2019	aps_c	mirrorless	reserve	11	Niche premium body; later than core volume picks.
+fujifilm	fujifilm-x-t3	Fujifilm X-T3	2018	aps_c	mirrorless	reserve	12	Legacy enthusiast reserve body.

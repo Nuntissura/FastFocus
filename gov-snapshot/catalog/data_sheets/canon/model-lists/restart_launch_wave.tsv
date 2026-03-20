@@ -1,0 +1,13 @@
+brand_slug	slug	display_name	release_year	sensor_format	camera_category	intake_status	priority	notes
+canon	canon-eos-r6-ii	Canon EOS R6 Mark II	2022	full_frame	mirrorless	selected	1	Core full-frame used-market target.
+canon	canon-eos-r6	Canon EOS R6	2020	full_frame	mirrorless	selected	2	Key predecessor with strong value interest.
+canon	canon-eos-r5	Canon EOS R5	2020	full_frame	mirrorless	selected	3	High-end full-frame anchor.
+canon	canon-eos-r8	Canon EOS R8	2023	full_frame	mirrorless	selected	4	Affordable modern full-frame option.
+canon	canon-eos-r7	Canon EOS R7	2022	aps_c	mirrorless	selected	5	APS-C enthusiast priority.
+canon	canon-eos-90d	Canon EOS 90D	2019	aps_c	dslr	selected	6	Late DSLR anchor still relevant in used buying.
+canon	canon-eos-5d-mark-iv	Canon EOS 5D Mark IV	2016	full_frame	dslr	selected	7	Legacy full-frame DSLR reference body.
+canon	canon-eos-6d-mark-ii	Canon EOS 6D Mark II	2017	full_frame	dslr	selected	8	Affordable Canon full-frame DSLR entry.
+canon	canon-eos-r10	Canon EOS R10	2022	aps_c	mirrorless	reserve	9	Reserve APS-C mirrorless body.
+canon	canon-eos-rp	Canon EOS RP	2019	full_frame	mirrorless	reserve	10	Reserve budget full-frame body.
+canon	canon-eos-r	Canon EOS R	2018	full_frame	mirrorless	reserve	11	Reserve early RF body.
+canon	canon-eos-r3	Canon EOS R3	2021	full_frame	mirrorless	reserve	12	Halo reserve body.

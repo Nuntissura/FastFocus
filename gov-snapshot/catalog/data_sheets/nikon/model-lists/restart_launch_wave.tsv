@@ -1,0 +1,13 @@
+brand_slug	slug	display_name	release_year	sensor_format	camera_category	intake_status	priority	notes
+nikon	nikon-z6-iii	Nikon Z6 III	2024	full_frame	mirrorless	selected	1	Current all-round full-frame priority.
+nikon	nikon-z8	Nikon Z8	2023	full_frame	mirrorless	selected	2	High-interest flagship-adjacent body.
+nikon	nikon-z6-ii	Nikon Z6 II	2020	full_frame	mirrorless	selected	3	Core used full-frame value body.
+nikon	nikon-z7-ii	Nikon Z7 II	2020	full_frame	mirrorless	selected	4	High-resolution full-frame anchor.
+nikon	nikon-z5	Nikon Z5	2020	full_frame	mirrorless	selected	5	Affordable full-frame entry point.
+nikon	nikon-z50	Nikon Z50	2019	aps_c	mirrorless	selected	6	APS-C used-market anchor.
+nikon	nikon-z9	Nikon Z9	2021	full_frame	mirrorless	selected	7	Halo body with strong search interest.
+nikon	nikon-d850	Nikon D850	2017	full_frame	dslr	selected	8	Late DSLR anchor still highly relevant.
+nikon	nikon-z-fc	Nikon Z fc	2021	aps_c	mirrorless	reserve	9	Style-led APS-C reserve model.
+nikon	nikon-d780	Nikon D780	2020	full_frame	dslr	reserve	10	Reserve late DSLR body.
+nikon	nikon-d500	Nikon D500	2016	aps_c	dslr	reserve	11	Reserve APS-C DSLR enthusiast body.
+nikon	nikon-d750	Nikon D750	2014	full_frame	dslr	reserve	12	Legacy value body for later budget coverage.

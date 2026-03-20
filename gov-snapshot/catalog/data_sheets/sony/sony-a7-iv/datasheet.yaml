@@ -1,0 +1,952 @@
+schema_version: "2.0"
+kind: camera_datasheet
+capture_medium: digital
+template_id: digital_camera_datasheet.v5
+status: draft
+requirements:
+  must_have:
+    - identifiers.slug
+    - identifiers.display_name
+    - identifiers.brand_slug
+    - identifiers.model_name
+    - classification.camera_category
+    - classification.lens_system_type
+    - release.release_year
+    - specs.sensor.sensor_format
+    - specs.sensor.effective_resolution_mp
+    - links.manufacturer_product_page
+  must_have_if_interchangeable:
+    - classification.mount_code
+  must_have_if_fixed_lens:
+    - classification.fixed_lens.focal_length_basis
+    - classification.fixed_lens.focal_length_min_mm
+    - classification.fixed_lens.focal_length_max_mm
+    - classification.fixed_lens.max_aperture_wide_f
+    - classification.fixed_lens.max_aperture_tele_f
+identifiers:
+  slug: sony-a7-iv
+  canonical_url: /cameras/sony-a7-iv
+  brand_slug: sony
+  brand_name: Sony
+  model_name: A7 IV
+  display_name: Sony A7 IV
+  model_family: null
+  aliases: []
+  region_variants:
+    - region_code: global
+      marketing_name: Sony A7 IV
+      sku: null
+  predecessor_model_slug: null
+  successor_model_slug: null
+classification:
+  camera_category: mirrorless
+  target_segment: hybrid_enthusiast
+  lens_system_type: interchangeable
+  mount_code: sony_e
+  fixed_lens:
+    focal_length_basis: null
+    focal_length_min_mm: null
+    focal_length_max_mm: null
+    max_aperture_wide_f: null
+    max_aperture_tele_f: null
+  use_case_tags:
+    - hybrid_stills_video
+    - events
+    - portraits
+    - travel
+release:
+  announce_date: null
+  first_ship_date: null
+  release_year: 2021
+  launch_msrp:
+    body_only:
+      amount: null
+      currency: USD
+      includes_tax: false
+    with_kit_lens:
+      amount: null
+      currency: USD
+      includes_tax: false
+  production:
+    start_year: 2021
+    end_year: null
+    is_discontinued: false
+    confidence: 0.9
+specs:
+  body:
+    body_type: slr_style_mirrorless
+    body_material: null
+    dimensions_mm:
+      w: 131.3
+      h: 96.4
+      d: 79.8
+    weight_with_battery_g: 658
+    weather_sealed: true
+  sensor:
+    sensor_format: full_frame
+    sensor_type: CMOS
+    effective_resolution_mp: 33
+    total_resolution_mp: 34.1
+    max_resolution_px:
+      w: null
+      h: null
+    other_resolutions: []
+    image_ratio:
+      w: null
+      h: null
+    physical_dimensions_mm:
+      w: 35.9
+      h: 23.9
+    sensor_size_notes: null
+    crop_factor: 1.0
+    native_iso_min: 100
+    native_iso_max: 51200
+    boosted_iso_min: 50
+    boosted_iso_max: 204800
+    image_processor: []
+    color_space:
+      - sRGB
+      - Adobe RGB
+      - BT.2020
+    color_filter_array: null
+  image:
+    white_balance_presets: null
+    custom_white_balance: null
+    uncompressed_format: RAW (compressed, lossless compressed, or uncompressed)
+    jpeg_quality_levels:
+      - Extra fine
+      - Fine
+      - Standard
+      - Light
+    file_formats:
+      - JPEG
+      - HEIF
+      - RAW
+  stabilization:
+    image_stabilization: sensor_shift_5_axis
+    ibis: true
+    lens_is: null
+    digital_is: null
+    cipa_rating_stops: 5.5
+    notes: Compensation depends on the mounted lens.
+  optics:
+    optical_zoom_x: null
+    digital_zoom_x: null
+    normal_focus_range_cm:
+      min: null
+      max: null
+    macro_focus_range_cm:
+      min: null
+      max: null
+  autofocus:
+    autofocus_supported: true
+    manual_focus_supported: true
+    focus_method:
+      - phase-detection
+      - contrast-detection
+    focus_points_total: 759
+    phase_detect_points: 759
+    autofocus_assist_lamp: true
+    low_light_af_ev: -4
+    subject_detection:
+      human_eye: true
+      human_face: true
+      animal_eye: true
+  display:
+    live_view: true
+    rear_screen:
+      size_in: 3.0
+      resolution_dots: 1036800
+      touch: true
+      articulation: vari_angle
+      screen_type: TFT
+  viewfinder:
+    type: electronic OLED
+    resolution_dots: 3686400
+    refresh_rate_hz: 120
+    coverage_percent: 100
+    magnification: 0.78
+  shutter:
+    min_shutter_speed_s: 30
+    max_shutter_speed_mechanical_s: 0.000125
+    max_shutter_speed_electronic_s: 0.000125
+    flash_sync_speed_s: 0.004
+  exposure:
+    aperture_priority: true
+    shutter_priority: true
+    manual_exposure_mode: true
+    subject_scene_modes: false
+    exposure_modes:
+      - auto
+      - program
+      - aperture_priority
+      - shutter_priority
+      - manual
+      - flexible_exposure
+      - slow_and_quick
+    scene_modes: []
+    exposure_compensation_ev:
+      min: -5
+      max: 5
+  flash:
+    built_in: false
+    external: true
+    flash_range_m:
+      min: null
+      max: null
+    modes:
+      - flash_off
+      - autoflash
+      - fill_flash
+      - slow_sync
+      - rear_sync
+      - red_eye_reduction
+      - wireless
+      - high_speed_sync
+  shooting:
+    continuous_drive_fps: 10
+    continuous_fps_mechanical: 10
+    continuous_fps_electronic: 10
+    drive_modes:
+      - single_shot
+      - continuous
+      - self_timer
+      - bracket_single
+      - bracket_continuous
+      - white_balance_bracket
+      - DRO_bracket
+    self_timer_seconds:
+      - 2
+      - 5
+      - 10
+    max_buffer_frames:
+      raw: null
+      jpeg: null
+  metering:
+    metering_modes:
+      - multi_segment
+      - center_weighted
+      - spot
+      - entire_screen_average
+      - highlight
+  bracketing:
+    ae_bracketing: true
+    wb_bracketing: true
+  video:
+    resolutions:
+      - 4K
+      - Full HD
+    formats:
+      - XAVC S
+      - XAVC HS
+      - XAVC S-I
+    notes: 4K/60p recording is available in Super 35 mode rather than full-width full-frame readout.
+    modes:
+      - proxy_recording
+      - slow_and_quick_motion
+      - USB_streaming
+    microphone: true
+    speaker: true
+    max_internal:
+      resolution: 4K
+      frame_rate_fps: 60
+      bit_depth: 10
+    max_external:
+      raw: null
+    log_profiles:
+      - S-Log2
+      - S-Log3
+      - HLG
+    recording_limit_minutes: null
+  storage:
+    storage_types:
+      - CFexpress Type A
+      - SD UHS-II
+    card_slots: 2
+    slot_1_type: CFexpress Type A or SD UHS-II
+    slot_2_type: SD UHS-II
+  connectivity:
+    usb_connector: USB Type-C and Multi/Micro USB
+    usb_charging_supported: true
+    hdmi_connector: micro HDMI Type-D
+    mic_input_3_5mm: true
+    headphone_output_3_5mm: true
+    wifi: true
+    bluetooth: true
+    wireless: Wi-Fi 2.4 GHz / 5 GHz and Bluetooth 4.1
+    wireless_notes: 5 GHz availability varies by region.
+    remote_control:
+      - smartphone
+      - PC
+    hot_shoe: true
+    pc_sync_port: false
+  power:
+    battery_model: NP-FZ100
+    battery_description: One rechargeable battery pack NP-FZ100
+    battery_life_cipa_shots: null
+    usb_charging_in_camera: true
+  durability:
+    shutter_rating_cycles: null
+  other_features:
+    orientation_sensor: null
+    timelapse_recording: true
+    gps: null
+    gps_notes: null
+display:
+  summary_badges:
+    - classification.camera_category
+    - release.release_year
+    - specs.sensor.sensor_format
+    - specs.sensor.effective_resolution_mp
+    - specs.shooting.continuous_drive_fps
+    - specs.video.max_internal.resolution
+  comparison_sections:
+    - section_id: basic_information
+      label: Basic Information
+      rows:
+        - label: Announced
+          field_paths:
+            - release.announce_date
+        - label: Review / Preview
+          field_paths:
+            - links.dpreview_product_page
+    - section_id: price
+      label: Price
+      rows:
+        - label: MSRP
+          field_paths:
+            - release.launch_msrp.body_only
+    - section_id: body_type
+      label: Body type
+      rows:
+        - label: Body type
+          field_paths:
+            - specs.body.body_type
+        - label: Body material
+          field_paths:
+            - specs.body.body_material
+    - section_id: sensor
+      label: Sensor
+      rows:
+        - label: Max resolution
+          field_paths:
+            - specs.sensor.max_resolution_px
+        - label: Other resolutions
+          field_paths:
+            - specs.sensor.other_resolutions
+        - label: Image ratio w:h
+          field_paths:
+            - specs.sensor.image_ratio
+        - label: Effective pixels
+          field_paths:
+            - specs.sensor.effective_resolution_mp
+        - label: Sensor photo detectors
+          field_paths:
+            - specs.sensor.total_resolution_mp
+        - label: Sensor size
+          field_paths:
+            - specs.sensor.sensor_format
+            - specs.sensor.physical_dimensions_mm
+        - label: Sensor size notes
+          field_paths:
+            - specs.sensor.sensor_size_notes
+        - label: Sensor type
+          field_paths:
+            - specs.sensor.sensor_type
+        - label: Processor
+          field_paths:
+            - specs.sensor.image_processor
+        - label: Color space
+          field_paths:
+            - specs.sensor.color_space
+        - label: Color filter array
+          field_paths:
+            - specs.sensor.color_filter_array
+    - section_id: image
+      label: Image
+      rows:
+        - label: ISO
+          field_paths:
+            - specs.sensor.native_iso_min
+            - specs.sensor.native_iso_max
+        - label: Boosted ISO (minimum)
+          field_paths:
+            - specs.sensor.boosted_iso_min
+        - label: Boosted ISO (maximum)
+          field_paths:
+            - specs.sensor.boosted_iso_max
+        - label: White balance presets
+          field_paths:
+            - specs.image.white_balance_presets
+        - label: Custom white balance
+          field_paths:
+            - specs.image.custom_white_balance
+        - label: Image stabilization
+          field_paths:
+            - specs.stabilization.image_stabilization
+        - label: Image stabilization notes
+          field_paths:
+            - specs.stabilization.notes
+        - label: CIPA image stabilization rating
+          field_paths:
+            - specs.stabilization.cipa_rating_stops
+        - label: Uncompressed format
+          field_paths:
+            - specs.image.uncompressed_format
+        - label: JPEG quality levels
+          field_paths:
+            - specs.image.jpeg_quality_levels
+        - label: File format
+          field_paths:
+            - specs.image.file_formats
+    - section_id: optics_and_focus
+      label: Optics & Focus
+      rows:
+        - label: Focal length (equiv.)
+          field_paths:
+            - classification.fixed_lens.focal_length_basis
+            - classification.fixed_lens.focal_length_min_mm
+            - classification.fixed_lens.focal_length_max_mm
+        - label: Optical zoom
+          field_paths:
+            - specs.optics.optical_zoom_x
+        - label: Maximum aperture
+          field_paths:
+            - classification.fixed_lens.max_aperture_wide_f
+            - classification.fixed_lens.max_aperture_tele_f
+        - label: Autofocus
+          field_paths:
+            - specs.autofocus.autofocus_supported
+        - label: Autofocus assist lamp
+          field_paths:
+            - specs.autofocus.autofocus_assist_lamp
+        - label: Digital zoom
+          field_paths:
+            - specs.optics.digital_zoom_x
+        - label: Manual focus
+          field_paths:
+            - specs.autofocus.manual_focus_supported
+        - label: Normal focus range
+          field_paths:
+            - specs.optics.normal_focus_range_cm
+        - label: Macro focus range
+          field_paths:
+            - specs.optics.macro_focus_range_cm
+        - label: Number of focus points
+          field_paths:
+            - specs.autofocus.focus_points_total
+        - label: Lens mount
+          field_paths:
+            - classification.mount_code
+        - label: Focal length multiplier
+          field_paths:
+            - specs.sensor.crop_factor
+    - section_id: screen_viewfinder
+      label: Screen / viewfinder
+      rows:
+        - label: Articulated LCD
+          field_paths:
+            - specs.display.rear_screen.articulation
+        - label: Screen size
+          field_paths:
+            - specs.display.rear_screen.size_in
+        - label: Screen dots
+          field_paths:
+            - specs.display.rear_screen.resolution_dots
+        - label: Touch screen
+          field_paths:
+            - specs.display.rear_screen.touch
+        - label: Screen type
+          field_paths:
+            - specs.display.rear_screen.screen_type
+        - label: Live view
+          field_paths:
+            - specs.display.live_view
+        - label: Viewfinder type
+          field_paths:
+            - specs.viewfinder.type
+        - label: Viewfinder coverage
+          field_paths:
+            - specs.viewfinder.coverage_percent
+        - label: Viewfinder magnification
+          field_paths:
+            - specs.viewfinder.magnification
+        - label: Viewfinder resolution
+          field_paths:
+            - specs.viewfinder.resolution_dots
+    - section_id: photography_features
+      label: Photography features
+      rows:
+        - label: Minimum shutter speed
+          field_paths:
+            - specs.shutter.min_shutter_speed_s
+        - label: Maximum shutter speed
+          field_paths:
+            - specs.shutter.max_shutter_speed_mechanical_s
+        - label: Maximum shutter speed (electronic)
+          field_paths:
+            - specs.shutter.max_shutter_speed_electronic_s
+        - label: Aperture priority
+          field_paths:
+            - specs.exposure.aperture_priority
+        - label: Shutter priority
+          field_paths:
+            - specs.exposure.shutter_priority
+        - label: Manual exposure mode
+          field_paths:
+            - specs.exposure.manual_exposure_mode
+        - label: Subject / scene modes
+          field_paths:
+            - specs.exposure.subject_scene_modes
+        - label: Exposure modes
+          field_paths:
+            - specs.exposure.exposure_modes
+        - label: Scene modes
+          field_paths:
+            - specs.exposure.scene_modes
+        - label: Built-in flash
+          field_paths:
+            - specs.flash.built_in
+        - label: Flash range
+          field_paths:
+            - specs.flash.flash_range_m
+        - label: External flash
+          field_paths:
+            - specs.flash.external
+        - label: Flash modes
+          field_paths:
+            - specs.flash.modes
+        - label: Flash X sync speed
+          field_paths:
+            - specs.shutter.flash_sync_speed_s
+        - label: Drive modes
+          field_paths:
+            - specs.shooting.drive_modes
+        - label: Continuous drive
+          field_paths:
+            - specs.shooting.continuous_drive_fps
+        - label: Self-timer
+          field_paths:
+            - specs.shooting.self_timer_seconds
+        - label: Metering modes
+          field_paths:
+            - specs.metering.metering_modes
+        - label: Exposure compensation
+          field_paths:
+            - specs.exposure.exposure_compensation_ev
+        - label: AE Bracketing
+          field_paths:
+            - specs.bracketing.ae_bracketing
+        - label: WB Bracketing
+          field_paths:
+            - specs.bracketing.wb_bracketing
+    - section_id: videography_features
+      label: Videography features
+      rows:
+        - label: Resolutions
+          field_paths:
+            - specs.video.resolutions
+        - label: Format
+          field_paths:
+            - specs.video.formats
+        - label: Videography notes
+          field_paths:
+            - specs.video.notes
+        - label: Modes
+          field_paths:
+            - specs.video.modes
+        - label: Microphone
+          field_paths:
+            - specs.video.microphone
+        - label: Speaker
+          field_paths:
+            - specs.video.speaker
+    - section_id: storage
+      label: Storage
+      rows:
+        - label: Storage types
+          field_paths:
+            - specs.storage.storage_types
+    - section_id: connectivity
+      label: Connectivity
+      rows:
+        - label: USB
+          field_paths:
+            - specs.connectivity.usb_connector
+        - label: USB charging
+          field_paths:
+            - specs.connectivity.usb_charging_supported
+        - label: HDMI
+          field_paths:
+            - specs.connectivity.hdmi_connector
+        - label: Microphone port
+          field_paths:
+            - specs.connectivity.mic_input_3_5mm
+        - label: Headphone port
+          field_paths:
+            - specs.connectivity.headphone_output_3_5mm
+        - label: Wireless
+          field_paths:
+            - specs.connectivity.wireless
+        - label: Wireless notes
+          field_paths:
+            - specs.connectivity.wireless_notes
+        - label: Remote control
+          field_paths:
+            - specs.connectivity.remote_control
+    - section_id: physical
+      label: Physical
+      rows:
+        - label: Environmentally sealed
+          field_paths:
+            - specs.body.weather_sealed
+        - label: Battery
+          field_paths:
+            - specs.power.battery_model
+        - label: Battery description
+          field_paths:
+            - specs.power.battery_description
+        - label: Battery Life (CIPA)
+          field_paths:
+            - specs.power.battery_life_cipa_shots
+        - label: Weight (inc. batteries)
+          field_paths:
+            - specs.body.weight_with_battery_g
+        - label: Dimensions
+          field_paths:
+            - specs.body.dimensions_mm
+    - section_id: other_features
+      label: Other features
+      rows:
+        - label: Orientation sensor
+          field_paths:
+            - specs.other_features.orientation_sensor
+        - label: Timelapse recording
+          field_paths:
+            - specs.other_features.timelapse_recording
+        - label: GPS
+          field_paths:
+            - specs.other_features.gps
+        - label: GPS notes
+          field_paths:
+            - specs.other_features.gps_notes
+content_modules:
+  bio: The Sony A7 IV is the mainstream full-frame Alpha body for buyers who want stronger stills resolution, reliable autofocus, and serious video tools in one camera without stepping up to Sony's flagship pricing.
+  used_buying_checklist:
+    - code: check_sensor_and_screen
+      label: Inspect sensor, LCD/EVF, and test for dead/hot pixels.
+      severity: high
+    - code: check_shutter_and_controls
+      label: Test shutter, both command dials, joystick, and AF-ON because hard-used event bodies wear there first.
+      severity: high
+    - code: check_ports_and_card_slot
+      label: Test both card slots with real media and inspect the HDMI micro, USB-C, mic, and headphone ports for rig wear.
+      severity: medium
+    - code: check_battery_and_charging
+      label: Confirm NP-FZ100 health and verify USB-C power delivery or charging works cleanly in camera.
+      severity: medium
+  known_issues: []
+editorial_modules:
+  recommended_for:
+    - Hybrid shooters who want more cropping room than older 24 MP full-frame bodies without giving up reliable autofocus.
+    - Event, portrait, and travel work where dual-card redundancy and USB-C power support are useful.
+    - Buyers who want a current, liquid Sony E-mount full-frame body that still balances stills and video well.
+  not_ideal_for:
+    - Buyers who specifically need uncropped 4K/60 from the full-frame sensor.
+    - Sports specialists who want the faster readout and blackout behavior of Sony's higher-tier action bodies.
+    - Budget buyers who would rather accept older autofocus or single-card compromises to save money.
+  strengths:
+    - 33 MP full-frame sensor gives noticeably more cropping headroom than the A7 III class.
+    - 759-point phase-detect autofocus and subject recognition make it dependable for mixed stills and video work.
+    - Dual-card storage, 5.5-stop IBIS, and USB-C PD make it easier to trust on longer paid shoots.
+  tradeoffs:
+    - 4K/60 is a Super 35 crop rather than a full-width full-frame mode.
+    - The body is bigger and pricier than Sony's APS-C options.
+    - Used prices stay relatively firm because the A7 IV is still a current mainstream full-frame body.
+  ownership_notes:
+    maintenance_tips:
+      - Check both card slots with an SD card and, if possible, a CFexpress Type A card before buying used.
+      - Inspect the HDMI micro port and rubber door covers if the body was used on cages, rigs, or external monitors.
+      - Test IBIS at slower shutter speeds and listen for abnormal rattles after shipping impacts.
+    firmware_notes:
+      - Update to the latest Sony system software before judging autofocus behavior, app pairing, or transfer stability.
+images:
+  hero: images/hero.jpg
+  gallery: []
+  comparison_card: null
+  notes:
+    aspect_ratio: 16:9
+    preferred_max_width_px: 1600
+links:
+  manufacturer_product_page: https://electronics.sony.com/imaging/interchangeable-lens-cameras/all-interchangeable-lens-cameras/p/ilce7m4-b
+  manufacturer_support_page: https://www.sony.com/electronics/support/e-mount-body-ilce-7-series/ilce-7m4
+  manual_pdf: null
+  firmware_download_page: https://www.sony.com/electronics/support/e-mount-body-ilce-7-series/ilce-7m4/software/00288929
+  dpreview_product_page: null
+  wikipedia: https://en.wikipedia.org/wiki/Sony_%CE%B17_IV
+  wikidata: null
+provenance:
+  sources:
+    - source_id: sony_a7iv_product
+      source_type: manufacturer
+      source_url: https://electronics.sony.com/imaging/interchangeable-lens-cameras/all-interchangeable-lens-cameras/p/ilce7m4-b
+      retrieved_at: 2026-03-20
+      license: link_only
+      confidence: 0.9
+      notes: Sony Electronics product page with model positioning and body-specific footnotes.
+    - source_id: sony_a7iv_support
+      source_type: manufacturer
+      source_url: https://www.sony.com/electronics/support/e-mount-body-ilce-7-series/ilce-7m4
+      retrieved_at: 2026-03-20
+      license: link_only
+      confidence: 0.9
+      notes: Sony support landing page for downloads, manuals, and product family identity.
+    - source_id: sony_a7iv_specs
+      source_type: manufacturer
+      source_url: https://www.sony.com/electronics/support/e-mount-body-ilce-7-series/ilce-7m4/specifications
+      retrieved_at: 2026-03-20
+      license: link_only
+      confidence: 0.95
+      notes: Sony specifications page used for the core technical fields.
+    - source_id: sony_a7iv_firmware
+      source_type: manufacturer
+      source_url: https://www.sony.com/electronics/support/e-mount-body-ilce-7-series/ilce-7m4/software/00288929
+      retrieved_at: 2026-03-20
+      license: link_only
+      confidence: 0.9
+      notes: Latest Sony firmware download page for current support linkage.
+    - source_id: commons_a7iv_hero
+      source_type: media
+      source_url: https://commons.wikimedia.org/wiki/File:Sony_A7_IV_(ILCE-7M4)_-_by_Henry_S%C3%B6derlund_(51739988735).jpg
+      retrieved_at: 2026-03-20
+      license: CC-BY-2.0
+      confidence: 0.9
+      notes: Candidate hero image with reusable attribution terms.
+  field_sources:
+    release.release_year:
+      source_ids:
+        - sony_a7iv_support
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    classification.mount_code:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.body.dimensions_mm:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.body.weight_with_battery_g:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.body.weather_sealed:
+      source_ids:
+        - sony_a7iv_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.sensor_format:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.sensor_type:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.effective_resolution_mp:
+      source_ids:
+        - sony_a7iv_specs
+        - sony_a7iv_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.total_resolution_mp:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.physical_dimensions_mm:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.native_iso_min:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.native_iso_max:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.boosted_iso_min:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.boosted_iso_max:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.stabilization.cipa_rating_stops:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.autofocus.focus_points_total:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.autofocus.low_light_af_ev:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.display.rear_screen.size_in:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.display.rear_screen.resolution_dots:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.viewfinder.resolution_dots:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.shooting.continuous_drive_fps:
+      source_ids:
+        - sony_a7iv_specs
+        - sony_a7iv_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.video.max_internal.resolution:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.video.max_internal.frame_rate_fps:
+      source_ids:
+        - sony_a7iv_specs
+        - sony_a7iv_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.storage.card_slots:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.storage.slot_1_type:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.storage.slot_2_type:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.connectivity.usb_connector:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.connectivity.hdmi_connector:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.connectivity.wireless:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.power.battery_model:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.power.usb_charging_in_camera:
+      source_ids:
+        - sony_a7iv_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    links.manufacturer_product_page:
+      source_ids:
+        - sony_a7iv_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    links.manufacturer_support_page:
+      source_ids:
+        - sony_a7iv_support
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    links.firmware_download_page:
+      source_ids:
+        - sony_a7iv_firmware
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    images.hero:
+      source_ids:
+        - commons_a7iv_hero
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+review:
+  facts_state: suggested
+  editorial_state: suggested
+  qa_checklist:
+    - Template is digital-only (no film fields).
+    - slug and canonical_url follow /cameras/{slug}.
+    - EU-biased canonical name; alternates are in region_variants/aliases.
+    - If lens_system_type is interchangeable, mount_code is set.
+    - If lens_system_type is fixed, mount_code is null and fixed_lens is set.
+    - Core facts are present and sourced (release_year, sensor_format,
+      resolution).
+    - No placeholder values remain (camera-slug, Brand Name, YYYY-MM-DD).
+  last_reviewed_at: 2026-03-20
+  last_reviewed_by: Codex

@@ -16,11 +16,19 @@ if [[ -z "${DATABASE_URL:-}" ]]; then
 fi
 
 export FF_GOV_ROOT="${FF_GOV_ROOT:-./gov-snapshot}"
+export FF_ACTIVE_CAMERA_BRANDS="${FF_ACTIVE_CAMERA_BRANDS:-sony}"
 
 echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] Running database migrations..."
 node apps/api/src/db/migrate.js
 
-echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] Importing Canon datasheets..."
-node apps/api/src/db/import_camera_datasheets.js --brand-slug canon --confirm
+IFS=',' read -r -a FF_BRAND_LIST <<< "$FF_ACTIVE_CAMERA_BRANDS"
+for raw_brand in "${FF_BRAND_LIST[@]}"; do
+  brand="$(echo "$raw_brand" | xargs)"
+  if [[ -z "$brand" ]]; then
+    continue
+  fi
+  echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] Importing ${brand} datasheets..."
+  node apps/api/src/db/import_camera_datasheets.js --brand-slug "$brand" --confirm
+done
 
 echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] Pre-run complete."

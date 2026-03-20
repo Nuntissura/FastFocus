@@ -1,0 +1,913 @@
+schema_version: "2.0"
+kind: camera_datasheet
+capture_medium: digital
+template_id: digital_camera_datasheet.v5
+status: draft
+requirements:
+  must_have:
+    - identifiers.slug
+    - identifiers.display_name
+    - identifiers.brand_slug
+    - identifiers.model_name
+    - classification.camera_category
+    - classification.lens_system_type
+    - release.release_year
+    - specs.sensor.sensor_format
+    - specs.sensor.effective_resolution_mp
+    - links.manufacturer_product_page
+  must_have_if_interchangeable:
+    - classification.mount_code
+  must_have_if_fixed_lens:
+    - classification.fixed_lens.focal_length_basis
+    - classification.fixed_lens.focal_length_min_mm
+    - classification.fixed_lens.focal_length_max_mm
+    - classification.fixed_lens.max_aperture_wide_f
+    - classification.fixed_lens.max_aperture_tele_f
+identifiers:
+  slug: sony-a6700
+  canonical_url: /cameras/sony-a6700
+  brand_slug: sony
+  brand_name: Sony
+  model_name: A6700
+  display_name: Sony A6700
+  model_family: null
+  aliases: []
+  region_variants:
+    - region_code: global
+      marketing_name: Sony A6700
+      sku: null
+  predecessor_model_slug: null
+  successor_model_slug: null
+classification:
+  camera_category: mirrorless
+  target_segment: hybrid_enthusiast
+  lens_system_type: interchangeable
+  mount_code: sony_e
+  fixed_lens:
+    focal_length_basis: null
+    focal_length_min_mm: null
+    focal_length_max_mm: null
+    max_aperture_wide_f: null
+    max_aperture_tele_f: null
+  use_case_tags:
+    - hybrid_stills_video
+    - travel
+    - wildlife
+    - creator
+release:
+  announce_date: null
+  first_ship_date: null
+  release_year: 2023
+  launch_msrp:
+    body_only:
+      amount: null
+      currency: USD
+      includes_tax: false
+    with_kit_lens:
+      amount: null
+      currency: USD
+      includes_tax: false
+  production:
+    start_year: 2023
+    end_year: null
+    is_discontinued: false
+    confidence: 0.9
+specs:
+  body:
+    body_type: rangefinder_style_mirrorless
+    body_material: null
+    dimensions_mm:
+      w: 122.0
+      h: 69.0
+      d: 75.1
+    weight_with_battery_g: 493
+    weather_sealed: true
+  sensor:
+    sensor_format: aps_c
+    sensor_type: CMOS
+    effective_resolution_mp: 26
+    total_resolution_mp: 27.0
+    max_resolution_px:
+      w: null
+      h: null
+    other_resolutions: []
+    image_ratio:
+      w: null
+      h: null
+    physical_dimensions_mm:
+      w: 23.3
+      h: 15.5
+    sensor_size_notes: null
+    crop_factor: null
+    native_iso_min: 100
+    native_iso_max: 32000
+    boosted_iso_min: 50
+    boosted_iso_max: 102400
+    image_processor:
+      - BIONZ XR
+      - dedicated AI processor
+    color_space: []
+    color_filter_array: null
+  image:
+    white_balance_presets: null
+    custom_white_balance: null
+    uncompressed_format: RAW
+    jpeg_quality_levels:
+      - RAW
+      - JPEG
+      - HEIF
+    file_formats:
+      - JPEG
+      - HEIF
+      - RAW
+  stabilization:
+    image_stabilization: sensor_shift_5_axis
+    ibis: true
+    lens_is: null
+    digital_is: true
+    cipa_rating_stops: 5.0
+    notes: Active and Standard digital stabilization are available for movie capture.
+  optics:
+    optical_zoom_x: null
+    digital_zoom_x: null
+    normal_focus_range_cm:
+      min: null
+      max: null
+    macro_focus_range_cm:
+      min: null
+      max: null
+  autofocus:
+    autofocus_supported: true
+    manual_focus_supported: true
+    focus_method:
+      - phase-detection
+      - contrast-detection
+    focus_points_total: 759
+    phase_detect_points: 759
+    autofocus_assist_lamp: true
+    low_light_af_ev: -3
+    subject_detection:
+      human_eye: true
+      human_face: true
+      animal_eye: true
+  display:
+    live_view: true
+    rear_screen:
+      size_in: 3.0
+      resolution_dots: 1036800
+      touch: true
+      articulation: vari_angle
+      screen_type: TFT
+  viewfinder:
+    type: electronic OLED
+    resolution_dots: 2359296
+    refresh_rate_hz: 120
+    coverage_percent: null
+    magnification: 0.7
+  shutter:
+    min_shutter_speed_s: 30
+    max_shutter_speed_mechanical_s: 0.00025
+    max_shutter_speed_electronic_s: 0.000125
+    flash_sync_speed_s: 0.00625
+  exposure:
+    aperture_priority: true
+    shutter_priority: true
+    manual_exposure_mode: true
+    subject_scene_modes: false
+    exposure_modes:
+      - auto
+      - program
+      - aperture_priority
+      - shutter_priority
+      - manual
+      - slow_and_quick
+    scene_modes: []
+    exposure_compensation_ev:
+      min: -5
+      max: 5
+  flash:
+    built_in: false
+    external: true
+    flash_range_m:
+      min: null
+      max: null
+    modes: []
+  shooting:
+    continuous_drive_fps: 11
+    continuous_fps_mechanical: 11
+    continuous_fps_electronic: 11
+    drive_modes:
+      - single_shot
+      - continuous
+      - self_timer
+    self_timer_seconds:
+      - 2
+      - 5
+      - 10
+    max_buffer_frames:
+      raw: 59
+      jpeg: 143
+  metering:
+    metering_modes:
+      - multi_segment
+  bracketing:
+    ae_bracketing: null
+    wb_bracketing: null
+  video:
+    resolutions:
+      - 4K
+      - Full HD
+    formats:
+      - XAVC S
+      - XAVC HS
+      - XAVC S-I
+    notes: 4K/120 recording uses an approximate 38 percent crop.
+    modes:
+      - proxy_recording
+      - slow_and_quick_motion
+      - USB_streaming
+    microphone: true
+    speaker: true
+    max_internal:
+      resolution: 4K
+      frame_rate_fps: 120
+      bit_depth: 10
+    max_external:
+      raw: null
+    log_profiles: []
+    recording_limit_minutes: null
+  storage:
+    storage_types:
+      - SD UHS-I
+      - SD UHS-II
+    card_slots: 1
+    slot_1_type: SD UHS-I or UHS-II
+    slot_2_type: null
+  connectivity:
+    usb_connector: USB Type-C
+    usb_charging_supported: true
+    hdmi_connector: micro HDMI Type-D
+    mic_input_3_5mm: true
+    headphone_output_3_5mm: true
+    wifi: true
+    bluetooth: true
+    wireless: Wi-Fi 2.4 GHz / 5 GHz and Bluetooth 4.2
+    wireless_notes: 5 GHz communication may be restricted in some countries and regions.
+    remote_control:
+      - Bluetooth remote
+      - smartphone
+      - PC
+    hot_shoe: true
+    pc_sync_port: false
+  power:
+    battery_model: NP-FZ100
+    battery_description: One rechargeable battery pack NP-FZ100
+    battery_life_cipa_shots: 570
+    usb_charging_in_camera: true
+  durability:
+    shutter_rating_cycles: null
+  other_features:
+    orientation_sensor: null
+    timelapse_recording: true
+    gps: null
+    gps_notes: null
+display:
+  summary_badges:
+    - classification.camera_category
+    - release.release_year
+    - specs.sensor.sensor_format
+    - specs.sensor.effective_resolution_mp
+    - specs.shooting.continuous_drive_fps
+    - specs.video.max_internal.resolution
+  comparison_sections:
+    - section_id: basic_information
+      label: Basic Information
+      rows:
+        - label: Announced
+          field_paths:
+            - release.announce_date
+        - label: Review / Preview
+          field_paths:
+            - links.dpreview_product_page
+    - section_id: price
+      label: Price
+      rows:
+        - label: MSRP
+          field_paths:
+            - release.launch_msrp.body_only
+    - section_id: body_type
+      label: Body type
+      rows:
+        - label: Body type
+          field_paths:
+            - specs.body.body_type
+        - label: Body material
+          field_paths:
+            - specs.body.body_material
+    - section_id: sensor
+      label: Sensor
+      rows:
+        - label: Max resolution
+          field_paths:
+            - specs.sensor.max_resolution_px
+        - label: Other resolutions
+          field_paths:
+            - specs.sensor.other_resolutions
+        - label: Image ratio w:h
+          field_paths:
+            - specs.sensor.image_ratio
+        - label: Effective pixels
+          field_paths:
+            - specs.sensor.effective_resolution_mp
+        - label: Sensor photo detectors
+          field_paths:
+            - specs.sensor.total_resolution_mp
+        - label: Sensor size
+          field_paths:
+            - specs.sensor.sensor_format
+            - specs.sensor.physical_dimensions_mm
+        - label: Sensor size notes
+          field_paths:
+            - specs.sensor.sensor_size_notes
+        - label: Sensor type
+          field_paths:
+            - specs.sensor.sensor_type
+        - label: Processor
+          field_paths:
+            - specs.sensor.image_processor
+        - label: Color space
+          field_paths:
+            - specs.sensor.color_space
+        - label: Color filter array
+          field_paths:
+            - specs.sensor.color_filter_array
+    - section_id: image
+      label: Image
+      rows:
+        - label: ISO
+          field_paths:
+            - specs.sensor.native_iso_min
+            - specs.sensor.native_iso_max
+        - label: Boosted ISO (minimum)
+          field_paths:
+            - specs.sensor.boosted_iso_min
+        - label: Boosted ISO (maximum)
+          field_paths:
+            - specs.sensor.boosted_iso_max
+        - label: White balance presets
+          field_paths:
+            - specs.image.white_balance_presets
+        - label: Custom white balance
+          field_paths:
+            - specs.image.custom_white_balance
+        - label: Image stabilization
+          field_paths:
+            - specs.stabilization.image_stabilization
+        - label: Image stabilization notes
+          field_paths:
+            - specs.stabilization.notes
+        - label: CIPA image stabilization rating
+          field_paths:
+            - specs.stabilization.cipa_rating_stops
+        - label: Uncompressed format
+          field_paths:
+            - specs.image.uncompressed_format
+        - label: JPEG quality levels
+          field_paths:
+            - specs.image.jpeg_quality_levels
+        - label: File format
+          field_paths:
+            - specs.image.file_formats
+    - section_id: optics_and_focus
+      label: Optics & Focus
+      rows:
+        - label: Focal length (equiv.)
+          field_paths:
+            - classification.fixed_lens.focal_length_basis
+            - classification.fixed_lens.focal_length_min_mm
+            - classification.fixed_lens.focal_length_max_mm
+        - label: Optical zoom
+          field_paths:
+            - specs.optics.optical_zoom_x
+        - label: Maximum aperture
+          field_paths:
+            - classification.fixed_lens.max_aperture_wide_f
+            - classification.fixed_lens.max_aperture_tele_f
+        - label: Autofocus
+          field_paths:
+            - specs.autofocus.autofocus_supported
+        - label: Autofocus assist lamp
+          field_paths:
+            - specs.autofocus.autofocus_assist_lamp
+        - label: Digital zoom
+          field_paths:
+            - specs.optics.digital_zoom_x
+        - label: Manual focus
+          field_paths:
+            - specs.autofocus.manual_focus_supported
+        - label: Normal focus range
+          field_paths:
+            - specs.optics.normal_focus_range_cm
+        - label: Macro focus range
+          field_paths:
+            - specs.optics.macro_focus_range_cm
+        - label: Number of focus points
+          field_paths:
+            - specs.autofocus.focus_points_total
+        - label: Lens mount
+          field_paths:
+            - classification.mount_code
+        - label: Focal length multiplier
+          field_paths:
+            - specs.sensor.crop_factor
+    - section_id: screen_viewfinder
+      label: Screen / viewfinder
+      rows:
+        - label: Articulated LCD
+          field_paths:
+            - specs.display.rear_screen.articulation
+        - label: Screen size
+          field_paths:
+            - specs.display.rear_screen.size_in
+        - label: Screen dots
+          field_paths:
+            - specs.display.rear_screen.resolution_dots
+        - label: Touch screen
+          field_paths:
+            - specs.display.rear_screen.touch
+        - label: Screen type
+          field_paths:
+            - specs.display.rear_screen.screen_type
+        - label: Live view
+          field_paths:
+            - specs.display.live_view
+        - label: Viewfinder type
+          field_paths:
+            - specs.viewfinder.type
+        - label: Viewfinder coverage
+          field_paths:
+            - specs.viewfinder.coverage_percent
+        - label: Viewfinder magnification
+          field_paths:
+            - specs.viewfinder.magnification
+        - label: Viewfinder resolution
+          field_paths:
+            - specs.viewfinder.resolution_dots
+    - section_id: photography_features
+      label: Photography features
+      rows:
+        - label: Minimum shutter speed
+          field_paths:
+            - specs.shutter.min_shutter_speed_s
+        - label: Maximum shutter speed
+          field_paths:
+            - specs.shutter.max_shutter_speed_mechanical_s
+        - label: Maximum shutter speed (electronic)
+          field_paths:
+            - specs.shutter.max_shutter_speed_electronic_s
+        - label: Aperture priority
+          field_paths:
+            - specs.exposure.aperture_priority
+        - label: Shutter priority
+          field_paths:
+            - specs.exposure.shutter_priority
+        - label: Manual exposure mode
+          field_paths:
+            - specs.exposure.manual_exposure_mode
+        - label: Subject / scene modes
+          field_paths:
+            - specs.exposure.subject_scene_modes
+        - label: Exposure modes
+          field_paths:
+            - specs.exposure.exposure_modes
+        - label: Scene modes
+          field_paths:
+            - specs.exposure.scene_modes
+        - label: Built-in flash
+          field_paths:
+            - specs.flash.built_in
+        - label: Flash range
+          field_paths:
+            - specs.flash.flash_range_m
+        - label: External flash
+          field_paths:
+            - specs.flash.external
+        - label: Flash modes
+          field_paths:
+            - specs.flash.modes
+        - label: Flash X sync speed
+          field_paths:
+            - specs.shutter.flash_sync_speed_s
+        - label: Drive modes
+          field_paths:
+            - specs.shooting.drive_modes
+        - label: Continuous drive
+          field_paths:
+            - specs.shooting.continuous_drive_fps
+        - label: Self-timer
+          field_paths:
+            - specs.shooting.self_timer_seconds
+        - label: Metering modes
+          field_paths:
+            - specs.metering.metering_modes
+        - label: Exposure compensation
+          field_paths:
+            - specs.exposure.exposure_compensation_ev
+        - label: AE Bracketing
+          field_paths:
+            - specs.bracketing.ae_bracketing
+        - label: WB Bracketing
+          field_paths:
+            - specs.bracketing.wb_bracketing
+    - section_id: videography_features
+      label: Videography features
+      rows:
+        - label: Resolutions
+          field_paths:
+            - specs.video.resolutions
+        - label: Format
+          field_paths:
+            - specs.video.formats
+        - label: Videography notes
+          field_paths:
+            - specs.video.notes
+        - label: Modes
+          field_paths:
+            - specs.video.modes
+        - label: Microphone
+          field_paths:
+            - specs.video.microphone
+        - label: Speaker
+          field_paths:
+            - specs.video.speaker
+    - section_id: storage
+      label: Storage
+      rows:
+        - label: Storage types
+          field_paths:
+            - specs.storage.storage_types
+    - section_id: connectivity
+      label: Connectivity
+      rows:
+        - label: USB
+          field_paths:
+            - specs.connectivity.usb_connector
+        - label: USB charging
+          field_paths:
+            - specs.connectivity.usb_charging_supported
+        - label: HDMI
+          field_paths:
+            - specs.connectivity.hdmi_connector
+        - label: Microphone port
+          field_paths:
+            - specs.connectivity.mic_input_3_5mm
+        - label: Headphone port
+          field_paths:
+            - specs.connectivity.headphone_output_3_5mm
+        - label: Wireless
+          field_paths:
+            - specs.connectivity.wireless
+        - label: Wireless notes
+          field_paths:
+            - specs.connectivity.wireless_notes
+        - label: Remote control
+          field_paths:
+            - specs.connectivity.remote_control
+    - section_id: physical
+      label: Physical
+      rows:
+        - label: Environmentally sealed
+          field_paths:
+            - specs.body.weather_sealed
+        - label: Battery
+          field_paths:
+            - specs.power.battery_model
+        - label: Battery description
+          field_paths:
+            - specs.power.battery_description
+        - label: Battery Life (CIPA)
+          field_paths:
+            - specs.power.battery_life_cipa_shots
+        - label: Weight (inc. batteries)
+          field_paths:
+            - specs.body.weight_with_battery_g
+        - label: Dimensions
+          field_paths:
+            - specs.body.dimensions_mm
+    - section_id: other_features
+      label: Other features
+      rows:
+        - label: Orientation sensor
+          field_paths:
+            - specs.other_features.orientation_sensor
+        - label: Timelapse recording
+          field_paths:
+            - specs.other_features.timelapse_recording
+        - label: GPS
+          field_paths:
+            - specs.other_features.gps
+        - label: GPS notes
+          field_paths:
+            - specs.other_features.gps_notes
+content_modules:
+  bio: The Sony a6700 is the compact APS-C Alpha body for buyers who want modern subject recognition, strong stills speed, and unusually deep video tools without moving up to a heavier full-frame kit.
+  used_buying_checklist:
+    - code: check_sensor_and_screen
+      label: Inspect sensor, LCD/EVF, and test for dead/hot pixels.
+      severity: high
+    - code: check_shutter_and_controls
+      label: Test shutter, front dial, rear wheel, AF joystick, and the record button because compact Sony bodies see heavy one-handed use.
+      severity: high
+    - code: check_ports_and_card_slot
+      label: Check the SD slot, HDMI micro, USB-C, and audio ports for bent contacts or loose fit from cages and microphones.
+      severity: medium
+    - code: check_battery_and_charging
+      label: Confirm NP-FZ100 health and verify USB-C charging or power delivery behaves normally.
+      severity: medium
+  known_issues: []
+editorial_modules:
+  recommended_for:
+    - Buyers who want a small travel-friendly body without giving up modern autofocus and serious video features.
+    - Wildlife or family shooters who benefit from APS-C reach, 11 fps bursts, and strong subject recognition.
+    - Creators who want 10-bit 4K and USB streaming in a lighter, cheaper package than Sony full-frame bodies.
+  not_ideal_for:
+    - Buyers who strongly prefer dual-card storage for paid work.
+    - Anyone who dislikes micro HDMI durability or small-body ergonomics with larger lenses.
+    - People chasing the lowest used prices, because the a6700 remains current and relatively expensive second-hand.
+  strengths:
+    - Excellent autofocus and subject recognition for an APS-C body.
+    - 4K/120, 10-bit codecs, and USB streaming make it unusually capable for solo creators.
+    - Compact size keeps the overall Sony E-mount travel kit lighter than comparable full-frame setups.
+  tradeoffs:
+    - Only one card slot, which limits redundancy for critical paid work.
+    - The EVF is functional rather than luxurious compared with Sony's pricier bodies.
+    - 4K/120 uses a crop, and the compact grip can feel cramped with heavier lenses.
+  ownership_notes:
+    maintenance_tips:
+      - Test the card slot door and latch carefully because single-slot bodies often see more repeated use.
+      - Inspect the HDMI micro port if the camera was used with external monitors or capture cards.
+      - Try your heaviest intended lens on the body before buying if grip comfort matters to you.
+    firmware_notes:
+      - Install the latest Sony firmware before evaluating smartphone transfer reliability, LUT behavior, or Wi-Fi stability.
+images:
+  hero: images/hero.jpg
+  gallery: []
+  comparison_card: null
+  notes:
+    aspect_ratio: 16:9
+    preferred_max_width_px: 1600
+links:
+  manufacturer_product_page: https://electronics.sony.com/imaging/interchangeable-lens-cameras/aps-c/p/ilce6700-b
+  manufacturer_support_page: https://www.sony.com/electronics/support/e-mount-body-ilce-6000-series/ilce-6700
+  manual_pdf: null
+  firmware_download_page: https://www.sony.com/electronics/support/e-mount-body-ilce-6000-series/ilce-6700/software/00298441
+  dpreview_product_page: null
+  wikipedia: null
+  wikidata: null
+provenance:
+  sources:
+    - source_id: sony_a6700_product
+      source_type: manufacturer
+      source_url: https://electronics.sony.com/imaging/interchangeable-lens-cameras/aps-c/p/ilce6700-b
+      retrieved_at: 2026-03-20
+      license: link_only
+      confidence: 0.95
+      notes: Sony Electronics product page with body-only positioning, feature summary, and dust/moisture footnote.
+    - source_id: sony_a6700_support
+      source_type: manufacturer
+      source_url: https://www.sony.com/electronics/support/e-mount-body-ilce-6000-series/ilce-6700
+      retrieved_at: 2026-03-20
+      license: link_only
+      confidence: 0.9
+      notes: Sony support landing page with model family, manuals, and current support state.
+    - source_id: sony_a6700_specs
+      source_type: manufacturer
+      source_url: https://www.sony.com/electronics/support/e-mount-body-ilce-6000-series/ilce-6700/specifications
+      retrieved_at: 2026-03-20
+      license: link_only
+      confidence: 0.95
+      notes: Sony specifications page used for technical field values.
+    - source_id: sony_a6700_firmware
+      source_type: manufacturer
+      source_url: https://www.sony.com/electronics/support/e-mount-body-ilce-6000-series/ilce-6700/software/00298441
+      retrieved_at: 2026-03-20
+      license: link_only
+      confidence: 0.9
+      notes: Latest Sony firmware page for the a6700 family.
+    - source_id: commons_a6700_hero
+      source_type: media
+      source_url: https://commons.wikimedia.org/wiki/File:Sony_A6700_by_Henry_S%C3%B6derlund.jpg
+      retrieved_at: 2026-03-20
+      license: CC-BY-2.0
+      confidence: 0.95
+      notes: Valued Wikimedia Commons image with reusable attribution.
+  field_sources:
+    release.release_year:
+      source_ids:
+        - sony_a6700_support
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    classification.mount_code:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.body.dimensions_mm:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.body.weight_with_battery_g:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.body.weather_sealed:
+      source_ids:
+        - sony_a6700_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.sensor_format:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.sensor_type:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.effective_resolution_mp:
+      source_ids:
+        - sony_a6700_specs
+        - sony_a6700_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.total_resolution_mp:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.native_iso_min:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.native_iso_max:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.boosted_iso_min:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.boosted_iso_max:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.image_processor:
+      source_ids:
+        - sony_a6700_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.stabilization.cipa_rating_stops:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.autofocus.focus_points_total:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.autofocus.low_light_af_ev:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.display.rear_screen.size_in:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.display.rear_screen.resolution_dots:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.viewfinder.resolution_dots:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.shooting.continuous_drive_fps:
+      source_ids:
+        - sony_a6700_specs
+        - sony_a6700_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.video.max_internal.frame_rate_fps:
+      source_ids:
+        - sony_a6700_specs
+        - sony_a6700_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.storage.card_slots:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.connectivity.usb_connector:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.connectivity.hdmi_connector:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.connectivity.wireless:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.power.battery_model:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.power.battery_life_cipa_shots:
+      source_ids:
+        - sony_a6700_specs
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    links.manufacturer_product_page:
+      source_ids:
+        - sony_a6700_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    links.manufacturer_support_page:
+      source_ids:
+        - sony_a6700_support
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    links.firmware_download_page:
+      source_ids:
+        - sony_a6700_firmware
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    images.hero:
+      source_ids:
+        - commons_a6700_hero
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+review:
+  facts_state: suggested
+  editorial_state: suggested
+  qa_checklist:
+    - Template is digital-only (no film fields).
+    - slug and canonical_url follow /cameras/{slug}.
+    - EU-biased canonical name; alternates are in region_variants/aliases.
+    - If lens_system_type is interchangeable, mount_code is set.
+    - If lens_system_type is fixed, mount_code is null and fixed_lens is set.
+    - Core facts are present and sourced (release_year, sensor_format,
+      resolution).
+    - No placeholder values remain (camera-slug, Brand Name, YYYY-MM-DD).
+  last_reviewed_at: 2026-03-20
+  last_reviewed_by: Codex
