@@ -39,6 +39,10 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function run(cmd, args, { cwd, env, label } = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(cmd, args, {
@@ -100,7 +104,60 @@ async function main() {
   const databaseUrl = envString("DATABASE_URL", defaultDatabaseUrl);
   const adminToken = envString("FF_ADMIN_TOKEN", "dev-admin");
   const observedDate = envString("FF_PRICE_BANDS_DATE", utcTodayDate());
-  const activeCameraBrands = parseCsv(envString("FF_ACTIVE_CAMERA_BRANDS", "sony,nikon"));
+  const activeCameraBrands = parseCsv(
+    envString("FF_ACTIVE_CAMERA_BRANDS", "sony,nikon,fujifilm,panasonic,olympus,om-system,canon"),
+  );
+  const brandFixtures = {
+    sony: {
+      brand: "sony",
+      cameraSlug: "sony-a7-iv",
+      cameraLabel: "Sony A7 IV",
+      compareSlug: "sony-a7-iv-vs-sony-a7-c-ii",
+      compareLabels: ["Sony A7 IV", "Sony A7C II"],
+    },
+    nikon: {
+      brand: "nikon",
+      cameraSlug: "nikon-z8",
+      cameraLabel: "Nikon Z8",
+      compareSlug: "nikon-z8-vs-nikon-z6-iii",
+      compareLabels: ["Nikon Z8", "Nikon Z6 III"],
+    },
+    fujifilm: {
+      brand: "fujifilm",
+      cameraSlug: "fujifilm-x-s20",
+      cameraLabel: "Fujifilm X-S20",
+      compareSlug: "fujifilm-x-s20-vs-fujifilm-x-h2",
+      compareLabels: ["Fujifilm X-S20", "Fujifilm X-H2"],
+    },
+    panasonic: {
+      brand: "panasonic",
+      cameraSlug: "panasonic-lumix-s5-ii",
+      cameraLabel: "Panasonic Lumix S5 II",
+      compareSlug: "panasonic-lumix-s5-ii-vs-panasonic-lumix-s5",
+      compareLabels: ["Panasonic Lumix S5 II", "Panasonic Lumix S5"],
+    },
+    olympus: {
+      brand: "olympus",
+      cameraSlug: "olympus-om-d-e-m1-mark-iii",
+      cameraLabel: "Olympus OM-D E-M1 Mark III",
+      compareSlug: "olympus-om-d-e-m1-mark-iii-vs-olympus-om-d-e-m1-mark-ii",
+      compareLabels: ["Olympus OM-D E-M1 Mark III", "Olympus OM-D E-M1 Mark II"],
+    },
+    "om-system": {
+      brand: "om-system",
+      cameraSlug: "om-system-om-1-mark-ii",
+      cameraLabel: "OM System OM-1 Mark II",
+      compareSlug: "om-system-om-1-mark-ii-vs-om-system-om-1",
+      compareLabels: ["OM System OM-1 Mark II", "OM System OM-1"],
+    },
+    canon: {
+      brand: "canon",
+      cameraSlug: "canon-eos-r5",
+      cameraLabel: "Canon EOS R5",
+      compareSlug: "canon-eos-r5-vs-canon-eos-r6",
+      compareLabels: ["Canon EOS R5", "Canon EOS R6"],
+    },
+  };
 
   await ensureDependenciesInstalled(repoRoot);
 
@@ -178,57 +235,55 @@ async function main() {
       assert(typeof json.status.batch_refresh.max_age_hours === "number", "expected max_age_hours number");
     }
 
-    {
-      const { res, json } = await fetchJson(`${baseUrl}/api/v1/cameras?brand=sony&limit=6`);
-      assert(res.status === 200, `/api/v1/cameras?brand=sony expected 200, got ${res.status}`);
-      assert(json.ok === true, "/api/v1/cameras ok=true for sony");
-      assert(Array.isArray(json.cameras), "/api/v1/cameras sony cameras is array");
-      assert(json.cameras.length >= 1, "expected at least 1 sony camera");
-    }
-
-    if (activeCameraBrands.includes("nikon")) {
-      const { res, json } = await fetchJson(`${baseUrl}/api/v1/cameras?brand=nikon&limit=6`);
-      assert(res.status === 200, `/api/v1/cameras?brand=nikon expected 200, got ${res.status}`);
-      assert(json.ok === true, "/api/v1/cameras ok=true for nikon");
-      assert(Array.isArray(json.cameras), "/api/v1/cameras nikon cameras is array");
-      assert(json.cameras.length >= 1, "expected at least 1 nikon camera");
+    for (const brandSlug of activeCameraBrands) {
+      const fixture = brandFixtures[brandSlug];
+      if (!fixture) continue;
+      const { res, json } = await fetchJson(`${baseUrl}/api/v1/cameras?brand=${encodeURIComponent(fixture.brand)}&limit=6`);
+      assert(res.status === 200, `/api/v1/cameras?brand=${fixture.brand} expected 200, got ${res.status}`);
+      assert(json.ok === true, `/api/v1/cameras ok=true for ${fixture.brand}`);
+      assert(Array.isArray(json.cameras), `/api/v1/cameras ${fixture.brand} cameras is array`);
+      assert(json.cameras.length >= 1, `expected at least 1 ${fixture.brand} camera`);
     }
 
     {
       const { res, html } = await fetchHtml(`${baseUrl}/`);
       assert(res.status === 200, `/ expected 200, got ${res.status}`);
-      assert(/Sony A7 IV|Sony A7 III|Sony A7C II/i.test(html), "expected homepage to show at least one Sony model");
+      const homepageLabels = activeCameraBrands
+        .map((brandSlug) => brandFixtures[brandSlug]?.cameraLabel)
+        .filter(Boolean)
+        .map((label) => escapeRegExp(label));
+      assert(
+        new RegExp(homepageLabels.join("|"), "i").test(html),
+        "expected homepage to show at least one active-brand model",
+      );
       assert(/Best current eBay deals|Fresh eBay arrivals|Browse camera pages/i.test(html), "expected homepage utility sections");
     }
 
-    {
-      const { res, html } = await fetchHtml(`${baseUrl}/cameras/sony-a7-iv`);
-      assert(res.status === 200, `/cameras/sony-a7-iv expected 200, got ${res.status}`);
-      assert(/Sony A7 IV/i.test(html), "expected camera page to contain Sony A7 IV");
-      assert(/<h2>Specs<\/h2>/i.test(html), "expected Sony camera page to render Specs section");
-      assert(/Typical used price/i.test(html), "expected Sony camera page to render price band card");
-      assert(/<h2>Listings<\/h2>/i.test(html), "expected Sony camera page to render Listings section");
-    }
+    for (const brandSlug of activeCameraBrands) {
+      const fixture = brandFixtures[brandSlug];
+      if (!fixture) continue;
 
-    if (activeCameraBrands.includes("nikon")) {
-      const { res, html } = await fetchHtml(`${baseUrl}/cameras/nikon-z8`);
-      assert(res.status === 200, `/cameras/nikon-z8 expected 200, got ${res.status}`);
-      assert(/Nikon Z8/i.test(html), "expected Nikon camera page to contain Nikon Z8");
-      assert(/<h2>Specs<\/h2>/i.test(html), "expected Nikon camera page to render Specs section");
-    }
+      {
+        const { res, html } = await fetchHtml(`${baseUrl}/cameras/${fixture.cameraSlug}`);
+        assert(res.status === 200, `/cameras/${fixture.cameraSlug} expected 200, got ${res.status}`);
+        assert(new RegExp(escapeRegExp(fixture.cameraLabel), "i").test(html), `expected camera page to contain ${fixture.cameraLabel}`);
+        assert(/<h2>Specs<\/h2>/i.test(html), `expected ${fixture.cameraSlug} page to render Specs section`);
+      }
 
-    {
-      const { res, html } = await fetchHtml(`${baseUrl}/compare/sony-a7-iv-vs-sony-a7-c-ii`);
-      assert(res.status === 200, `/compare/sony-a7-iv-vs-sony-a7-c-ii expected 200, got ${res.status}`);
-      assert(/Sony A7 IV/i.test(html), "expected compare page to contain Sony A7 IV");
-      assert(/Sony A7C II/i.test(html), "expected compare page to contain Sony A7C II");
-    }
+      {
+        const { res, html } = await fetchHtml(`${baseUrl}/compare/${fixture.compareSlug}`);
+        assert(res.status === 200, `/compare/${fixture.compareSlug} expected 200, got ${res.status}`);
+        for (const compareLabel of fixture.compareLabels) {
+          assert(new RegExp(escapeRegExp(compareLabel), "i").test(html), `expected compare page to contain ${compareLabel}`);
+        }
+      }
 
-    if (activeCameraBrands.includes("nikon")) {
-      const { res, html } = await fetchHtml(`${baseUrl}/compare/nikon-z8-vs-nikon-z6-iii`);
-      assert(res.status === 200, `/compare/nikon-z8-vs-nikon-z6-iii expected 200, got ${res.status}`);
-      assert(/Nikon Z8/i.test(html), "expected compare page to contain Nikon Z8");
-      assert(/Nikon Z6 III/i.test(html), "expected compare page to contain Nikon Z6 III");
+      if (fixture.cameraSlug === "sony-a7-iv") {
+        const { res, html } = await fetchHtml(`${baseUrl}/cameras/sony-a7-iv`);
+        assert(res.status === 200, `/cameras/sony-a7-iv expected 200, got ${res.status}`);
+        assert(/Typical used price/i.test(html), "expected Sony camera page to render price band card");
+        assert(/<h2>Listings<\/h2>/i.test(html), "expected Sony camera page to render Listings section");
+      }
     }
 
     let listingId;

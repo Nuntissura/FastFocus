@@ -1,0 +1,850 @@
+schema_version: "2.0"
+kind: camera_datasheet
+capture_medium: digital
+template_id: digital_camera_datasheet.v5
+status: draft
+requirements:
+  must_have:
+    - identifiers.slug
+    - identifiers.display_name
+    - identifiers.brand_slug
+    - identifiers.model_name
+    - classification.camera_category
+    - classification.lens_system_type
+    - release.release_year
+    - specs.sensor.sensor_format
+    - specs.sensor.effective_resolution_mp
+    - links.manufacturer_product_page
+  must_have_if_interchangeable:
+    - classification.mount_code
+  must_have_if_fixed_lens:
+    - classification.fixed_lens.focal_length_basis
+    - classification.fixed_lens.focal_length_min_mm
+    - classification.fixed_lens.focal_length_max_mm
+    - classification.fixed_lens.max_aperture_wide_f
+    - classification.fixed_lens.max_aperture_tele_f
+identifiers:
+  slug: fujifilm-x-h2
+  canonical_url: /cameras/fujifilm-x-h2
+  brand_slug: fujifilm
+  brand_name: Fujifilm
+  model_name: X-H2
+  display_name: Fujifilm X-H2
+  model_family: null
+  aliases: []
+  region_variants:
+    - region_code: global
+      marketing_name: Fujifilm X-H2
+      sku: null
+  predecessor_model_slug: null
+  successor_model_slug: null
+classification:
+  camera_category: mirrorless
+  target_segment: professional
+  lens_system_type: interchangeable
+  mount_code: fujifilm_x
+  fixed_lens:
+    focal_length_basis: null
+    focal_length_min_mm: null
+    focal_length_max_mm: null
+    max_aperture_wide_f: null
+    max_aperture_tele_f: null
+  use_case_tags:
+    - commercial
+    - landscape
+    - hybrid_stills_video
+    - wildlife
+release:
+  announce_date: null
+  first_ship_date: null
+  release_year: 2022
+  launch_msrp:
+    body_only:
+      amount: null
+      currency: USD
+      includes_tax: false
+    with_kit_lens:
+      amount: null
+      currency: USD
+      includes_tax: false
+  production:
+    start_year: 2022
+    end_year: null
+    is_discontinued: false
+    confidence: 0.9
+specs:
+  body:
+    body_type: slr_style_mirrorless
+    body_material: null
+    dimensions_mm:
+      w: 136.3
+      h: 92.9
+      d: 84.6
+    weight_with_battery_g: 660
+    weather_sealed: true
+  sensor:
+    sensor_format: aps_c
+    sensor_type: X-Trans CMOS 5 HR
+    effective_resolution_mp: 40.2
+    total_resolution_mp: 40.2
+    max_resolution_px:
+      w: 7728
+      h: 5152
+    other_resolutions: []
+    image_ratio:
+      w: 3
+      h: 2
+    physical_dimensions_mm:
+      w: 23.5
+      h: 15.6
+    sensor_size_notes: High-resolution 40 MP APS-C sensor for buyers who care about
+      detail and cropping headroom more than raw speed.
+    crop_factor: 1.5
+    native_iso_min: 125
+    native_iso_max: 12800
+    boosted_iso_min: 64
+    boosted_iso_max: 51200
+    image_processor:
+      - X-Processor 5
+    color_space:
+      - sRGB
+      - Adobe RGB
+    color_filter_array: X-Trans
+  image:
+    white_balance_presets: null
+    custom_white_balance: null
+    uncompressed_format: RAW
+    jpeg_quality_levels: []
+    file_formats:
+      - JPEG
+      - HEIF
+      - RAW
+  stabilization:
+    image_stabilization: sensor_shift_5_axis
+    ibis: true
+    lens_is: null
+    digital_is: null
+    cipa_rating_stops: 7
+    notes: This is the Fujifilm body to prioritize when you want maximum APS-C
+      detail and a serious body shape rather than the smallest carry package.
+  optics:
+    optical_zoom_x: null
+    digital_zoom_x: null
+    normal_focus_range_cm:
+      min: null
+      max: null
+    macro_focus_range_cm:
+      min: null
+      max: null
+  autofocus:
+    autofocus_supported: true
+    manual_focus_supported: true
+    focus_method:
+      - phase-detection
+      - contrast-detection
+    focus_points_total: 425
+    phase_detect_points: 425
+    autofocus_assist_lamp: null
+    low_light_af_ev: null
+    subject_detection:
+      human_eye: true
+      human_face: true
+      animal_eye: true
+  display:
+    live_view: true
+    rear_screen:
+      size_in: 3
+      resolution_dots: 1620000
+      touch: true
+      articulation: vari_angle
+      screen_type: TFT LCD
+  viewfinder:
+    type: electronic OLED
+    resolution_dots: 5760000
+    refresh_rate_hz: null
+    coverage_percent: 100
+    magnification: 0.8
+  shutter:
+    min_shutter_speed_s: null
+    max_shutter_speed_mechanical_s: 0.000125
+    max_shutter_speed_electronic_s: 0.00018
+    flash_sync_speed_s: 0.004
+  exposure:
+    aperture_priority: true
+    shutter_priority: true
+    manual_exposure_mode: true
+    subject_scene_modes: false
+    exposure_modes:
+      - auto
+      - program
+      - aperture_priority
+      - shutter_priority
+      - manual
+    scene_modes: []
+    exposure_compensation_ev:
+      min: -5
+      max: 5
+  flash:
+    built_in: false
+    external: true
+    flash_range_m:
+      min: null
+      max: null
+    modes: []
+  shooting:
+    continuous_drive_fps: 20
+    continuous_fps_mechanical: 15
+    continuous_fps_electronic: 20
+    drive_modes:
+      - single_shot
+      - continuous
+      - self_timer
+      - bracketing
+      - panorama
+    self_timer_seconds:
+      - 2
+      - 10
+    max_buffer_frames:
+      raw: null
+      jpeg: null
+  metering:
+    metering_modes:
+      - multi
+      - spot
+      - average
+      - center_weighted
+  bracketing:
+    ae_bracketing: true
+    wb_bracketing: true
+  video:
+    resolutions:
+      - 8K
+      - 6.2K
+      - 4K
+      - Full HD
+    formats:
+      - MOV
+      - MP4
+    notes: "The X-H2 is the high-resolution Fujifilm APS-C flagship: better for
+      landscape, studio detail, and flexible cropping than for maximum readout
+      speed."
+    modes:
+      - F-Log2
+      - open gate
+      - ProRes external workflows
+    microphone: true
+    speaker: true
+    max_internal:
+      resolution: 8K
+      frame_rate_fps: 30
+      bit_depth: 10
+    max_external:
+      raw: null
+    log_profiles:
+      - F-Log
+      - F-Log2
+      - HLG
+    recording_limit_minutes: null
+  storage:
+    storage_types:
+      - CFexpress Type B
+      - SD UHS-II
+    card_slots: 2
+    slot_1_type: CFexpress Type B
+    slot_2_type: SD UHS-II
+  connectivity:
+    usb_connector: USB Type-C
+    usb_charging_supported: true
+    hdmi_connector: full HDMI
+    mic_input_3_5mm: true
+    headphone_output_3_5mm: true
+    wifi: true
+    bluetooth: true
+    wireless: Wi-Fi and Bluetooth
+    wireless_notes: Pairs best with buyers who will actually use Fujifilm's pro-body
+      tethering, remote, or hybrid workflows.
+    remote_control:
+      - smartphone
+    hot_shoe: true
+    pc_sync_port: null
+  power:
+    battery_model: NP-W235
+    battery_description: One rechargeable battery pack NP-W235
+    battery_life_cipa_shots: null
+    usb_charging_in_camera: true
+  durability:
+    shutter_rating_cycles: null
+  other_features:
+    orientation_sensor: null
+    timelapse_recording: true
+    gps: null
+    gps_notes: null
+display:
+  summary_badges:
+    - classification.camera_category
+    - release.release_year
+    - specs.sensor.sensor_format
+    - specs.sensor.effective_resolution_mp
+    - specs.shooting.continuous_drive_fps
+    - specs.video.max_internal.resolution
+  comparison_sections:
+    - section_id: basic_information
+      label: Basic Information
+      rows:
+        - label: Announced
+          field_paths:
+            - release.announce_date
+        - label: Review / Preview
+          field_paths:
+            - links.dpreview_product_page
+    - section_id: price
+      label: Price
+      rows:
+        - label: MSRP
+          field_paths:
+            - release.launch_msrp.body_only
+    - section_id: body_type
+      label: Body type
+      rows:
+        - label: Body type
+          field_paths:
+            - specs.body.body_type
+        - label: Body material
+          field_paths:
+            - specs.body.body_material
+    - section_id: sensor
+      label: Sensor
+      rows:
+        - label: Max resolution
+          field_paths:
+            - specs.sensor.max_resolution_px
+        - label: Other resolutions
+          field_paths:
+            - specs.sensor.other_resolutions
+        - label: Image ratio w:h
+          field_paths:
+            - specs.sensor.image_ratio
+        - label: Effective pixels
+          field_paths:
+            - specs.sensor.effective_resolution_mp
+        - label: Sensor photo detectors
+          field_paths:
+            - specs.sensor.total_resolution_mp
+        - label: Sensor size
+          field_paths:
+            - specs.sensor.sensor_format
+            - specs.sensor.physical_dimensions_mm
+        - label: Sensor size notes
+          field_paths:
+            - specs.sensor.sensor_size_notes
+        - label: Sensor type
+          field_paths:
+            - specs.sensor.sensor_type
+        - label: Processor
+          field_paths:
+            - specs.sensor.image_processor
+        - label: Color space
+          field_paths:
+            - specs.sensor.color_space
+        - label: Color filter array
+          field_paths:
+            - specs.sensor.color_filter_array
+    - section_id: image
+      label: Image
+      rows:
+        - label: ISO
+          field_paths:
+            - specs.sensor.native_iso_min
+            - specs.sensor.native_iso_max
+        - label: Boosted ISO (minimum)
+          field_paths:
+            - specs.sensor.boosted_iso_min
+        - label: Boosted ISO (maximum)
+          field_paths:
+            - specs.sensor.boosted_iso_max
+        - label: White balance presets
+          field_paths:
+            - specs.image.white_balance_presets
+        - label: Custom white balance
+          field_paths:
+            - specs.image.custom_white_balance
+        - label: Image stabilization
+          field_paths:
+            - specs.stabilization.image_stabilization
+        - label: Image stabilization notes
+          field_paths:
+            - specs.stabilization.notes
+        - label: CIPA image stabilization rating
+          field_paths:
+            - specs.stabilization.cipa_rating_stops
+        - label: Uncompressed format
+          field_paths:
+            - specs.image.uncompressed_format
+        - label: JPEG quality levels
+          field_paths:
+            - specs.image.jpeg_quality_levels
+        - label: File format
+          field_paths:
+            - specs.image.file_formats
+    - section_id: optics_and_focus
+      label: Optics & Focus
+      rows:
+        - label: Focal length (equiv.)
+          field_paths:
+            - classification.fixed_lens.focal_length_basis
+            - classification.fixed_lens.focal_length_min_mm
+            - classification.fixed_lens.focal_length_max_mm
+        - label: Optical zoom
+          field_paths:
+            - specs.optics.optical_zoom_x
+        - label: Maximum aperture
+          field_paths:
+            - classification.fixed_lens.max_aperture_wide_f
+            - classification.fixed_lens.max_aperture_tele_f
+        - label: Autofocus
+          field_paths:
+            - specs.autofocus.autofocus_supported
+        - label: Autofocus assist lamp
+          field_paths:
+            - specs.autofocus.autofocus_assist_lamp
+        - label: Digital zoom
+          field_paths:
+            - specs.optics.digital_zoom_x
+        - label: Manual focus
+          field_paths:
+            - specs.autofocus.manual_focus_supported
+        - label: Normal focus range
+          field_paths:
+            - specs.optics.normal_focus_range_cm
+        - label: Macro focus range
+          field_paths:
+            - specs.optics.macro_focus_range_cm
+        - label: Number of focus points
+          field_paths:
+            - specs.autofocus.focus_points_total
+        - label: Lens mount
+          field_paths:
+            - classification.mount_code
+        - label: Focal length multiplier
+          field_paths:
+            - specs.sensor.crop_factor
+    - section_id: screen_viewfinder
+      label: Screen / viewfinder
+      rows:
+        - label: Articulated LCD
+          field_paths:
+            - specs.display.rear_screen.articulation
+        - label: Screen size
+          field_paths:
+            - specs.display.rear_screen.size_in
+        - label: Screen dots
+          field_paths:
+            - specs.display.rear_screen.resolution_dots
+        - label: Touch screen
+          field_paths:
+            - specs.display.rear_screen.touch
+        - label: Screen type
+          field_paths:
+            - specs.display.rear_screen.screen_type
+        - label: Live view
+          field_paths:
+            - specs.display.live_view
+        - label: Viewfinder type
+          field_paths:
+            - specs.viewfinder.type
+        - label: Viewfinder coverage
+          field_paths:
+            - specs.viewfinder.coverage_percent
+        - label: Viewfinder magnification
+          field_paths:
+            - specs.viewfinder.magnification
+        - label: Viewfinder resolution
+          field_paths:
+            - specs.viewfinder.resolution_dots
+    - section_id: photography_features
+      label: Photography features
+      rows:
+        - label: Minimum shutter speed
+          field_paths:
+            - specs.shutter.min_shutter_speed_s
+        - label: Maximum shutter speed
+          field_paths:
+            - specs.shutter.max_shutter_speed_mechanical_s
+        - label: Maximum shutter speed (electronic)
+          field_paths:
+            - specs.shutter.max_shutter_speed_electronic_s
+        - label: Aperture priority
+          field_paths:
+            - specs.exposure.aperture_priority
+        - label: Shutter priority
+          field_paths:
+            - specs.exposure.shutter_priority
+        - label: Manual exposure mode
+          field_paths:
+            - specs.exposure.manual_exposure_mode
+        - label: Subject / scene modes
+          field_paths:
+            - specs.exposure.subject_scene_modes
+        - label: Exposure modes
+          field_paths:
+            - specs.exposure.exposure_modes
+        - label: Scene modes
+          field_paths:
+            - specs.exposure.scene_modes
+        - label: Built-in flash
+          field_paths:
+            - specs.flash.built_in
+        - label: Flash range
+          field_paths:
+            - specs.flash.flash_range_m
+        - label: External flash
+          field_paths:
+            - specs.flash.external
+        - label: Flash modes
+          field_paths:
+            - specs.flash.modes
+        - label: Flash X sync speed
+          field_paths:
+            - specs.shutter.flash_sync_speed_s
+        - label: Drive modes
+          field_paths:
+            - specs.shooting.drive_modes
+        - label: Continuous drive
+          field_paths:
+            - specs.shooting.continuous_drive_fps
+        - label: Self-timer
+          field_paths:
+            - specs.shooting.self_timer_seconds
+        - label: Metering modes
+          field_paths:
+            - specs.metering.metering_modes
+        - label: Exposure compensation
+          field_paths:
+            - specs.exposure.exposure_compensation_ev
+        - label: AE Bracketing
+          field_paths:
+            - specs.bracketing.ae_bracketing
+        - label: WB Bracketing
+          field_paths:
+            - specs.bracketing.wb_bracketing
+    - section_id: videography_features
+      label: Videography features
+      rows:
+        - label: Resolutions
+          field_paths:
+            - specs.video.resolutions
+        - label: Format
+          field_paths:
+            - specs.video.formats
+        - label: Videography notes
+          field_paths:
+            - specs.video.notes
+        - label: Modes
+          field_paths:
+            - specs.video.modes
+        - label: Microphone
+          field_paths:
+            - specs.video.microphone
+        - label: Speaker
+          field_paths:
+            - specs.video.speaker
+    - section_id: storage
+      label: Storage
+      rows:
+        - label: Storage types
+          field_paths:
+            - specs.storage.storage_types
+    - section_id: connectivity
+      label: Connectivity
+      rows:
+        - label: USB
+          field_paths:
+            - specs.connectivity.usb_connector
+        - label: USB charging
+          field_paths:
+            - specs.connectivity.usb_charging_supported
+        - label: HDMI
+          field_paths:
+            - specs.connectivity.hdmi_connector
+        - label: Microphone port
+          field_paths:
+            - specs.connectivity.mic_input_3_5mm
+        - label: Headphone port
+          field_paths:
+            - specs.connectivity.headphone_output_3_5mm
+        - label: Wireless
+          field_paths:
+            - specs.connectivity.wireless
+        - label: Wireless notes
+          field_paths:
+            - specs.connectivity.wireless_notes
+        - label: Remote control
+          field_paths:
+            - specs.connectivity.remote_control
+    - section_id: physical
+      label: Physical
+      rows:
+        - label: Environmentally sealed
+          field_paths:
+            - specs.body.weather_sealed
+        - label: Battery
+          field_paths:
+            - specs.power.battery_model
+        - label: Battery description
+          field_paths:
+            - specs.power.battery_description
+        - label: Battery Life (CIPA)
+          field_paths:
+            - specs.power.battery_life_cipa_shots
+        - label: Weight (inc. batteries)
+          field_paths:
+            - specs.body.weight_with_battery_g
+        - label: Dimensions
+          field_paths:
+            - specs.body.dimensions_mm
+    - section_id: other_features
+      label: Other features
+      rows:
+        - label: Orientation sensor
+          field_paths:
+            - specs.other_features.orientation_sensor
+        - label: Timelapse recording
+          field_paths:
+            - specs.other_features.timelapse_recording
+        - label: GPS
+          field_paths:
+            - specs.other_features.gps
+        - label: GPS notes
+          field_paths:
+            - specs.other_features.gps_notes
+content_modules:
+  bio: "The Fujifilm X-H2 is the detail-first APS-C flagship in this launch set: a
+    40 MP X-mount body for buyers who want room to crop, large-print potential,
+    and a more serious body than the smaller X-S or X-T lines. It matters
+    because it offers genuine resolution headroom without forcing a jump to
+    medium format."
+  used_buying_checklist:
+    - code: check_sensor_and_screen
+      label: Inspect the EVF, vari-angle screen, and 40 MP sensor output for dead
+        pixels or impact damage, especially on bodies used for commercial work.
+      severity: high
+    - code: check_shutter_and_controls
+      label: Test both command dials, AF joystick, top LCD, and burst behavior because
+        X-H bodies are often used as serious client-work tools.
+      severity: high
+    - code: check_ports_and_card_slot
+      label: Inspect full-size HDMI, USB-C, audio jacks, CFexpress slot, and SD slot
+        for rig wear or unreliable card writes.
+      severity: medium
+    - code: check_battery_and_charging
+      label: Confirm NP-W235 health and check whether the seller used the body heavily
+        for high-resolution bursts or long-form video.
+      severity: medium
+  known_issues: []
+editorial_modules:
+  recommended_for:
+    - Landscape, studio, and commercial buyers who want more detail than the 26
+      MP Fujifilm bodies can deliver.
+    - Photographers who want a serious Fujifilm body shape without stepping into
+      GFX cost and lens size.
+    - Buyers who care more about resolution and flexibility than maximum burst
+      speed.
+  not_ideal_for:
+    - Action shooters who would benefit more from the X-H2S readout and burst
+      ceiling.
+    - People who specifically want a lighter Fuji travel body.
+    - Budget buyers who do not need 40 MP APS-C files.
+  strengths:
+    - The X-H2 gives Fujifilm shooters real resolution headroom while keeping
+      the smaller APS-C ecosystem.
+    - It combines a pro-body feature set with a sensor that feels meaningfully
+      different from the 26 MP tier.
+    - Full-size HDMI and dual-card flexibility make it more credible for paid
+      work than the smaller bodies.
+  tradeoffs:
+    - If your subject moves fast, the X-H2S is the better Fujifilm flagship even
+      if it has fewer megapixels.
+    - 40 MP files and current used prices only make sense if you actually
+      benefit from the extra detail.
+    - The X-H body style is more tool-like and less charming than Fujifilm's
+      smaller classic-dial bodies.
+  ownership_notes:
+    maintenance_tips:
+      - Inspect both card slots and run a write test on CFexpress plus SD before
+        trusting a used body.
+      - Check for cage marks and port wear because pro-body X-H buyers often use
+        monitors, recorders, and rigs.
+      - Look for screen-hinge looseness or EVF damage if the body has lived in a
+        working kit.
+    firmware_notes:
+      - Keep firmware current before judging autofocus or video stability
+        because Fujifilm has continued refining this platform.
+images:
+  hero: images/hero.jpg
+  gallery: []
+  comparison_card: null
+  notes:
+    aspect_ratio: 16:9
+    preferred_max_width_px: 1600
+links:
+  manufacturer_product_page: https://www.fujifilm-x.com/en-gb/products/cameras/x-h2/
+  manufacturer_support_page: https://www.fujifilm-x.com/en-gb/support/download/firmware/cameras/x-h2/
+  manual_pdf: null
+  firmware_download_page: https://www.fujifilm-x.com/en-gb/support/download/firmware/cameras/x-h2/
+  dpreview_product_page: https://www.dpreview.com/reviews/fujifilm-x-h2-initial-review
+  wikipedia: null
+  wikidata: null
+provenance:
+  sources:
+    - source_id: fujifilm_x_h2_product
+      source_type: manufacturer
+      source_url: https://www.fujifilm-x.com/en-gb/products/cameras/x-h2/
+      retrieved_at: 2026-03-20
+      license: link_only
+      confidence: 0.95
+      notes: Official Fujifilm product/spec page used for core launch-facing specs and
+        positioning.
+    - source_id: fujifilm_x_h2_support
+      source_type: manufacturer
+      source_url: https://www.fujifilm-x.com/en-gb/support/download/firmware/cameras/x-h2/
+      retrieved_at: 2026-03-20
+      license: link_only
+      confidence: 0.9
+      notes: Official Fujifilm support/firmware page used for active support linkage.
+    - source_id: fujifilm_x_h2_review
+      source_type: review
+      source_url: https://www.dpreview.com/reviews/fujifilm-x-h2-initial-review
+      retrieved_at: 2026-03-20
+      license: link_only
+      confidence: 0.7
+      notes: DPReview launch review linked as a secondary buyer-orientation source.
+    - source_id: fujifilm_x_h2_hero
+      source_type: media
+      source_url: https://commons.wikimedia.org/wiki/File:Fujifilm_X-H2_4_nov_2022a.jpg
+      retrieved_at: 2026-03-20
+      license: CC-BY-SA-4.0
+      confidence: 0.95
+      notes: Wikimedia Commons hero image stored locally with attribution.
+  field_sources:
+    release.release_year:
+      source_ids:
+        - fujifilm_x_h2_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    classification.mount_code:
+      source_ids:
+        - fujifilm_x_h2_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.body.dimensions_mm:
+      source_ids:
+        - fujifilm_x_h2_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.body.weight_with_battery_g:
+      source_ids:
+        - fujifilm_x_h2_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.effective_resolution_mp:
+      source_ids:
+        - fujifilm_x_h2_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.total_resolution_mp:
+      source_ids:
+        - fujifilm_x_h2_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.native_iso_min:
+      source_ids:
+        - fujifilm_x_h2_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.sensor.native_iso_max:
+      source_ids:
+        - fujifilm_x_h2_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.autofocus.focus_points_total:
+      source_ids:
+        - fujifilm_x_h2_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.shooting.continuous_drive_fps:
+      source_ids:
+        - fujifilm_x_h2_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.video.max_internal.resolution:
+      source_ids:
+        - fujifilm_x_h2_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.storage.card_slots:
+      source_ids:
+        - fujifilm_x_h2_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.power.battery_model:
+      source_ids:
+        - fujifilm_x_h2_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    links.manufacturer_product_page:
+      source_ids:
+        - fujifilm_x_h2_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    links.manufacturer_support_page:
+      source_ids:
+        - fujifilm_x_h2_support
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    links.firmware_download_page:
+      source_ids:
+        - fujifilm_x_h2_support
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    specs.stabilization.cipa_rating_stops:
+      source_ids:
+        - fujifilm_x_h2_product
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+    images.hero:
+      source_ids:
+        - fujifilm_x_h2_hero
+      review_state: suggested
+      reviewed_by: null
+      reviewed_at: null
+review:
+  facts_state: suggested
+  editorial_state: suggested
+  qa_checklist:
+    - Template is digital-only (no film fields).
+    - slug and canonical_url follow /cameras/{slug}.
+    - EU-biased canonical name; alternates are in region_variants/aliases.
+    - If lens_system_type is interchangeable, mount_code is set.
+    - If lens_system_type is fixed, mount_code is null and fixed_lens is set.
+    - Core facts are present and sourced (release_year, sensor_format,
+      resolution).
+    - No placeholder values remain (camera-slug, Brand Name, YYYY-MM-DD).
+  last_reviewed_at: 2026-03-20
+  last_reviewed_by: Codex

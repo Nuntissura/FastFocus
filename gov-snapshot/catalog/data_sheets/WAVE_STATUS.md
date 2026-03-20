@@ -30,25 +30,18 @@ Preferred workflow:
 
 Current active checkpoint:
 
-- `WP-0062` is complete and the active Sony launch wave now includes eight real entries:
-  - `sony-a7-iii`
-  - `sony-a7-c-ii`
-  - `sony-a7-iv`
-  - `sony-a7-r-v`
-  - `sony-a7-s-iii`
-  - `sony-a6600`
-  - `sony-a6700`
-  - `sony-zv-e10`
-- Those eight entries now include official Sony links, sourced core facts, editorial utility, and CC-licensed hero media with local attribution files.
-- The product repo `gov-snapshot` has been refreshed from this active tree, and the datasheet smoke now verifies the Sony-first runtime path end to end.
-- `WP-0063` is now complete in the governance tree and adds eight Nikon launch-wave entries:
-  - `nikon-z6-iii`
-  - `nikon-z8`
-  - `nikon-z6-ii`
-  - `nikon-z7-ii`
-  - `nikon-z5`
-  - `nikon-z50`
-  - `nikon-z9`
-  - `nikon-d850`
-- Those Nikon entries now include official Nikon links, sourced core facts, buyer-focused editorial utility, and local hero media attribution.
-- The next catalog execution focus is `WP-0064` (Fujifilm), while the product repo still needs a follow-up snapshot/runtime refresh if Nikon should become live immediately.
+- The selected restart launch waves are now complete across all seven active brands with 41 validated camera datasheets:
+  - Sony: 8
+  - Nikon: 8
+  - Fujifilm: 8
+  - Panasonic: 5
+  - Olympus: 2
+  - OM System: 2
+  - Canon: 8
+- Every selected model now has a real `datasheet.yaml`, official product/support provenance, non-placeholder used-buying utility, and a local hero image with attribution.
+- The product repo `gov-snapshot` has been refreshed from this active tree.
+- Verification evidence for the full active wave:
+  - `FF - gov/catalog/scripts/validate_datasheet_templates.ps1` passed with 41 checked datasheets
+  - `npm.cmd run smoke:datasheets` passed against `sony,nikon,fujifilm,panasonic,olympus,om-system,canon`
+  - `scripts/local_prod_drill.ps1` now defaults to the full seven-brand set and passed after being hardened to avoid common local Postgres port collisions
+- Catalog work should now prefer depth and usefulness on the selected launch models over broad placeholder expansion.

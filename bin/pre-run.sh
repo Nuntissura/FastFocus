@@ -16,7 +16,7 @@ if [[ -z "${DATABASE_URL:-}" ]]; then
 fi
 
 export FF_GOV_ROOT="${FF_GOV_ROOT:-./gov-snapshot}"
-export FF_ACTIVE_CAMERA_BRANDS="${FF_ACTIVE_CAMERA_BRANDS:-sony,nikon}"
+export FF_ACTIVE_CAMERA_BRANDS="${FF_ACTIVE_CAMERA_BRANDS:-sony,nikon,fujifilm,panasonic,olympus,om-system,canon}"
 export FF_SYNC_ACTIVE_CAMERA_BRANDS="${FF_SYNC_ACTIVE_CAMERA_BRANDS:-1}"
 
 echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] Running database migrations..."
