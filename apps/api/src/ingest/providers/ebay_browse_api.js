@@ -7,6 +7,67 @@ function normalizeEnv(value) {
   return v === "sandbox" ? "sandbox" : "production";
 }
 
+function uniqueStrings(values) {
+  const out = [];
+  const seen = new Set();
+  for (const value of values || []) {
+    const normalized = String(value || "").trim().replace(/\s+/g, " ");
+    if (!normalized) continue;
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(normalized);
+  }
+  return out;
+}
+
+function compactModelVariant(value) {
+  const normalized = String(value || "").trim().replace(/\s+/g, " ");
+  if (!normalized || !/[0-9]/.test(normalized)) return null;
+  const compact = normalized.replace(/[\s/-]+/g, "");
+  if (!compact || compact.toLowerCase() === normalized.toLowerCase()) return null;
+  return compact;
+}
+
+function normalizeTimestamp(value) {
+  if (!value || typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const parsed = new Date(trimmed);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return parsed.toISOString();
+}
+
+export function buildEbaySearchQueriesForCamera(camera, { maxQueries = 4 } = {}) {
+  const limit = Number.isInteger(maxQueries) && maxQueries > 0 ? maxQueries : 4;
+  const interchangeable = camera?.lens_system_type !== "fixed";
+  const names = uniqueStrings([camera?.display_name, camera?.model_name, ...(Array.isArray(camera?.aliases) ? camera.aliases : [])]);
+
+  const out = [];
+  const seen = new Set();
+  const pushQuery = (query, label) => {
+    const normalized = String(query || "").trim().replace(/\s+/g, " ");
+    if (!normalized) return;
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push({ query: normalized, label });
+  };
+
+  for (let i = 0; i < names.length && out.length < limit; i += 1) {
+    pushQuery(interchangeable ? `${names[i]} body` : names[i], i === 0 ? "display_name" : i === 1 ? "model_name" : "alias");
+  }
+
+  if (out.length < limit) {
+    const compact = compactModelVariant(camera?.model_name);
+    if (compact) {
+      pushQuery(interchangeable ? `${compact} body` : compact, "model_name_compact");
+    }
+  }
+
+  return out.slice(0, limit);
+}
+
 export function normalizeEbaySearchSort(value) {
   const normalized = String(value || "").trim().toLowerCase();
   if (!normalized || normalized === "best" || normalized === "bestmatch" || normalized === "default") return null;
@@ -56,8 +117,14 @@ function normalizeMedia(item) {
   return out;
 }
 
-export function normalizeEbayItemSummaryToListing(item, { marketplaceCode = "ebay", retrievedAt, env, query, sort = null, filter = null } = {}) {
+export function normalizeEbayItemSummaryToListing(
+  item,
+  { marketplaceCode = "ebay", retrievedAt, env, query, queryLabel = null, sort = null, filter = null } = {},
+) {
   const now = retrievedAt || new Date().toISOString();
+  const itemCreatedAt = normalizeTimestamp(item && item.itemCreationDate ? String(item.itemCreationDate) : null);
+  const itemOriginAt = normalizeTimestamp(item && item.itemOriginDate ? String(item.itemOriginDate) : null);
+  const firstSeenAt = itemOriginAt || itemCreatedAt || now;
 
   const itemId = item && item.itemId ? String(item.itemId) : null;
   const itemUrl = item && item.itemWebUrl ? String(item.itemWebUrl) : null;
@@ -121,19 +188,25 @@ export function normalizeEbayItemSummaryToListing(item, { marketplaceCode = "eba
       provider: "ebay_browse_api",
       env,
       query,
+      query_label: queryLabel,
       sort,
       filter,
+      item_creation_date: itemCreatedAt,
+      item_origin_date: itemOriginAt,
     },
 
-    first_seen_at: now,
+    first_seen_at: firstSeenAt,
     last_seen_at: now,
 
     snapshot: {
       provider: "ebay_browse_api",
       env,
       query,
+      query_label: queryLabel,
       sort,
       filter,
+      item_creation_date: itemCreatedAt,
+      item_origin_date: itemOriginAt,
       item_summary: item,
       retrieved_at: now,
     },

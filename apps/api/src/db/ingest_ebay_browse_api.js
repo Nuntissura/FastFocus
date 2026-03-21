@@ -1,10 +1,28 @@
 import pg from "pg";
 
 import { getEbayAccessToken } from "../ingest/providers/ebay_oauth.js";
-import { normalizeEbayItemSummaryToListing, normalizeEbaySearchSort, searchEbayBrowseApi } from "../ingest/providers/ebay_browse_api.js";
+import {
+  buildEbaySearchQueriesForCamera,
+  normalizeEbayItemSummaryToListing,
+  normalizeEbaySearchSort,
+  searchEbayBrowseApi,
+} from "../ingest/providers/ebay_browse_api.js";
 import { ingestListingsOnce } from "../ingest/write_listings.js";
 
 const { Client } = pg;
+const DEFAULT_CAMERA_SLUGS = [
+  "sony-a7-iv",
+  "sony-a6700",
+  "nikon-z6-iii",
+  "nikon-z8",
+  "fujifilm-x-s20",
+  "fujifilm-x-t5",
+  "panasonic-lumix-s5-ii",
+  "olympus-om-d-e-m1-mark-iii",
+  "om-system-om-1-mark-ii",
+  "canon-eos-r6-ii",
+  "canon-eos-r5",
+].join(",");
 
 function envString(name, fallback) {
   const raw = process.env[name];
@@ -45,11 +63,11 @@ function parseSearchSorts(value) {
   return out;
 }
 
-async function loadCameraQueries(client, slugs) {
+async function loadCameraQueries(client, slugs, { maxQueriesPerModel = 4 } = {}) {
   if (!slugs.length) return [];
   const res = await client.query(
     `
-    SELECT cm.slug, cm.display_name, b.name AS brand_name
+    SELECT cm.slug, cm.display_name, b.name AS brand_name, cm.aliases, cm.lens_system_type
     FROM camera_models cm
     JOIN brands b ON b.brand_id = cm.brand_id
     WHERE cm.slug = ANY($1::text[])
@@ -61,11 +79,22 @@ async function loadCameraQueries(client, slugs) {
   return slugs
     .map((slug) => bySlug.get(slug))
     .filter(Boolean)
-    .map((r) => ({
-      kind: "camera",
-      slug: r.slug,
-      query: `${r.display_name} body`,
-    }));
+    .flatMap((r) =>
+      buildEbaySearchQueriesForCamera(
+        {
+          display_name: r.display_name,
+          model_name: Array.isArray(r.aliases) && r.aliases.length ? r.aliases[0] : null,
+          aliases: Array.isArray(r.aliases) ? r.aliases : [],
+          lens_system_type: r.lens_system_type,
+        },
+        { maxQueries: maxQueriesPerModel },
+      ).map((queryDef) => ({
+        kind: "camera",
+        slug: r.slug,
+        query: queryDef.query,
+        query_label: queryDef.label,
+      })),
+    );
 }
 
 async function loadLensQueries(client, slugs) {
@@ -114,13 +143,14 @@ async function main() {
   const clientSecret = envString("EBAY_CLIENT_SECRET", "");
   const marketplaceId = envString("EBAY_MARKETPLACE_ID", "EBAY_US");
 
-  const cameraSlugs = parseCsv(envString("FF_EBAY_CAMERA_SLUGS", "sony-a7-iv,nikon-z6-ii,fujifilm-x-t30"));
-  const lensSlugs = parseCsv(envString("FF_EBAY_LENS_SLUGS", "olympus-m-zuiko-12-40mm-f2-8-pro,canon-rf-24-70mm-f2-8l-is-usm"));
+  const cameraSlugs = parseCsv(envString("FF_EBAY_CAMERA_SLUGS", DEFAULT_CAMERA_SLUGS));
+  const lensSlugs = parseCsv(envString("FF_EBAY_LENS_SLUGS", ""));
 
   const extraQueries = parseCsv(envString("FF_EBAY_EXTRA_QUERIES", ""));
 
   const limitPerQuery = envInt("FF_EBAY_LIMIT_PER_QUERY", 25, { min: 1, max: 200 });
   const pagesPerQuery = envInt("FF_EBAY_PAGES_PER_QUERY", 1, { min: 1, max: 20 });
+  const queryVariantsPerModel = envInt("FF_EBAY_QUERY_VARIANTS_PER_MODEL", 4, { min: 1, max: 6 });
   const searchSorts = parseSearchSorts(envString("FF_EBAY_SORTS", "best,newlyListed"));
   const searchFilter = envString("FF_EBAY_FILTER", "");
 
@@ -134,7 +164,7 @@ async function main() {
 
   try {
     const modelQueries = [
-      ...(await loadCameraQueries(db, cameraSlugs)),
+      ...(await loadCameraQueries(db, cameraSlugs, { maxQueriesPerModel: queryVariantsPerModel })),
       ...(await loadLensQueries(db, lensSlugs)),
       ...extraQueries.map((q) => ({ kind: "custom", slug: null, query: q })),
     ];
@@ -173,6 +203,7 @@ async function main() {
               retrievedAt,
               env,
               query: q.query,
+              queryLabel: q.query_label || null,
               sort: searchSort,
               filter: searchFilter || null,
             });

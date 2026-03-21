@@ -162,18 +162,37 @@ async function main() {
     );
     const trackerWatchIds = trackerWatchRes.rows.map((r) => r.premium_tracker_watch_id);
 
+    const eventRes = await client.query(
+      `
+      SELECT event_id
+      FROM events
+      WHERE
+        camera_id = ANY($1::uuid[])
+        OR compare_camera_id = ANY($1::uuid[])
+        OR listing_id = ANY($2::uuid[])
+      `,
+      [cameraIds, listingIds],
+    );
+    const eventIds = eventRes.rows.map((r) => r.event_id);
+
     // eslint-disable-next-line no-console
     console.log("Dependent listings matched:", listingIds.length);
     // eslint-disable-next-line no-console
     console.log("Dependent saved searches matched:", savedSearchIds.length);
     // eslint-disable-next-line no-console
     console.log("Dependent premium tracker watches matched:", trackerWatchIds.length);
+    // eslint-disable-next-line no-console
+    console.log("Dependent analytics events matched:", eventIds.length);
 
     if (!args.confirm) {
       await client.query("ROLLBACK");
       // eslint-disable-next-line no-console
       console.log("Dry run complete (no changes). Re-run with --confirm to apply deletes.");
       return;
+    }
+
+    if (eventIds.length > 0) {
+      await client.query(`DELETE FROM events WHERE event_id = ANY($1::bigint[])`, [eventIds]);
     }
 
     if (listingIds.length > 0) {
@@ -190,7 +209,6 @@ async function main() {
     }
 
     await client.query(`DELETE FROM price_observations WHERE camera_id = ANY($1::uuid[])`, [cameraIds]);
-    await client.query(`DELETE FROM events WHERE camera_id = ANY($1::uuid[]) OR compare_camera_id = ANY($1::uuid[])`, [cameraIds]);
     await client.query(`DELETE FROM source_evidence WHERE entity_type = 'camera_model' AND entity_id = ANY($1::uuid[])`, [cameraIds]);
     await client.query(`DELETE FROM camera_models WHERE camera_id = ANY($1::uuid[])`, [cameraIds]);
 

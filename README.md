@@ -170,8 +170,11 @@ npm.cmd run db:match:listings
 ```
 
 Real eBay Browse API ingest knobs:
+- `FF_EBAY_CAMERA_SLUGS=` should stay camera-body-first and favor the current launch-priority bodies instead of broad historical coverage.
+- `FF_EBAY_QUERY_VARIANTS_PER_MODEL=4` widens each configured camera into a small set of eBay-safe name variants (`display_name`, model alias, compact model code) before dedupe.
 - `FF_EBAY_SORTS=best,newlyListed` widens coverage by pulling both best-match and fresh listings before dedupe.
 - `FF_EBAY_FILTER=` lets you pass a raw Browse API filter string when you need to narrow the market.
+- `FF_EBAY_LENS_SLUGS=` now defaults empty so the launch refresh stays camera-body-first unless you opt lenses in explicitly.
 - `EBAY_CATEGORY_IDS=` is optional, but keep it deliberate because Browse API search expects explicit category selection rather than a generic crawler.
 
 Try DB-backed endpoints:
